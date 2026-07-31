@@ -4,6 +4,10 @@ import ProjectDetail, { type Project } from './ProjectDetail';
 import AdminLogin from './AdminLogin';
 import ForgotPassword from './ForgotPassword';
 import NewPassword from './NewPassword';
+import AdminDashboard from './AdminDashboard';
+import AdminProjects from './AdminProjects';
+import AdminAddProject from './AdminAddProject';
+import AdminSettings from './AdminSettings';
 
 const PROJECTS: Project[] = [
   {
@@ -273,7 +277,7 @@ function App() {
     ? PROJECTS 
     : PROJECTS.filter(p => p.category === activeFilter);
 
-  if (currentRoute === '/admin') {
+  if (currentRoute === '/auth' || currentRoute === '/auth/') {
     return <AdminLogin isDarkTheme={isDarkTheme} />;
   }
 
@@ -283,6 +287,22 @@ function App() {
 
   if (currentRoute === '/new-password' || currentRoute === '/new-password/') {
     return <NewPassword isDarkTheme={isDarkTheme} />;
+  }
+
+  if (currentRoute === '/admin' || currentRoute === '/admin/') {
+    return <AdminDashboard isDarkTheme={isDarkTheme} toggleTheme={toggleTheme} />;
+  }
+
+  if (currentRoute === '/projects' || currentRoute === '/projects/') {
+    return <AdminProjects isDarkTheme={isDarkTheme} toggleTheme={toggleTheme} />;
+  }
+
+  if (currentRoute === '/projects/add' || currentRoute === '/projects/add/') {
+    return <AdminAddProject isDarkTheme={isDarkTheme} toggleTheme={toggleTheme} />;
+  }
+
+  if (currentRoute === '/settings' || currentRoute === '/settings/') {
+    return <AdminSettings isDarkTheme={isDarkTheme} toggleTheme={toggleTheme} />;
   }
 
   return (
@@ -592,7 +612,7 @@ function App() {
                 <a href="#">Transit Corridors</a>
                 <a href="#">Civil Engineering</a>
                 <a href="#">Bridge Rehabilitation</a>
-                <a href="/admin" style={{ color: 'var(--cta)', marginTop: '1rem' }}>Admin Portal →</a>
+                <a href="/auth" style={{ color: 'var(--cta)', marginTop: '1rem' }}>Admin Portal →</a>
               </div>
             </div>
           </div>
