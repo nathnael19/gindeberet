@@ -12,7 +12,7 @@ export default function AdminLogin({ isDarkTheme }: { isDarkTheme: boolean }) {
     // Simulate login delay
     setTimeout(() => {
       setIsLoading(false);
-      alert('Login functionality to be implemented');
+      window.location.href = '/admin';
     }, 1000);
   };
 
