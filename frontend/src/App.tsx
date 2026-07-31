@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import ProjectDetail, { type Project } from './ProjectDetail';
+import AdminLogin from './AdminLogin';
+import ForgotPassword from './ForgotPassword';
+import NewPassword from './NewPassword';
 
 const PROJECTS: Project[] = [
   {
@@ -181,6 +184,7 @@ function App() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [currentRoute, setCurrentRoute] = useState(window.location.pathname);
   
   // Form State
   const [projectType, setProjectType] = useState('');
@@ -197,6 +201,14 @@ function App() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentRoute(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const PROJECT_OPTIONS = [
@@ -260,6 +272,18 @@ function App() {
   const filteredProjects = activeFilter === 'All' 
     ? PROJECTS 
     : PROJECTS.filter(p => p.category === activeFilter);
+
+  if (currentRoute === '/admin') {
+    return <AdminLogin isDarkTheme={isDarkTheme} />;
+  }
+
+  if (currentRoute === '/forgot-password' || currentRoute === '/forgot-password/') {
+    return <ForgotPassword isDarkTheme={isDarkTheme} />;
+  }
+
+  if (currentRoute === '/new-password' || currentRoute === '/new-password/') {
+    return <NewPassword isDarkTheme={isDarkTheme} />;
+  }
 
   return (
     <div className="app">
@@ -568,6 +592,7 @@ function App() {
                 <a href="#">Transit Corridors</a>
                 <a href="#">Civil Engineering</a>
                 <a href="#">Bridge Rehabilitation</a>
+                <a href="/admin" style={{ color: 'var(--cta)', marginTop: '1rem' }}>Admin Portal →</a>
               </div>
             </div>
           </div>
