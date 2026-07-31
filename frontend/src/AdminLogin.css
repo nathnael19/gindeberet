@@ -1,0 +1,328 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
+
+.admin-login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #F8FAFC;
+  font-family: 'Fira Sans', sans-serif;
+  color: #334155;
+  padding: 1rem;
+}
+
+.admin-login-wrapper.dark-mode {
+  background-color: #0F172A;
+  color: #F8FAFC;
+}
+
+.admin-login-container {
+  background: white;
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.admin-login-wrapper.dark-mode .admin-login-container {
+  background: #1E293B;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  border: 1px solid #334155;
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.admin-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.admin-logo img {
+  height: 32px;
+  width: auto;
+}
+
+.admin-logo span {
+  font-family: 'Fira Code', monospace;
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.5px;
+}
+
+.admin-logo .accent {
+  color: #F97316;
+}
+
+.admin-login-header h2 {
+  font-family: 'Fira Code', monospace;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #1E293B;
+}
+
+.admin-login-wrapper.dark-mode .admin-login-header h2 {
+  color: #F8FAFC;
+}
+
+.admin-login-header p {
+  font-size: 0.875rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.admin-login-wrapper.dark-mode .admin-login-header p {
+  color: #94A3B8;
+}
+
+.admin-login-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.admin-login-form label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #334155;
+}
+
+.admin-login-wrapper.dark-mode .admin-login-form label {
+  color: #CBD5E1;
+}
+
+.admin-login-form input[type="email"],
+.admin-login-form input[type="password"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: 'Fira Code', monospace;
+  transition: all 0.2s ease;
+  background-color: #F8FAFC;
+  color: #0F172A;
+}
+
+.admin-login-wrapper.dark-mode .admin-login-form input[type="email"],
+.admin-login-wrapper.dark-mode .admin-login-form input[type="password"] {
+  background-color: #0F172A;
+  border-color: #334155;
+  color: #F8FAFC;
+}
+
+.admin-login-form input:focus {
+  outline: none;
+  border-color: #64748B;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
+  background-color: white;
+}
+
+.admin-login-wrapper.dark-mode .admin-login-form input:focus {
+  border-color: #94A3B8;
+  background-color: #1E293B;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.admin-login-form .remember-me {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+  margin-bottom: 0;
+}
+
+.custom-checkbox-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.custom-checkbox {
+  height: 18px;
+  width: 18px;
+  background-color: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-login-wrapper.dark-mode .custom-checkbox {
+  background-color: #0F172A;
+  border-color: #334155;
+}
+
+.custom-checkbox-input:checked ~ .custom-checkbox {
+  background-color: #F97316;
+  border-color: #F97316;
+}
+
+.custom-checkbox-input:focus ~ .custom-checkbox {
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+}
+
+.custom-checkbox::after {
+  content: "";
+  display: none;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-bottom: 2px;
+}
+
+.custom-checkbox-input:checked ~ .custom-checkbox::after {
+  display: block;
+}
+
+.forgot-password {
+  color: #F97316;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.forgot-password:hover {
+  color: #EA580C;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 0.875rem;
+  background-color: #F97316;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 48px;
+}
+
+.btn-login:hover {
+  background-color: #EA580C;
+}
+
+.btn-login:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
+}
+
+.btn-login.loading {
+  background-color: #FB923C;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.admin-login-footer {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.back-link {
+  color: #64748B;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+}
+
+.admin-login-wrapper.dark-mode .back-link {
+  color: #94A3B8;
+}
+
+.back-link:hover {
+  color: #334155;
+}
+
+.admin-login-wrapper.dark-mode .back-link:hover {
+  color: #F8FAFC;
+}
+
+.reset-success {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  background-color: #10B981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 1.5rem auto;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2), 0 2px 4px -1px rgba(16, 185, 129, 0.1);
+}
+
+.reset-success h3 {
+  font-family: 'Fira Code', monospace;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: #1E293B;
+}
+
+.admin-login-wrapper.dark-mode .reset-success h3 {
+  color: #F8FAFC;
+}
+
+.reset-success p {
+  color: #64748B;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.admin-login-wrapper.dark-mode .reset-success p {
+  color: #94A3B8;
+}
+
+.reset-success strong {
+  color: #334155;
+  font-weight: 600;
+}
+
+.admin-login-wrapper.dark-mode .reset-success strong {
+  color: #CBD5E1;
+}
