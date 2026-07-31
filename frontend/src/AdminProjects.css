@@ -1,0 +1,27 @@
+/* AdminProjects.css — page-specific overrides */
+
+.results-count {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.results-count strong {
+  color: var(--text-main);
+}
+
+.search-clear-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.search-clear-btn:hover {
+  color: var(--text-main);
+}
