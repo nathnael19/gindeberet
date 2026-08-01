@@ -45,12 +45,6 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
     </svg>
   );
 
-  const SearchIcon = () => (
-    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--text-muted)' }}>
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-  );
-
   const navItems = [
     { key: 'overview' as const, label: 'Overview', path: '/admin', Icon: HomeIcon },
     { key: 'projects' as const, label: 'Projects', path: '/projects', Icon: ProjectsIcon },
@@ -91,10 +85,7 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
       {/* Main */}
       <main className="dashboard-main">
         <header className="dashboard-header">
-          <div className="header-search">
-            <SearchIcon />
-            <input type="text" placeholder="Search projects, documents, or people..." />
-          </div>
+
           <div className="header-actions">
             <button onClick={toggleTheme} className="icon-btn theme-toggle" aria-label="Toggle Theme" style={{ fontSize: '1.25rem', padding: '0.25rem' }}>
               {isDarkTheme ? '☀️' : '🌙'}

@@ -19,8 +19,43 @@ export default function AdminAddProject({
     year: '',
     status: 'pending',
     description: '',
-    image: '',
   });
+
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string>('');
+  
+  const [galleryImages, setGalleryImages] = useState<File[]>([]);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setCoverImage(file);
+      setCoverPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setGalleryImages([...galleryImages, ...files]);
+      
+      const newPreviews = files.map(file => URL.createObjectURL(file));
+      setGalleryPreviews([...galleryPreviews, ...newPreviews]);
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    const newImages = [...galleryImages];
+    newImages.splice(index, 1);
+    setGalleryImages(newImages);
+
+    const newPreviews = [...galleryPreviews];
+    // Revoke the object URL to avoid memory leaks
+    URL.revokeObjectURL(newPreviews[index]);
+    newPreviews.splice(index, 1);
+    setGalleryPreviews(newPreviews);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -177,18 +212,67 @@ export default function AdminAddProject({
               />
             </div>
             <div className="form-group full-width">
-              <label htmlFor="image">Cover Image URL</label>
-              <input
-                type="url"
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
-              />
-              {formData.image && (
+              <label>Cover Image <span className="required">*</span></label>
+              <div className="upload-container">
+                <input
+                  type="file"
+                  id="cover-upload"
+                  accept="image/*"
+                  onChange={handleCoverChange}
+                  className="file-input-hidden"
+                />
+                <label htmlFor="cover-upload" className="upload-dropzone">
+                  <div className="upload-content">
+                    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Click to upload cover image</span>
+                    <span className="upload-hint">PNG, JPG, WEBP up to 5MB</span>
+                  </div>
+                </label>
+              </div>
+              {coverPreview && (
                 <div className="image-preview">
-                  <img src={formData.image} alt="Preview" />
+                  <img src={coverPreview} alt="Cover Preview" />
+                  <button type="button" className="remove-image-btn" onClick={() => { setCoverImage(null); setCoverPreview(''); }}>
+                    &times;
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="form-group full-width">
+              <label>Gallery Images</label>
+              <div className="upload-container">
+                <input
+                  type="file"
+                  id="gallery-upload"
+                  accept="image/*"
+                  multiple
+                  onChange={handleGalleryChange}
+                  className="file-input-hidden"
+                />
+                <label htmlFor="gallery-upload" className="upload-dropzone">
+                  <div className="upload-content">
+                    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>Click to upload gallery images</span>
+                    <span className="upload-hint">Upload multiple images</span>
+                  </div>
+                </label>
+              </div>
+              
+              {galleryPreviews.length > 0 && (
+                <div className="gallery-preview-grid">
+                  {galleryPreviews.map((preview, idx) => (
+                    <div key={idx} className="gallery-preview-item">
+                      <img src={preview} alt={`Gallery ${idx + 1}`} />
+                      <button type="button" className="remove-image-btn" onClick={() => removeGalleryImage(idx)}>
+                        &times;
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
