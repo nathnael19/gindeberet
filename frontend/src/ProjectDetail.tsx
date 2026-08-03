@@ -1,6 +1,27 @@
 import { useEffect } from 'react';
 import './ProjectDetail.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const BACKEND_BASE_URL = API_BASE_URL.replace('/api', '');
+
+// Helper function to get full image URL
+const getImageUrl = (imagePath: string) => {
+  if (!imagePath) return 'https://images.unsplash.com/photo-1545459720-aac8509eb02c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+  if (imagePath.startsWith('http')) {
+    try {
+      const parsedUrl = new URL(imagePath);
+      if (parsedUrl.pathname.startsWith('/uploads/')) {
+        return `${BACKEND_BASE_URL}${parsedUrl.pathname}`;
+      }
+    } catch {
+      return imagePath;
+    }
+
+    return imagePath;
+  }
+  return `${BACKEND_BASE_URL}${imagePath}`;
+};
+
 export interface Project {
   id: number;
   title: string;
@@ -24,9 +45,10 @@ interface ProjectDetailProps {
   project: Project;
   onClose: () => void;
   isDarkTheme: boolean;
+  onEdit?: () => void;
 }
 
-export default function ProjectDetail({ project, onClose, isDarkTheme }: ProjectDetailProps) {
+export default function ProjectDetail({ project, onClose, isDarkTheme, onEdit }: ProjectDetailProps) {
   // Lock body scroll while open
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -52,7 +74,7 @@ export default function ProjectDetail({ project, onClose, isDarkTheme }: Project
       <div className={`pd-panel ${isDarkTheme ? 'dark' : ''}`}>
         {/* Hero */}
         <div className="pd-hero">
-          <img src={project.image} alt={project.title} className="pd-hero-img" />
+          <img src={getImageUrl(project.image)} alt={project.title} className="pd-hero-img" />
           <div className="pd-hero-overlay" />
 
           {/* Close button */}
@@ -148,7 +170,7 @@ export default function ProjectDetail({ project, onClose, isDarkTheme }: Project
                   <div className="pd-gallery">
                     {project.gallery.map((src, i) => (
                       <div key={i} className="pd-gallery-item">
-                        <img src={src} alt={`${project.title} - photo ${i + 1}`} loading="lazy" />
+                        <img src={getImageUrl(src)} alt={`${project.title} - photo ${i + 1}`} loading="lazy" />
                       </div>
                     ))}
                   </div>
@@ -158,6 +180,12 @@ export default function ProjectDetail({ project, onClose, isDarkTheme }: Project
 
             {/* Right sidebar */}
             <div className="pd-col-side">
+              {onEdit && (
+                <button type="button" className="pd-edit-btn" onClick={onEdit}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Edit Project
+                </button>
+              )}
               {project.highlights && project.highlights.length > 0 && (
                 <div className="pd-highlights-card">
                   <h3 className="pd-highlights-title">Key Highlights</h3>

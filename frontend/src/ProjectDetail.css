@@ -371,6 +371,33 @@
   margin-top: 1px;
 }
 
+/* Admin edit button */
+.pd-edit-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  background: var(--cta);
+  color: #000;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.pd-edit-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
 /* CTA card */
 .pd-cta-card {
   background: var(--primary);
