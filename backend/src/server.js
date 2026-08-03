@@ -11,6 +11,7 @@ const activityRoutes = require('./routes/activity');
 const dashboardRoutes = require('./routes/dashboard');
 const uploadRoutes = require('./routes/upload');
 const settingsRoutes = require('./routes/settings');
+const landingRoutes = require('./routes/landing');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -57,6 +58,7 @@ app.use('/api/activity', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/landing', landingRoutes);
 
 // 404 handler
 app.use((req, res) => {
