@@ -22,6 +22,22 @@ async function seed() {
 
     console.log('Admin user created/updated');
 
+    // Create default site settings
+    await prisma.siteSettings.upsert({
+      where: { id: 1 },
+      update: {},
+      create: {
+        id: 1,
+        officeLocation: '123 Industrial Way, Builder City, BC 12345',
+        phone: '(555) 123-4567',
+        workingHours: 'Mon-Fri, 8am-6pm',
+        email: 'info@gindeberet.com',
+        mapUrl: 'https://www.google.com/maps/search/?api=1&query=9.0244,38.7469'
+      }
+    });
+
+    console.log('Default site settings created');
+
     // Create sample projects
     const sampleProjects = [
       {
@@ -35,6 +51,9 @@ async function seed() {
         duration: '6 months',
         year: '2024',
         description: 'Modern commercial complex with office spaces and retail units',
+        challenge: 'Delivering a commercial complex on a tight urban plot while keeping existing tenant operations running throughout construction.',
+        solution: 'Phased construction with nighttime logistics, prefabricated facade panels, and a dedicated pedestrian walkway to isolate active zones from work zones.',
+        highlights: ['LEED Silver design', 'Zero lost-time incidents', 'Delivered 2 weeks early'],
         image: null,
         createdBy: adminUser.id
       },
@@ -49,6 +68,9 @@ async function seed() {
         duration: '4 months',
         year: '2024',
         description: 'Luxury residential villa with modern amenities',
+        challenge: 'Building on a narrow sloped plot with soft-soil conditions and strict height restrictions from the local zoning code.',
+        solution: 'Deep foundation piling paired with a stepped structural frame that follows the terrain, keeping the villa within height limits.',
+        highlights: ['Smart home integration', 'Rammed earth feature walls'],
         image: null,
         createdBy: adminUser.id
       },
@@ -63,6 +85,9 @@ async function seed() {
         duration: '8 months',
         year: '2024',
         description: 'Multi-story office building for tech company',
+        challenge: 'Fast-tracked delivery required for lease start, with limited street access for material staging in a dense business district.',
+        solution: 'Off-site prefabrication of structural steel and MEP modules, with just-in-time deliveries scheduled during off-peak hours.',
+        highlights: ['14-month build in 11 months', 'Open-plan flexible floors'],
         image: null,
         createdBy: adminUser.id
       },
@@ -77,6 +102,9 @@ async function seed() {
         duration: '12 months',
         year: '2024',
         description: 'Modern apartment complex with 50 units',
+        challenge: 'Coordinating 50 residential units plus shared amenities while managing public utility relocations on the project site.',
+        solution: 'Early engagement with utility providers, dual-tower construction sequence, and a shared amenities core built first to serve both phases.',
+        highlights: ['50 residential units', 'Shared rooftop amenity deck'],
         image: null,
         createdBy: adminUser.id
       },
@@ -91,6 +119,9 @@ async function seed() {
         duration: '18 months',
         year: '2024',
         description: 'Large shopping mall with entertainment facilities',
+        challenge: 'A complex phasing challenge: opening retail anchors before the entertainment wing was complete, with 40+ tenant fit-outs running in parallel.',
+        solution: 'A rolling handover schedule with zoned MEP isolation so anchors traded early while construction continued in other wings without cross-contamination.',
+        highlights: ['40+ tenant fit-outs', '6 cinema screens'],
         image: null,
         createdBy: adminUser.id
       }
