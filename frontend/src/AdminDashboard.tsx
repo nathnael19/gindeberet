@@ -1,7 +1,25 @@
+import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { ALL_PROJECTS } from './adminData';
+import { projectsApi, activityApi, dashboardApi } from './api';
 import AdminLayout from './AdminLayout';
+import { formatBirr } from './format';
 import './AdminDashboard.css';
+
+interface DashboardProject {
+  id: string | number;
+  name: string;
+  client: string;
+  budget: string;
+  status: string;
+}
+
+interface DashboardActivity {
+  id?: string | number;
+  user?: string;
+  action?: string;
+  target?: string;
+  time?: string;
+}
 
 export default function AdminDashboard({
   isDarkTheme,
@@ -10,24 +28,126 @@ export default function AdminDashboard({
   isDarkTheme: boolean;
   toggleTheme: () => void;
 }) {
-  const revenueData = [
-    { name: 'Jan', revenue: 4200 },
-    { name: 'Feb', revenue: 3800 },
-    { name: 'Mar', revenue: 5100 },
-    { name: 'Apr', revenue: 4700 },
-    { name: 'May', revenue: 6200 },
-    { name: 'Jun', revenue: 5900 },
-    { name: 'Jul', revenue: 7500 },
-  ];
+  const [revenueData, setRevenueData] = useState<any[]>([]);
 
-  const activities = [
-    { id: 1, user: 'Sarah Jenkins', action: 'approved milestone 3 on', target: 'Highway 401', time: '2 hours ago' },
-    { id: 2, user: 'Mike Chen', action: 'uploaded new schematics for', target: 'River Bridge', time: '5 hours ago' },
-    { id: 3, user: 'System', action: 'generated weekly report', target: 'Q3 Financials', time: '1 day ago' },
-    { id: 4, user: 'Elena Rossi', action: 'added a new team member to', target: 'Downtown Utility', time: '1 day ago' },
-  ];
+  const [activities, setActivities] = useState<DashboardActivity[]>([]);
+  const [recentProjects, setRecentProjects] = useState<DashboardProject[]>([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    completed: 0,
+    pending: 0
+  });
+  const [kpiData, setKpiData] = useState({
+    totalRevenue: null,
+    teamMembers: null,
+    incidentReports: null
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  const recentProjects = ALL_PROJECTS.slice(0, 4);
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+
+        const projectsResponse = await projectsApi.getAllCached(undefined, (freshResponse) => {
+          if (isActive && freshResponse.success) {
+            setRecentProjects(freshResponse.data.slice(0, 4));
+          }
+        });
+
+        if (!isActive) {
+          return;
+        }
+
+        if (projectsResponse.success) {
+          setRecentProjects(projectsResponse.data.slice(0, 4));
+        }
+
+        const activitiesResponse = await activityApi.getRecentCached(4, (freshResponse) => {
+          if (isActive && freshResponse.success) {
+            setActivities(freshResponse.data);
+          }
+        });
+
+        if (!isActive) {
+          return;
+        }
+
+        if (activitiesResponse.success) {
+          setActivities(activitiesResponse.data);
+        }
+
+        const statsResponse = await projectsApi.getStatsCached((freshResponse) => {
+          if (isActive && freshResponse.success) {
+            setStats({
+              total: freshResponse.data.total,
+              active: freshResponse.data.byStatus.ACTIVE || 0,
+              completed: freshResponse.data.byStatus.COMPLETED || 0,
+              pending: freshResponse.data.byStatus.PENDING || 0,
+            });
+          }
+        });
+
+        if (!isActive) {
+          return;
+        }
+
+        if (statsResponse.success) {
+          setStats({
+            total: statsResponse.data.total,
+            active: statsResponse.data.byStatus.ACTIVE || 0,
+            completed: statsResponse.data.byStatus.COMPLETED || 0,
+            pending: statsResponse.data.byStatus.PENDING || 0,
+          });
+        }
+
+        const revenueResponse = await dashboardApi.getRevenueCached((freshResponse) => {
+          if (isActive && freshResponse.success) {
+            setRevenueData(freshResponse.data);
+          }
+        });
+
+        if (!isActive) {
+          return;
+        }
+
+        if (revenueResponse.success) {
+          setRevenueData(revenueResponse.data);
+        } else {
+          setRevenueData([]);
+        }
+
+        const kpiResponse = await dashboardApi.getKPICached((freshResponse) => {
+          if (isActive && freshResponse.success) {
+            setKpiData(freshResponse.data);
+          }
+        });
+
+        if (!isActive) {
+          return;
+        }
+
+        if (kpiResponse.success) {
+          setKpiData(kpiResponse.data);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchDashboardData();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const ProjectsIcon = () => (
     <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -52,10 +172,10 @@ export default function AdminDashboard({
             <span className="kpi-title">Total Active Projects</span>
             <div className="kpi-icon"><ProjectsIcon /></div>
           </div>
-          <div className="kpi-value">12</div>
+          <div className="kpi-value">{isLoading ? '...' : stats.active}</div>
           <div className="kpi-trend trend-up">
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-            <span>+2 this month</span>
+            <span>{stats.total} total projects</span>
           </div>
         </div>
 
@@ -66,10 +186,9 @@ export default function AdminDashboard({
               <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
           </div>
-          <div className="kpi-value">$254M</div>
-          <div className="kpi-trend trend-up">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-            <span>+14.5% vs last year</span>
+          <div className="kpi-value">{kpiData.totalRevenue || 'N/A'}</div>
+          <div className="kpi-trend trend-neutral">
+            <span>Year to date</span>
           </div>
         </div>
 
@@ -78,10 +197,9 @@ export default function AdminDashboard({
             <span className="kpi-title">Team Members</span>
             <div className="kpi-icon"><TeamIcon /></div>
           </div>
-          <div className="kpi-value">148</div>
+          <div className="kpi-value">{kpiData.teamMembers || 'N/A'}</div>
           <div className="kpi-trend trend-neutral">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14" /></svg>
-            <span>No change</span>
+            <span>Active members</span>
           </div>
         </div>
 
@@ -92,10 +210,9 @@ export default function AdminDashboard({
               <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             </div>
           </div>
-          <div className="kpi-value">0</div>
-          <div className="kpi-trend trend-up">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /></svg>
-            <span>Zero incidents in 90 days</span>
+          <div className="kpi-value">{kpiData.incidentReports ?? 'N/A'}</div>
+          <div className="kpi-trend trend-neutral">
+            <span>Total logged</span>
           </div>
         </div>
       </div>
@@ -107,24 +224,30 @@ export default function AdminDashboard({
             <h2 className="panel-title">Revenue Overview</h2>
           </div>
           <div style={{ width: '100%', height: 300, marginTop: '1rem' }}>
-            <ResponsiveContainer>
-              <AreaChart data={revenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} dx={-10} tickFormatter={(v) => `$${v}`} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: 'var(--bg-main)', borderColor: 'var(--border-main)', borderRadius: '8px' }}
-                  itemStyle={{ color: 'var(--text-main)', fontWeight: 500 }}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="var(--primary)" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={3} />
-              </AreaChart>
-            </ResponsiveContainer>
+            {revenueData.length > 0 ? (
+              <ResponsiveContainer>
+                <AreaChart data={revenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} dx={-10} tickFormatter={(v) => `ETB ${v}`} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'var(--bg-main)', borderColor: 'var(--border-main)', borderRadius: '8px' }}
+                    itemStyle={{ color: 'var(--text-main)', fontWeight: 500 }}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="var(--primary)" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={3} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)' }}>
+                No revenue data available
+              </div>
+            )}
           </div>
         </div>
 
@@ -156,19 +279,28 @@ export default function AdminDashboard({
                 </tr>
               </thead>
               <tbody>
-                {recentProjects.map((project) => (
-                  <tr key={project.id}>
-                    <td style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{project.id}</td>
-                    <td style={{ fontWeight: 600, color: 'var(--text-main)' }}>{project.name}</td>
-                    <td>{project.client}</td>
-                    <td style={{ fontFamily: 'var(--font-heading)' }}>{project.budget}</td>
-                    <td>
-                      <span className={`status-badge status-${project.status}`}>
-                        {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-                      </span>
-                    </td>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>Loading...</td>
                   </tr>
-                ))}
+                ) : recentProjects.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>No projects yet</td>
+                  </tr>
+                ) : (
+                  recentProjects.map((project) => (
+                    <tr key={project.id}>
+                      <td style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{project.id}</td>
+                      <td style={{ fontWeight: 600, color: 'var(--text-main)' }}>{project.name}</td>
+                      <td>{project.client}</td>
+                      <td style={{ fontFamily: 'var(--font-heading)' }}>{formatBirr(project.budget)}</td>                      <td>
+                        <span className={`status-badge status-${project.status}`}>
+                          {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -181,22 +313,28 @@ export default function AdminDashboard({
             <a href="#" className="panel-action">View All</a>
           </div>
           <div className="activity-list">
-            {activities.map((activity, idx) => (
-              <div className="activity-item" key={idx}>
-                <div className="activity-icon">
-                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </div>
-                <div className="activity-content">
-                  <div className="activity-text">
-                    <strong>{activity.user}</strong> {activity.action} <strong>{activity.target}</strong>
+            {isLoading ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Loading...</div>
+            ) : activities.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No recent activity</div>
+            ) : (
+              activities.map((activity, idx) => (
+                <div className="activity-item" key={activity.id || idx}>
+                  <div className="activity-icon">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
                   </div>
-                  <div className="activity-time">{activity.time}</div>
+                  <div className="activity-content">
+                    <div className="activity-text">
+                      <strong>{activity.user}</strong> {activity.action} {activity.target && <strong>{activity.target}</strong>}
+                    </div>
+                    <div className="activity-time">{activity.time}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
