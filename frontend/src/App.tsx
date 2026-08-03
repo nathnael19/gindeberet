@@ -8,12 +8,30 @@ import AdminDashboard from './AdminDashboard';
 import AdminProjects from './AdminProjects';
 import AdminAddProject from './AdminAddProject';
 import AdminSettings from './AdminSettings';
-import { publicApi, getToken } from './api';
+import { publicApi, settingsApi, getToken } from './api';
 
 const CATEGORIES = ['All', 'Roads', 'Corridors', 'Infrastructure', 'Bridges'];
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const BACKEND_BASE_URL = API_BASE_URL.replace('/api', '');
+
+const DEFAULT_SITE_SETTINGS = {
+  officeLocation: '123 Industrial Way, Builder City, BC 12345',
+  phone: '(555) 123-4567',
+  workingHours: 'Mon-Fri, 8am-6pm',
+  email: 'info@gindeberet.com',
+  mapUrl: 'https://www.google.com/maps/search/?api=1&query=9.0244,38.7469'
+};
+
+const getLineBreakText = (value: string | null | undefined) => {
+  const text = (value || '').trim();
+  return text ? text.split('\n').map((line, i, arr) => (
+    <span key={i}>
+      {line}
+      {i < arr.length - 1 && <br />}
+    </span>
+  )) : null;
+};
 
 // Helper function to get full image URL
 const getImageUrl = (imagePath: string) => {
@@ -47,8 +65,10 @@ function App() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [currentRoute, setCurrentRoute] = useState(window.location.pathname);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [completedProjectsCount, setCompletedProjectsCount] = useState(0);
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [projectsError, setProjectsError] = useState('');
+  const [siteSettings, setSiteSettings] = useState<any>(DEFAULT_SITE_SETTINGS);
   
   // Form State
   const [projectType, setProjectType] = useState('');
@@ -127,6 +147,9 @@ function App() {
         setIsLoadingProjects(true);
         const response = await publicApi.getProjects();
         if (response.success) {
+          setCompletedProjectsCount(
+            response.data.filter((p: any) => p.status?.toLowerCase() === 'completed').length
+          );
           // Transform backend data to match frontend Project type
           const transformedProjects = response.data.map((p: any) => ({
             id: p.id,
@@ -140,9 +163,9 @@ function App() {
             value: p.budget,
             year: p.year,
             status: p.status.charAt(0).toUpperCase() + p.status.slice(1),
-            challenge: 'Project details will be updated soon.',
-            solution: 'Implementation details will be updated soon.',
-            highlights: ['Project managed successfully'],
+            challenge: p.challenge || undefined,
+            solution: p.solution || undefined,
+            highlights: Array.isArray(p.highlights) && p.highlights.length > 0 ? p.highlights : undefined,
             gallery: p.gallery && p.gallery.length > 0 ? p.gallery.map((url: string) => getImageUrl(url)) : (p.image ? [getImageUrl(p.image)] : ['https://images.unsplash.com/photo-1545459720-aac8509eb02c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'])
           }));
           setProjects(transformedProjects);
@@ -156,6 +179,28 @@ function App() {
     };
 
     fetchProjects();
+  }, []);
+
+  // Fetch site settings (office location, phone, working hours)
+  useEffect(() => {
+    const fetchSiteSettings = async () => {
+      try {
+        const response = await settingsApi.getSite();
+        if (response.success && response.data) {
+          setSiteSettings({
+            officeLocation: response.data.officeLocation || DEFAULT_SITE_SETTINGS.officeLocation,
+            phone: response.data.phone || DEFAULT_SITE_SETTINGS.phone,
+            workingHours: response.data.workingHours || DEFAULT_SITE_SETTINGS.workingHours,
+            email: response.data.email || DEFAULT_SITE_SETTINGS.email,
+            mapUrl: response.data.mapUrl || DEFAULT_SITE_SETTINGS.mapUrl
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching site settings:', error);
+      }
+    };
+
+    fetchSiteSettings();
   }, []);
 
   const toggleTheme = () => {
@@ -319,7 +364,7 @@ function App() {
               
               <div className="stats-container">
                 <div className="stat-item">
-                  <h3>50<span>+</span></h3>
+                  <h3>{completedProjectsCount}<span>+</span></h3>
                   <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Projects Completed</p>
                 </div>
                 <div className="stat-item">
@@ -454,7 +499,7 @@ function App() {
                 <div className="contact-icon">📍</div>
                 <div>
                   <h4>Office Location</h4>
-                  <p>123 Industrial Way<br/>Builder City, BC 12345</p>
+                  <p>{getLineBreakText(siteSettings.officeLocation)}</p>
                 </div>
               </div>
               
@@ -462,7 +507,15 @@ function App() {
                 <div className="contact-icon">📞</div>
                 <div>
                   <h4>Phone</h4>
-                  <p>(555) 123-4567<br/>Mon-Fri, 8am-6pm</p>
+                  <p>{getLineBreakText(siteSettings.phone)}</p>
+                </div>
+              </div>
+
+              <div className="contact-item">
+                <div className="contact-icon">🕐</div>
+                <div>
+                  <h4>Working Hours</h4>
+                  <p>{getLineBreakText(siteSettings.workingHours)}</p>
                 </div>
               </div>
 
@@ -470,9 +523,23 @@ function App() {
                 <div className="contact-icon">✉️</div>
                 <div>
                   <h4>Email</h4>
-                  <p>info@gindeberet.com<br/>careers@gindeberet.com</p>
+                  <p>{getLineBreakText(siteSettings.email)}</p>
                 </div>
               </div>
+
+              {siteSettings.mapUrl && (
+                <div className="contact-map-wrap">
+                  <a
+                    href={siteSettings.mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="contact-map-link"
+                  >
+                    <span className="contact-map-link-icon">📍</span>
+                    Open in Google Maps
+                  </a>
+                </div>
+              )}
             </div>
             
             <div className="contact-form-wrap reveal-up" style={{ transitionDelay: '0.2s' }}>

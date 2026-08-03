@@ -255,6 +255,35 @@ export const publicApi = {
   },
 };
 
+// Site settings API (public contact info shown on the landing page)
+export const settingsApi = {
+  getSite: async () => {
+    return publicApiCall<{ success: boolean; data: any }>('/settings');
+  },
+
+  getSiteCached: async (onUpdate?: (value: { success: boolean; data: any }) => void) => {
+    return loadFromCacheWithBackgroundRefresh({
+      key: buildAdminCacheKey('settings:site'),
+      fetcher: () => settingsApi.getSite(),
+      onUpdate,
+    });
+  },
+
+  updateSite: async (payload: { officeLocation?: string; phone?: string; workingHours?: string; email?: string; mapUrl?: string }) => {
+    const response = await apiCall<{ success: boolean; data: any; message?: string }>('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+
+    if (response.success) {
+      invalidateCache(buildAdminCacheKey('settings:site'));
+      invalidateAdminData();
+    }
+
+    return response;
+  },
+};
+
 // Upload API
 export const uploadApi = {
   uploadImage: async (file: File) => {
