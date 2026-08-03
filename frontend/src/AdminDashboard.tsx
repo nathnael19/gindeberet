@@ -172,7 +172,7 @@ export default function AdminDashboard({
             <span className="kpi-title">Total Active Projects</span>
             <div className="kpi-icon"><ProjectsIcon /></div>
           </div>
-          <div className="kpi-value">{isLoading ? '...' : stats.active}</div>
+          <div className="kpi-value">{isLoading ? <div className="skeleton skeleton-value" style={{ margin: 'auto 0' }}></div> : stats.active}</div>
           <div className="kpi-trend trend-up">
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
             <span>{stats.total} total projects</span>
@@ -186,7 +186,7 @@ export default function AdminDashboard({
               <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
           </div>
-          <div className="kpi-value">{kpiData.totalRevenue || 'N/A'}</div>
+          <div className="kpi-value">{isLoading ? <div className="skeleton skeleton-value" style={{ margin: 'auto 0' }}></div> : (kpiData.totalRevenue || 'N/A')}</div>
           <div className="kpi-trend trend-neutral">
             <span>Year to date</span>
           </div>
@@ -197,7 +197,7 @@ export default function AdminDashboard({
             <span className="kpi-title">Team Members</span>
             <div className="kpi-icon"><TeamIcon /></div>
           </div>
-          <div className="kpi-value">{kpiData.teamMembers || 'N/A'}</div>
+          <div className="kpi-value">{isLoading ? <div className="skeleton skeleton-value" style={{ margin: 'auto 0' }}></div> : (kpiData.teamMembers || 'N/A')}</div>
           <div className="kpi-trend trend-neutral">
             <span>Active members</span>
           </div>
@@ -210,7 +210,7 @@ export default function AdminDashboard({
               <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             </div>
           </div>
-          <div className="kpi-value">{kpiData.incidentReports ?? 'N/A'}</div>
+          <div className="kpi-value">{isLoading ? <div className="skeleton skeleton-value" style={{ margin: 'auto 0' }}></div> : (kpiData.incidentReports ?? 'N/A')}</div>
           <div className="kpi-trend trend-neutral">
             <span>Total logged</span>
           </div>
@@ -237,8 +237,8 @@ export default function AdminDashboard({
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} dx={-10} tickFormatter={(v) => `ETB ${v}`} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: 'var(--bg-main)', borderColor: 'var(--border-main)', borderRadius: '8px' }}
-                    itemStyle={{ color: 'var(--text-main)', fontWeight: 500 }}
+                    contentStyle={{ backgroundColor: 'color-mix(in srgb, var(--bg-offset) 70%, transparent)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderColor: 'color-mix(in srgb, var(--border-color) 50%, transparent)', borderRadius: '12px', boxShadow: '0 8px 30px -10px rgba(0,0,0,0.1)' }}
+                    itemStyle={{ color: 'var(--text-main)', fontWeight: 600 }}
                   />
                   <Area type="monotone" dataKey="revenue" stroke="var(--primary)" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={3} />
                 </AreaChart>
@@ -280,9 +280,13 @@ export default function AdminDashboard({
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>Loading...</td>
-                  </tr>
+                  <>
+                    {[1, 2, 3, 4].map(i => (
+                      <tr key={`skel-${i}`}>
+                        <td colSpan={5}><div className="skeleton skeleton-row" style={{ margin: 0, height: '1.8rem' }}></div></td>
+                      </tr>
+                    ))}
+                  </>
                 ) : recentProjects.length === 0 ? (
                   <tr>
                     <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>No projects yet</td>
@@ -314,7 +318,17 @@ export default function AdminDashboard({
           </div>
           <div className="activity-list">
             {isLoading ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Loading...</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {[1, 2, 3, 4].map(i => (
+                  <div className="activity-item" key={`askel-${i}`}>
+                    <div className="skeleton" style={{ width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0 }}></div>
+                    <div style={{ flex: 1 }}>
+                      <div className="skeleton skeleton-text" style={{ width: '80%' }}></div>
+                      <div className="skeleton skeleton-text" style={{ width: '40%', height: '1rem' }}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : activities.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No recent activity</div>
             ) : (
