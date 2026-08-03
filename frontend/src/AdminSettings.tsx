@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { authApi, settingsApi } from './api';
 import AdminLayout from './AdminLayout';
+import AdminLandingSettings from './AdminLandingSettings';
 import './AdminSettings.css';
 
 const ADMIN_SETTINGS_STORAGE_KEY = 'gindeberet:admin-settings';
@@ -58,11 +59,11 @@ export default function AdminSettings({
   isDarkTheme: boolean;
   toggleTheme: () => void;
 }) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'website'>(() => {
+  const [activeTab, setActiveTab] = useState<'profile' | 'website' | 'content'>(() => {
     if (typeof window !== 'undefined') {
       const savedTab = window.localStorage.getItem('gindeberet:admin-settings-tab');
-      if (savedTab === 'profile' || savedTab === 'website') {
-        return savedTab;
+      if (savedTab === 'profile' || savedTab === 'website' || savedTab === 'content') {
+        return savedTab as 'profile' | 'website' | 'content';
       }
     }
     return 'profile';
@@ -455,6 +456,15 @@ export default function AdminSettings({
         </svg>
       ),
     },
+    {
+      key: 'content' as const,
+      label: 'Landing Content',
+      icon: (
+        <svg className="settings-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15" />
+        </svg>
+      ),
+    },
   ];
 
   return (
@@ -714,6 +724,11 @@ export default function AdminSettings({
                   </div>
                 )}
               </form>
+            )}
+
+            {/* ── Landing Page Content ── */}
+            {activeTab === 'content' && (
+              <AdminLandingSettings />
             )}
 
               </div>

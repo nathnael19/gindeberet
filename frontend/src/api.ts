@@ -345,4 +345,31 @@ export const uploadApi = {
   },
 };
 
+// Landing Page dynamic sections API
+export const landingApi = {
+  getSection: async (section: string) => {
+    return publicApiCall<{ success: boolean; data: any[] }>(`/landing/${section}`);
+  },
+  
+  createItem: async (section: string, data: any) => {
+    return apiCall<{ success: boolean; data: any }>(`/landing/${section}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateItem: async (section: string, id: string | number, data: any) => {
+    return apiCall<{ success: boolean; data: any }>(`/landing/${section}/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteItem: async (section: string, id: string | number) => {
+    return apiCall<{ success: boolean; message: string }>(`/landing/${section}/${id}`, {
+      method: 'DELETE',
+    });
+  }
+};
+
 export { getToken, setToken, removeToken };
