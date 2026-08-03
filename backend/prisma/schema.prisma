@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  password   String
+  firstName  String?
+  lastName   String?
+  role       Role      @default(ADMIN)
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastLogin  DateTime?
+
+  projectsCreated  Project[]      @relation("CreatedBy")
+  activities       ActivityLog[]
+
+  @@map("admin_users")
+}
+
+model Project {
+  id          String      @id
+  name        String
+  client      String
+  status      ProjectStatus @default(PENDING)
+  budget      String
+  location    String
+  category    String
+  duration    String
+  year        String
+  description String?
+  image       String?
+  createdBy   Int?
+  createdByUser  AdminUser?  @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  activities  ActivityLog[]
+  gallery     ProjectGallery[]
+
+  @@index([status])
+  @@index([category])
+  @@index([year])
+  @@map("projects")
+}
+
+model ProjectGallery {
+  id        Int      @id @default(autoincrement())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+  @@map("project_gallery")
+}
+
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  user        AdminUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  action      String
+  targetType  String?
+  targetId    String?
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([createdAt])
+  @@map("activity_log")
+}
+
+enum Role {
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  PENDING
+}
