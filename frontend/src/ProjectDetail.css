@@ -271,11 +271,11 @@
 
 /* Sections */
 .pd-section {
-  margin-bottom: 2.5rem;
+  padding: 0;
 }
 
-.pd-section:last-child {
-  margin-bottom: 0;
+.pd-section + .pd-section {
+  margin-top: 1.5rem;
 }
 
 .pd-section-title {

@@ -617,6 +617,32 @@
   color: var(--text-muted);
 }
 
+.contact-map-wrap {
+  margin-top: 0.5rem;
+}
+
+.contact-map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--cta);
+  color: #000;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: opacity 0.3s ease;
+}
+
+.contact-map-link:hover {
+  opacity: 0.85;
+}
+
+.contact-map-link-icon {
+  font-size: 1.1rem;
+}
+
 .contact-form-card {
   background: var(--bg-offset);
   padding: 3rem;
