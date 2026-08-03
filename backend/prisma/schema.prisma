@@ -39,6 +39,9 @@ model Project {
   duration    String
   year        String
   description String?
+  challenge   String?
+  solution    String?
+  highlights  Json?
   image       String?
   createdBy   Int?
   createdByUser  AdminUser?  @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
@@ -63,6 +66,19 @@ model ProjectGallery {
 
   @@index([projectId])
   @@map("project_gallery")
+}
+
+model SiteSettings {
+  id             Int       @id @default(1)
+  officeLocation String?
+  phone          String?
+  workingHours   String?
+  email          String?
+  mapUrl         String?
+  updatedBy      Int?
+  updatedAt      DateTime  @updatedAt
+
+  @@map("site_settings")
 }
 
 model ActivityLog {
