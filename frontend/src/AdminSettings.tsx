@@ -1,6 +1,58 @@
 import { useState, useRef, useEffect } from 'react';
+import { authApi } from './api';
 import AdminLayout from './AdminLayout';
 import './AdminSettings.css';
+
+const ADMIN_SETTINGS_STORAGE_KEY = 'gindeberet:admin-settings';
+
+type PersistedAdminSettings = {
+  phone?: string;
+  bio?: string;
+  twoFactor?: boolean;
+  emailNotifs?: boolean;
+  projectUpdates?: boolean;
+  teamAlerts?: boolean;
+  weeklyReport?: boolean;
+  securityAlerts?: boolean;
+  language?: string;
+  timezone?: string;
+  dateFormat?: string;
+  density?: 'comfortable' | 'compact';
+};
+
+const readPersistedAdminSettings = (): PersistedAdminSettings => {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  try {
+    const rawValue = window.localStorage.getItem(ADMIN_SETTINGS_STORAGE_KEY);
+    if (!rawValue) {
+      return {};
+    }
+
+    const parsedValue = JSON.parse(rawValue);
+    if (!parsedValue || typeof parsedValue !== 'object') {
+      return {};
+    }
+
+    return parsedValue as PersistedAdminSettings;
+  } catch {
+    return {};
+  }
+};
+
+const writePersistedAdminSettings = (settings: PersistedAdminSettings) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(ADMIN_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+  } catch {
+    // Ignore storage quota or privacy errors.
+  }
+};
 
 export default function AdminSettings({
   isDarkTheme,
@@ -11,12 +63,13 @@ export default function AdminSettings({
 }) {
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications' | 'appearance'>('profile');
   const [saved, setSaved] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Profile state
-  const [fullName, setFullName] = useState('Admin User');
-  const [email, setEmail] = useState('admin@gindeberet.com');
-  const [phone, setPhone] = useState('+1 (555) 000-0000');
-  const [role, setRole] = useState('Superadmin');
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [role, setRole] = useState('');
   const [bio, setBio] = useState('');
 
   // Security state
@@ -45,6 +98,93 @@ export default function AdminSettings({
     emailNotifs, projectUpdates, teamAlerts, weeklyReport, securityAlerts,
     language, timezone, dateFormat, density
   });
+
+  const applyUserData = (userData: any) => {
+    const persistedSettings = readPersistedAdminSettings();
+    const nextFullName = userData.name || userData.fullName || [userData.firstName, userData.lastName].filter(Boolean).join(' ').trim();
+    const nextEmail = userData.email || '';
+    const nextPhone = persistedSettings.phone ?? '';
+    const nextRole = userData.role || '';
+    const nextBio = persistedSettings.bio ?? '';
+    const nextTwoFactor = persistedSettings.twoFactor ?? false;
+    const nextEmailNotifs = persistedSettings.emailNotifs ?? true;
+    const nextProjectUpdates = persistedSettings.projectUpdates ?? true;
+    const nextTeamAlerts = persistedSettings.teamAlerts ?? false;
+    const nextWeeklyReport = persistedSettings.weeklyReport ?? true;
+    const nextSecurityAlerts = persistedSettings.securityAlerts ?? true;
+    const nextLanguage = persistedSettings.language || 'en';
+    const nextTimezone = persistedSettings.timezone || 'America/Toronto';
+    const nextDateFormat = persistedSettings.dateFormat || 'MM/DD/YYYY';
+    const nextDensity = persistedSettings.density || 'comfortable';
+
+    setFullName(nextFullName);
+    setEmail(nextEmail);
+    setPhone(nextPhone);
+    setRole(nextRole);
+    setBio(nextBio);
+    setTwoFactor(nextTwoFactor);
+    setEmailNotifs(nextEmailNotifs);
+    setProjectUpdates(nextProjectUpdates);
+    setTeamAlerts(nextTeamAlerts);
+    setWeeklyReport(nextWeeklyReport);
+    setSecurityAlerts(nextSecurityAlerts);
+    setLanguage(nextLanguage);
+    setTimezone(nextTimezone);
+    setDateFormat(nextDateFormat);
+    setDensity(nextDensity);
+
+    initialValues.current = {
+      fullName: nextFullName,
+      email: nextEmail,
+      phone: nextPhone,
+      role: nextRole,
+      bio: nextBio,
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+      twoFactor: nextTwoFactor,
+      emailNotifs: nextEmailNotifs,
+      projectUpdates: nextProjectUpdates,
+      teamAlerts: nextTeamAlerts,
+      weeklyReport: nextWeeklyReport,
+      securityAlerts: nextSecurityAlerts,
+      language: nextLanguage,
+      timezone: nextTimezone,
+      dateFormat: nextDateFormat,
+      density: nextDensity,
+    };
+  };
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchUserData = async () => {
+      try {
+        const response = await authApi.getMeCached((freshResponse) => {
+          if (isActive && freshResponse.success && freshResponse.data) {
+            applyUserData(freshResponse.data);
+          }
+        });
+
+        if (isActive && response.success && response.data) {
+          applyUserData(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchUserData();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   useEffect(() => {
     const isDirty = 
@@ -93,17 +233,60 @@ export default function AdminSettings({
     setHasChanges(false);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    initialValues.current = {
-      fullName, email, phone, role, bio,
-      currentPassword, newPassword, confirmPassword, twoFactor,
-      emailNotifs, projectUpdates, teamAlerts, weeklyReport, securityAlerts,
-      language, timezone, dateFormat, density
-    };
-    setHasChanges(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+
+    const nameParts = fullName.trim().split(/\s+/);
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    try {
+      const response = await authApi.updateMe({
+        firstName,
+        lastName,
+        email,
+        role,
+        currentPassword: currentPassword || undefined,
+        newPassword: newPassword || undefined,
+      });
+
+      if (response.success) {
+        writePersistedAdminSettings({
+          phone,
+          bio,
+          twoFactor,
+          emailNotifs,
+          projectUpdates,
+          teamAlerts,
+          weeklyReport,
+          securityAlerts,
+          language,
+          timezone,
+          dateFormat,
+          density,
+        });
+
+        applyUserData(response.data || {
+          name: fullName,
+          email,
+          phone,
+          role,
+          bio,
+        });
+        setHasChanges(false);
+        setSaved(true);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        window.dispatchEvent(new CustomEvent('admin:user-updated', {
+          detail: response.data,
+        }));
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setSaved(false);
+    }
   };
 
   const tabs = [
@@ -148,38 +331,44 @@ export default function AdminSettings({
   return (
     <AdminLayout isDarkTheme={isDarkTheme} toggleTheme={toggleTheme} activePage="settings">
       <div className="settings-page">
-        <div className="settings-page-header">
-          <div>
-            <h1 className="page-title" style={{ marginBottom: '0.25rem' }}>Settings</h1>
-            <p className="settings-subtitle">Manage your account, security, and preferences</p>
+        {isLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', color: 'var(--text-muted)' }}>
+            Loading settings...
           </div>
-          {saved && (
-            <div className="settings-saved-toast">
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Changes saved!
+        ) : (
+          <>
+            <div className="settings-page-header">
+              <div>
+                <h1 className="page-title" style={{ marginBottom: '0.25rem' }}>Settings</h1>
+                <p className="settings-subtitle">Manage your account, security, and preferences</p>
+              </div>
+              {saved && (
+                <div className="settings-saved-toast">
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Changes saved!
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="settings-layout">
-          {/* Tab Sidebar */}
-          <nav className="settings-tabs">
-            {tabs.map(({ key, label, icon }) => (
-              <button
-                key={key}
-                className={`settings-tab-btn ${activeTab === key ? 'active' : ''}`}
-                onClick={() => setActiveTab(key)}
-              >
-                {icon}
-                {label}
-              </button>
-            ))}
-          </nav>
+            <div className="settings-layout">
+              {/* Tab Sidebar */}
+              <nav className="settings-tabs">
+                {tabs.map(({ key, label, icon }) => (
+                  <button
+                    key={key}
+                    className={`settings-tab-btn ${activeTab === key ? 'active' : ''}`}
+                    onClick={() => setActiveTab(key)}
+                  >
+                    {icon}
+                    {label}
+                  </button>
+                ))}
+              </nav>
 
-          {/* Content */}
-          <div className="settings-content">
+              {/* Content */}
+              <div className="settings-content">
 
             {/* ── Profile ── */}
             {activeTab === 'profile' && (
@@ -572,8 +761,10 @@ export default function AdminSettings({
               </form>
             )}
 
-          </div>
-        </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </AdminLayout>
   );
