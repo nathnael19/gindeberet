@@ -13,6 +13,9 @@ export interface AdminProject {
   description: string;
   image: string;
   gallery?: string[];
+  challenge?: string;
+  solution?: string;
+  highlights?: string[];
   createdAt?: string;
   updatedAt?: string;
 }

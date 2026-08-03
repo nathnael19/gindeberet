@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useEffect } from 'react';
+import { type ReactNode, useState, useEffect, useRef } from 'react';
 import { authApi } from './api';
 import './AdminDashboard.css';
 
@@ -16,6 +16,34 @@ const navigate = (path: string) => {
 
 export default function AdminLayout({ children, isDarkTheme, toggleTheme, activePage }: AdminLayoutProps) {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    try {
+      const saved = localStorage.getItem('adminSidebarCollapsed');
+      return saved ? JSON.parse(saved) : false;
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebar = () => {
+    setIsCollapsed((prev: boolean) => {
+      const newState = !prev;
+      localStorage.setItem('adminSidebarCollapsed', JSON.stringify(newState));
+      return newState;
+    });
+  };
 
   useEffect(() => {
     let isActive = true;
@@ -99,6 +127,12 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
     </svg>
   );
 
+  const MenuIcon = () => (
+    <svg className="nav-icon" style={{ cursor: 'pointer', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  );
+
   const navItems = [
     { key: 'overview' as const, label: 'Overview', path: '/admin', Icon: HomeIcon },
     { key: 'projects' as const, label: 'Projects', path: '/projects', Icon: ProjectsIcon },
@@ -108,10 +142,17 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
   return (
     <div className="admin-dashboard-layout">
       {/* Sidebar */}
-      <aside className="dashboard-sidebar">
-        <div className="sidebar-header">
-          <img src="/logo.png" alt="Gindeberet Logo" />
-          <span>GINDEBERET<span className="accent">.</span></span>
+      <aside className={`dashboard-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+        <div className="sidebar-header" style={{ justifyContent: isCollapsed ? 'center' : 'space-between' }}>
+          {!isCollapsed && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+              <img src="/logo.png" alt="Gindeberet Logo" style={{ flexShrink: 0 }} />
+              <span>GINDEBERET<span className="accent">.</span></span>
+            </div>
+          )}
+          <button onClick={toggleSidebar} className="icon-btn" aria-label="Toggle Sidebar" style={{ padding: '0.25rem', flexShrink: 0 }}>
+            <MenuIcon />
+          </button>
         </div>
 
         <nav className="sidebar-nav">
@@ -123,7 +164,7 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
               onClick={(e) => { e.preventDefault(); navigate(path); }}
             >
               <Icon />
-              {label}
+              {!isCollapsed && <span style={{ whiteSpace: 'nowrap' }}>{label}</span>}
             </a>
           ))}
         </nav>
@@ -135,7 +176,7 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
             window.location.href = '/';
           }}>
             <LogoutIcon />
-            Sign Out
+            {!isCollapsed && <span style={{ whiteSpace: 'nowrap' }}>Sign Out</span>}
           </button>
         </div>
       </aside>
@@ -148,9 +189,52 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
             <button onClick={toggleTheme} className="icon-btn theme-toggle" aria-label="Toggle Theme" style={{ fontSize: '1.25rem', padding: '0.25rem' }}>
               {isDarkTheme ? '☀️' : '🌙'}
             </button>
-            <button className="icon-btn" aria-label="Notifications">
-              <BellIcon />
-            </button>
+            <div className="notification-wrapper" ref={notificationRef} style={{ position: 'relative' }}>
+              <button 
+                className={`icon-btn ${showNotifications ? 'active' : ''}`} 
+                aria-label="Notifications"
+                onClick={() => setShowNotifications(!showNotifications)}
+                style={{ position: 'relative' }}
+              >
+                <BellIcon />
+                <span className="notification-badge">3</span>
+              </button>
+              
+              {showNotifications && (
+                <div className="notification-modal">
+                  <div className="notification-header">
+                    <h3>Notifications</h3>
+                    <button className="mark-read-btn">Mark all as read</button>
+                  </div>
+                  <div className="notification-list">
+                    <div className="notification-item unread">
+                      <div className="notification-icon new-project">🚀</div>
+                      <div className="notification-content">
+                        <p className="notification-text">New project <strong>"Eco Farm"</strong> was submitted for review.</p>
+                        <span className="notification-time">2 mins ago</span>
+                      </div>
+                    </div>
+                    <div className="notification-item unread">
+                      <div className="notification-icon system">⚠️</div>
+                      <div className="notification-content">
+                        <p className="notification-text">System maintenance scheduled for tonight at 2:00 AM.</p>
+                        <span className="notification-time">1 hour ago</span>
+                      </div>
+                    </div>
+                    <div className="notification-item">
+                      <div className="notification-icon user">👤</div>
+                      <div className="notification-content">
+                        <p className="notification-text">New user registration: <strong>John Doe</strong>.</p>
+                        <span className="notification-time">3 hours ago</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="notification-footer">
+                    <button className="view-all-btn">View all notifications</button>
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="user-profile">
               <div className="user-info">
                 <span className="user-name">{user?.name || 'Loading...'}</span>
