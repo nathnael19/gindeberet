@@ -110,6 +110,9 @@ const createProject = async (req, res) => {
       duration,
       year,
       description,
+      challenge,
+      solution,
+      highlights,
       image,
       gallery
     } = req.body;
@@ -147,6 +150,9 @@ const createProject = async (req, res) => {
         duration,
         year,
         description,
+        challenge,
+        solution,
+        highlights,
         image,
         createdBy: req.user.userId,
         gallery: gallery && gallery.length > 0 ? {
@@ -198,6 +204,9 @@ const updateProject = async (req, res) => {
       duration,
       year,
       description,
+      challenge,
+      solution,
+      highlights,
       image,
       gallery
     } = req.body;
@@ -226,6 +235,9 @@ const updateProject = async (req, res) => {
     if (duration !== undefined) updateData.duration = duration;
     if (year !== undefined) updateData.year = year;
     if (description !== undefined) updateData.description = description;
+    if (challenge !== undefined) updateData.challenge = challenge;
+    if (solution !== undefined) updateData.solution = solution;
+    if (highlights !== undefined) updateData.highlights = highlights;
     if (image !== undefined) updateData.image = image;
 
     if (Object.keys(updateData).length === 0 && gallery === undefined) {
@@ -300,12 +312,7 @@ const deleteProject = async (req, res) => {
       });
     }
 
-    // Delete project
-    await prisma.project.delete({
-      where: { id }
-    });
-
-    // Log activity
+    // Log activity before deleting so the projectId FK still resolves
     await prisma.activityLog.create({
       data: {
         userId: req.user.userId,
@@ -315,6 +322,11 @@ const deleteProject = async (req, res) => {
         projectId: id,
         description: `Deleted project: ${existingProject.name}`
       }
+    });
+
+    // Delete project
+    await prisma.project.delete({
+      where: { id }
     });
 
     res.json({
