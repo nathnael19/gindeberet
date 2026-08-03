@@ -8,7 +8,7 @@ import AdminDashboard from './AdminDashboard';
 import AdminProjects from './AdminProjects';
 import AdminAddProject from './AdminAddProject';
 import AdminSettings from './AdminSettings';
-import { publicApi, settingsApi, getToken } from './api';
+import { publicApi, settingsApi, landingApi, getToken } from './api';
 
 const CATEGORIES = ['All', 'Roads', 'Corridors', 'Infrastructure', 'Bridges'];
 
@@ -69,6 +69,14 @@ function App() {
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [projectsError, setProjectsError] = useState('');
   const [siteSettings, setSiteSettings] = useState<any>(DEFAULT_SITE_SETTINGS);
+  
+  // Landing Page Dynamic State
+  const [partners, setPartners] = useState<any[]>([]);
+  const [safetyFeatures, setSafetyFeatures] = useState<any[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [awards, setAwards] = useState<any[]>([]);
+  const [newsItems, setNewsItems] = useState<any[]>([]);
   
   // Form State
   const [projectType, setProjectType] = useState('');
@@ -201,6 +209,39 @@ function App() {
     };
 
     fetchSiteSettings();
+  }, []);
+
+  // Fetch dynamic landing page sections
+  useEffect(() => {
+    const fetchLandingData = async () => {
+      try {
+        const [
+          partnersRes,
+          safetyRes,
+          testimonialsRes,
+          teamRes,
+          awardsRes,
+          newsRes
+        ] = await Promise.all([
+          landingApi.getSection('partners'),
+          landingApi.getSection('safety'),
+          landingApi.getSection('testimonials'),
+          landingApi.getSection('team'),
+          landingApi.getSection('awards'),
+          landingApi.getSection('news')
+        ]);
+        
+        if (partnersRes.success) setPartners(partnersRes.data);
+        if (safetyRes.success) setSafetyFeatures(safetyRes.data);
+        if (testimonialsRes.success) setTestimonials(testimonialsRes.data);
+        if (teamRes.success) setTeamMembers(teamRes.data);
+        if (awardsRes.success) setAwards(awardsRes.data);
+        if (newsRes.success) setNewsItems(newsRes.data);
+      } catch (error) {
+        console.error('Error fetching landing data:', error);
+      }
+    };
+    fetchLandingData();
   }, []);
 
   const toggleTheme = () => {
@@ -349,6 +390,22 @@ function App() {
         </div>
       </section>
 
+      {/* Partners Section */}
+      <section className="partners-section">
+        <div className="container">
+          <p className="partners-title">Trusted by industry leaders and government agencies</p>
+          <div className="partners-logos">
+            {partners.length > 0 ? partners.map(partner => (
+              <div key={partner.id} className="partner-logo">
+                {partner.logoUrl ? <img src={getImageUrl(partner.logoUrl)} alt={partner.name} style={{maxHeight: '40px'}} /> : <span>{partner.name}</span>}
+              </div>
+            )) : (
+              <div style={{ color: 'var(--text-muted)' }}>No partners added yet.</div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* About Section */}
       <section id="about" className="about-section">
         <div className="container">
@@ -384,6 +441,30 @@ function App() {
                 <h4 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 800 }}>ISO 9001</h4>
                 <p style={{ fontSize: '0.875rem', fontWeight: 600 }}>Certified Company</p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Safety & Sustainability Section */}
+      <section id="safety" className="safety-section">
+        <div className="container">
+          <div className="safety-grid">
+            <div className="safety-image-wrap reveal-up">
+              <img src="https://images.unsplash.com/photo-1541888087425-ce81dc8ca664?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Safety on site" className="safety-image" />
+            </div>
+            <div className="safety-content reveal-up" style={{ transitionDelay: '0.2s' }}>
+              <h2 className="section-title">Commitment to Safety & Sustainability</h2>
+              <p style={{ marginTop: '1.5rem', color: 'var(--text-muted)' }}>
+                We believe that zero accidents is an achievable goal. Our safety-first culture ensures that everyone goes home safely every day. Furthermore, we integrate sustainable building practices to minimize environmental impact.
+              </p>
+              <ul className="safety-list">
+                {safetyFeatures.length > 0 ? safetyFeatures.map(feature => (
+                  <li key={feature.id}><span className="check-icon">{feature.icon || '✓'}</span> <strong>{feature.title}:</strong> {feature.description}</li>
+                )) : (
+                  <p style={{ color: 'var(--text-muted)' }}>No safety features listed.</p>
+                )}
+              </ul>
             </div>
           </div>
         </div>
@@ -480,6 +561,99 @@ function App() {
                   </div>
                 </div>
               ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section id="testimonials" className="testimonials-section">
+        <div className="container">
+          <div className="reveal-up" style={{ textAlign: 'center' }}>
+            <h2 className="section-title">What Our Clients Say</h2>
+            <p className="section-subtitle" style={{ margin: '1rem auto 3rem auto', color: 'var(--text-muted)' }}>Real feedback from our partners and clients.</p>
+          </div>
+          <div className="testimonials-grid">
+            {testimonials.length > 0 ? testimonials.map((t, i) => (
+              <div key={t.id} className="testimonial-card reveal-up" style={{ transitionDelay: `${i * 0.1}s` }}>
+                <div className="quote-icon">"</div>
+                <p className="testimonial-text">"{t.text}"</p>
+                <div className="testimonial-author">
+                  <div className="author-info">
+                    <h4>{t.authorName}</h4>
+                    <span>{t.authorTitle}</span>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <p style={{ color: 'var(--text-muted)', gridColumn: '1 / -1', textAlign: 'center' }}>No testimonials added yet.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Leadership / Our Team */}
+      <section id="team" className="team-section">
+        <div className="container">
+          <div className="reveal-up" style={{ textAlign: 'center' }}>
+            <h2 className="section-title">Our Leadership</h2>
+            <p className="section-subtitle" style={{ margin: '1rem auto 3rem auto', color: 'var(--text-muted)' }}>Meet the experts driving our vision forward.</p>
+          </div>
+          <div className="team-grid">
+            {teamMembers.length > 0 ? teamMembers.map((member, i) => (
+              <div key={member.id} className="team-card reveal-up" style={{ transitionDelay: `${i * 0.1}s` }}>
+                <img src={getImageUrl(member.imageUrl)} alt={member.name} className="team-image" />
+                <div className="team-info">
+                  <h3>{member.name}</h3>
+                  <span>{member.position}</span>
+                </div>
+              </div>
+            )) : (
+              <p style={{ color: 'var(--text-muted)', gridColumn: '1 / -1', textAlign: 'center' }}>No team members added yet.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Awards & Certifications */}
+      <section className="awards-section">
+        <div className="container">
+          <div className="reveal-up" style={{ textAlign: 'center' }}>
+            <h2 className="section-title">Awards & Certifications</h2>
+          </div>
+          <div className="awards-grid reveal-up">
+            {awards.length > 0 ? awards.map(award => (
+              <div key={award.id} className="award-item">
+                <span className="award-icon">{award.icon}</span>
+                <h4>{award.title}</h4>
+                <p>{award.description}</p>
+              </div>
+            )) : (
+              <p style={{ color: 'var(--text-muted)', gridColumn: '1 / -1', textAlign: 'center' }}>No awards listed.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Latest News */}
+      <section id="news" className="news-section">
+        <div className="container">
+          <div className="reveal-up" style={{ textAlign: 'center' }}>
+            <h2 className="section-title">Latest Updates</h2>
+            <p className="section-subtitle" style={{ margin: '1rem auto 3rem auto', color: 'var(--text-muted)' }}>Company news, insights, and industry updates.</p>
+          </div>
+          <div className="news-grid">
+            {newsItems.length > 0 ? newsItems.map((news, i) => (
+              <div key={news.id} className="news-card reveal-up" style={{ transitionDelay: `${i * 0.1}s` }}>
+                <div className="news-content">
+                  <span className="news-date">{news.date}</span>
+                  <h3>{news.title}</h3>
+                  <p>{news.excerpt}</p>
+                  {news.linkUrl && <a href={news.linkUrl} className="news-link">Read More →</a>}
+                </div>
+              </div>
+            )) : (
+              <p style={{ color: 'var(--text-muted)', gridColumn: '1 / -1', textAlign: 'center' }}>No news updates yet.</p>
             )}
           </div>
         </div>
