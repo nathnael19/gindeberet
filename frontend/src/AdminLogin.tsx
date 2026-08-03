@@ -1,19 +1,30 @@
 import { useState } from 'react';
+import { authApi } from './api';
 import './AdminLogin.css';
 
 export default function AdminLogin({ isDarkTheme }: { isDarkTheme: boolean }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate login delay
-    setTimeout(() => {
+    setError('');
+
+    try {
+      const response = await authApi.login(email, password);
+      if (response.success) {
+        window.location.href = '/admin';
+      } else {
+        setError('Login failed. Please try again.');
+      }
+    } catch (err) {
+      setError('Invalid email or password');
+    } finally {
       setIsLoading(false);
-      window.location.href = '/admin';
-    }, 1000);
+    }
   };
 
   return (
@@ -51,7 +62,13 @@ export default function AdminLogin({ isDarkTheme }: { isDarkTheme: boolean }) {
               required 
             />
           </div>
-          
+
+          {error && (
+            <div className="error-message" style={{ color: '#EF4444', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+              {error}
+            </div>
+          )}
+
           <div className="form-actions">
             <label className="remember-me">
               <input type="checkbox" className="custom-checkbox-input" />
