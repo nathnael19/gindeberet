@@ -42,6 +42,9 @@ const createEmptyForm = () => ({
   year: '',
   status: 'pending',
   description: '',
+  challenge: '',
+  solution: '',
+  highlights: '',
 });
 
 export default function AdminAddProject({
@@ -66,6 +69,8 @@ export default function AdminAddProject({
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -107,6 +112,9 @@ export default function AdminAddProject({
           year: project.year || '',
           status: project.status || 'pending',
           description: project.description || '',
+          challenge: project.challenge || '',
+          solution: project.solution || '',
+          highlights: Array.isArray(project.highlights) ? project.highlights.join('\n') : (project.highlights || ''),
         });
         setExistingImageUrl(project.image || '');
         setCoverPreview(project.image ? getImageUrl(project.image) : '');
@@ -207,6 +215,9 @@ export default function AdminAddProject({
         duration: formData.duration,
         year: formData.year,
         description: formData.description,
+        challenge: formData.challenge,
+        solution: formData.solution,
+        highlights: formData.highlights.split('\n').map((item) => item.trim()).filter(Boolean),
         image: imageUrl,
         gallery: galleryUrls,
       };
@@ -225,6 +236,28 @@ export default function AdminAddProject({
       setError(submitError instanceof Error ? submitError.message : 'Failed to save project. Please try again.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!projectId) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setError('');
+
+    try {
+      const response = await projectsApi.delete(projectId);
+      if (!response.success) {
+        throw new Error('Failed to delete project');
+      }
+      navigateTo('/projects');
+    } catch (deleteError) {
+      console.error('Error deleting project:', deleteError);
+      setError(deleteError instanceof Error ? deleteError.message : 'Failed to delete project. Please try again.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -314,6 +347,49 @@ export default function AdminAddProject({
                   <div className="form-group">
                     <label htmlFor="year">Year</label>
                     <input type="text" id="year" name="year" value={formData.year} onChange={handleChange} placeholder="e.g. 2023" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-section">
+                <h2 className="section-heading">Project Story</h2>
+                <p className="page-subtitle" style={{ marginBottom: '1.5rem', marginTop: '-0.5rem' }}>
+                  These sections appear on the project detail page.
+                </p>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label htmlFor="challenge">The Challenge</label>
+                    <textarea
+                      id="challenge"
+                      name="challenge"
+                      value={formData.challenge}
+                      onChange={handleChange}
+                      placeholder="Describe the challenges this project faced..."
+                      rows={4}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="solution">Our Approach</label>
+                    <textarea
+                      id="solution"
+                      name="solution"
+                      value={formData.solution}
+                      onChange={handleChange}
+                      placeholder="Describe how your team solved the challenge..."
+                      rows={4}
+                    />
+                  </div>
+                  <div className="form-group full-width">
+                    <label htmlFor="highlights">Key Highlights</label>
+                    <textarea
+                      id="highlights"
+                      name="highlights"
+                      value={formData.highlights}
+                      onChange={handleChange}
+                      placeholder={'One highlight per line, e.g.\nDelivered 2 weeks early\nLEED Silver design'}
+                      rows={4}
+                    />
+                    <span className="upload-hint">One highlight per line. Leave blank to hide this section.</span>
                   </div>
                 </div>
               </div>
@@ -413,10 +489,15 @@ export default function AdminAddProject({
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn-cancel" onClick={() => navigateTo('/projects')} disabled={isSaving}>
+                {isEditMode && (
+                  <button type="button" className="btn-delete" onClick={() => { setError(''); setShowDeleteConfirm(true); }} disabled={isSaving || isDeleting}>
+                    {isDeleting ? 'Deleting...' : 'Delete Project'}
+                  </button>
+                )}
+                <button type="button" className="btn-cancel" onClick={() => navigateTo('/projects')} disabled={isSaving || isDeleting}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-save" disabled={isSaving}>
+                <button type="submit" className="btn-save" disabled={isSaving || isDeleting}>
                   {isSaving ? (isEditMode ? 'Updating...' : 'Saving...') : (isEditMode ? 'Update Project' : 'Save Project')}
                 </button>
               </div>
@@ -424,6 +505,36 @@ export default function AdminAddProject({
           </>
         )}
       </div>
+
+      {showDeleteConfirm && (
+        <div className="confirm-overlay" role="dialog" aria-modal="true" aria-label="Confirm project deletion">
+          <div className="confirm-modal">
+            <div className="confirm-icon">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h2 className="confirm-title">Delete this project?</h2>
+            <p className="confirm-text">
+              Are you sure you want to delete{' '}
+              <strong>{formData.name || 'this project'}</strong>? This action cannot be undone.
+            </p>
+            {error && (
+              <div className="confirm-error">
+                {error}
+              </div>
+            )}
+            <div className="confirm-actions">
+              <button type="button" className="btn-cancel" onClick={() => setShowDeleteConfirm(false)} disabled={isDeleting}>
+                Cancel
+              </button>
+              <button type="button" className="btn-delete confirm-delete" onClick={handleDelete} disabled={isDeleting}>
+                {isDeleting ? 'Deleting...' : 'Delete Project'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

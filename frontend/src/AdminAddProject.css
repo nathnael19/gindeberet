@@ -308,6 +308,28 @@
   background: var(--bg-main);
 }
 
+.btn-delete {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: #EF4444;
+  font-weight: 600;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: auto;
+}
+
+.btn-delete:hover {
+  background: #EF4444;
+  color: #fff;
+}
+
+.btn-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .btn-save {
   padding: 0.75rem 1.5rem;
   background: var(--cta);
@@ -322,4 +344,89 @@
 .btn-save:hover {
   background: #e5ab1f;
   transform: translateY(-1px);
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.confirm-modal {
+  background: var(--bg-offset);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.4);
+}
+
+.confirm-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1.25rem;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #EF4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.75rem;
+}
+
+.confirm-text {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.confirm-error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #EF4444;
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.confirm-actions .btn-cancel {
+  flex: 1;
+}
+
+.confirm-actions .btn-delete {
+  margin-right: 0;
+  flex: 1;
+  background: #EF4444;
+  color: #fff;
+  border: none;
+}
+
+.confirm-actions .btn-delete:hover {
+  background: #DC2626;
 }
