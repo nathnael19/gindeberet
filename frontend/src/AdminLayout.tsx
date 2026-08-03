@@ -1,4 +1,5 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useState, useEffect } from 'react';
+import { authApi } from './api';
 import './AdminDashboard.css';
 
 interface AdminLayoutProps {
@@ -14,6 +15,59 @@ const navigate = (path: string) => {
 };
 
 export default function AdminLayout({ children, isDarkTheme, toggleTheme, activePage }: AdminLayoutProps) {
+  const [user, setUser] = useState<{ name: string; role: string } | null>(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchUserData = async () => {
+      try {
+        const response = await authApi.getMeCached((freshResponse) => {
+          if (isActive && freshResponse.success && freshResponse.data) {
+            setUser({
+              name: freshResponse.data.name || freshResponse.data.fullName || 'Admin User',
+              role: freshResponse.data.role || 'Admin',
+            });
+          }
+        });
+
+        if (isActive && response.success && response.data) {
+          setUser({
+            name: response.data.name || response.data.fullName || 'Admin User',
+            role: response.data.role || 'Admin',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        if (isActive) {
+          setUser({ name: 'Admin User', role: 'Admin' });
+        }
+      }
+    };
+
+    fetchUserData();
+
+    const handleUserUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<{ name?: string; fullName?: string; role?: string }>;
+      const userData = customEvent.detail;
+      if (!userData) {
+        return;
+      }
+
+      setUser({
+        name: userData.name || userData.fullName || 'Admin User',
+        role: userData.role || 'Admin',
+      });
+    };
+
+    window.addEventListener('admin:user-updated', handleUserUpdated);
+
+    return () => {
+      isActive = false;
+      window.removeEventListener('admin:user-updated', handleUserUpdated);
+    };
+  }, []);
+
   const HomeIcon = () => (
     <svg className="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -75,7 +129,11 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
         </nav>
 
         <div className="sidebar-footer">
-          <button className="logout-btn" onClick={() => window.location.href = '/'}>
+          <button className="logout-btn" onClick={() => {
+            authApi.logout();
+            // Force redirect to home page
+            window.location.href = '/';
+          }}>
             <LogoutIcon />
             Sign Out
           </button>
@@ -95,10 +153,10 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
             </button>
             <div className="user-profile">
               <div className="user-info">
-                <span className="user-name">Admin User</span>
-                <span className="user-role">Superadmin</span>
+                <span className="user-name">{user?.name || 'Loading...'}</span>
+                <span className="user-role">{user?.role || 'Loading...'}</span>
               </div>
-              <div className="user-avatar">A</div>
+              <div className="user-avatar">{user?.name?.charAt(0).toUpperCase() || 'A'}</div>
             </div>
           </div>
         </header>
