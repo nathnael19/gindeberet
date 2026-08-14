@@ -1,10 +1,11 @@
 # Auto-deploy to cPanel when code is pushed to main
 #
-# Required GitHub secrets (Settings → Secrets and variables → Actions):
+# Required GitHub Repository secrets (Settings → Secrets → Actions):
 #   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD
+#   FTP_BACKEND_DIR, FTP_FRONTEND_DIR
 #   VITE_API_URL, VITE_SITE_URL
 # Optional:
-#   FTP_PROTOCOL (ftps|ftp), FTP_PORT, FTP_FRONTEND_DIR, FTP_BACKEND_DIR
+#   FTP_PROTOCOL (ftp|ftps|ftps-legacy), FTP_PORT
 #
 # After backend deploy: cPanel → Node.js App → Restart
 # (NPM Install only when package.json dependencies change)
@@ -46,14 +47,35 @@ jobs:
           # Dummy URL only for generate; real DB URL stays on the server .env
           DATABASE_URL: mysql://user:pass@localhost:3306/dummy
 
+      - name: Verify FTP secrets (names must match exactly)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_BACKEND_DIR: ${{ secrets.FTP_BACKEND_DIR }}
+        run: |
+          missing=0
+          for name in FTP_SERVER FTP_USERNAME FTP_PASSWORD FTP_BACKEND_DIR; do
+            eval "val=\$$name"
+            if [ -z "$val" ]; then
+              echo "::error::$name is missing or empty. Add it under Settings → Secrets and variables → Actions → Repository secrets (not Environment secrets)."
+              missing=1
+            else
+              echo "$name is set (${#val} chars)"
+            fi
+          done
+          exit $missing
+
       - name: Deploy backend via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          port: 21
+          # Plain FTP is most reliable on shared cPanel; set secret FTP_PROTOCOL=ftps if needed
+          protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          security: loose
           local-dir: ./backend/
           server-dir: ${{ secrets.FTP_BACKEND_DIR }}
           exclude: |
@@ -94,14 +116,34 @@ jobs:
           VITE_SITE_URL: ${{ secrets.VITE_SITE_URL }}
         run: npm run build
 
+      - name: Verify FTP secrets (names must match exactly)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_FRONTEND_DIR: ${{ secrets.FTP_FRONTEND_DIR }}
+        run: |
+          missing=0
+          for name in FTP_SERVER FTP_USERNAME FTP_PASSWORD FTP_FRONTEND_DIR; do
+            eval "val=\$$name"
+            if [ -z "$val" ]; then
+              echo "::error::$name is missing or empty. Add it under Settings → Secrets and variables → Actions → Repository secrets (not Environment secrets)."
+              missing=1
+            else
+              echo "$name is set (${#val} chars)"
+            fi
+          done
+          exit $missing
+
       - name: Deploy frontend via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          port: 21
+          protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          security: loose
           local-dir: ./frontend/dist/
           server-dir: ${{ secrets.FTP_FRONTEND_DIR }}
           dangerous-clean-slate: false

@@ -11,7 +11,9 @@ Prisma client is **regenerated on GitHub’s Linux runners** before upload (avoi
 
 ## One-time: add secrets
 
-Repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+Repo → **Settings** → **Secrets and variables** → **Actions** → **Repository secrets** → **New repository secret**
+
+**Critical:** use **Repository secrets**, not Environment secrets, and not Variables. Names must match exactly (case-sensitive).
 
 | Secret name | Example value |
 |-------------|----------------|
@@ -23,7 +25,21 @@ Repo → **Settings** → **Secrets and variables** → **Actions** → **New re
 | `VITE_API_URL` | `https://api.gindeberetconstruction.com/api` |
 | `VITE_SITE_URL` | `https://gindeberetconstruction.com` |
 
-If FTPS fails, temporarily test with a workflow edit to `protocol: ftp` (less secure) or ask host for FTPS on port 21/990.
+Optional (defaults are already cPanel-friendly: `ftp` on port `21`):
+
+| Secret name | Example value |
+|-------------|----------------|
+| `FTP_PROTOCOL` | `ftp` (default) or `ftps` |
+| `FTP_PORT` | `21` |
+
+### If Actions says `Input required and not supplied: server`
+
+That means `FTP_SERVER` is empty for the workflow. Fix:
+
+1. Open https://github.com/nathnael19/gindeberet/settings/secrets/actions
+2. Confirm you are on **Repository secrets** (not Environments)
+3. Re-create `FTP_SERVER` / `FTP_USERNAME` / `FTP_PASSWORD` with non-empty values
+4. Re-run the workflow (**Actions** → latest run → **Re-run all jobs**) — no code push needed
 
 ## After each auto-deploy
 
