@@ -1,7 +1,8 @@
 let prisma;
 
 try {
-  const { PrismaClient } = require('@prisma/client');
+  // Generated offline for cPanel (prisma generate OOMs on shared hosting)
+  const { PrismaClient } = require('../generated/prisma');
   prisma = new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
@@ -23,10 +24,7 @@ try {
     }
   });
 } catch (err) {
-  console.error(
-    'Prisma client failed to load. Run: npx prisma generate. Detail:',
-    err.message
-  );
+  console.error('Prisma client failed to load:', err.message);
   prisma = new Proxy(
     {},
     {
@@ -35,7 +33,7 @@ try {
           return async () => {};
         }
         throw new Error(
-          `Prisma is not ready (tried to use "${String(prop)}"). Run prisma generate / cpanel-generate.js`
+          `Prisma is not ready (tried to use "${String(prop)}"). Upload src/generated/prisma from the repo.`
         );
       },
     }

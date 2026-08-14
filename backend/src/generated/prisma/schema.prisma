@@ -1,0 +1,308 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  // Commit generated client so cPanel does not need `prisma generate` (OOM on shared hosts)
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x", "rhel-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  firstName String?
+  lastName  String?
+  role      Role      @default(ADMIN)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLogin DateTime?
+
+  projectsCreated Project[]     @relation("CreatedBy")
+  activities      ActivityLog[]
+
+  @@map("admin_users")
+}
+
+model Project {
+  id            String           @id
+  name          String
+  client        String
+  status        ProjectStatus    @default(PENDING)
+  budget        String
+  location      String
+  category      String
+  duration      String
+  year          String
+  description   String?
+  challenge     String?
+  solution      String?
+  highlights    Json?
+  image         String?
+  isPublic      Boolean          @default(false)
+  createdBy     Int?
+  createdByUser AdminUser?       @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  activities    ActivityLog[]
+  gallery       ProjectGallery[]
+
+  @@index([status])
+  @@index([category])
+  @@index([year])
+  @@map("projects")
+}
+
+model ProjectGallery {
+  id        Int      @id @default(autoincrement())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+  @@map("project_gallery")
+}
+
+model SiteSettings {
+  id             Int      @id @default(1)
+  officeLocation String?
+  phone          String?
+  workingHours   String?
+  email          String?
+  mapUrl         String?
+  updatedBy      Int?
+  updatedAt      DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model ActivityLog {
+  id          Int        @id @default(autoincrement())
+  userId      Int?
+  user        AdminUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  projectId   String?
+  project     Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  action      String
+  targetType  String?
+  targetId    String?
+  description String?
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([createdAt])
+  @@map("activity_log")
+}
+
+enum Role {
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  PENDING
+}
+
+model Partner {
+  id        Int      @id @default(autoincrement())
+  name      String
+  logoUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("partners")
+}
+
+model SafetyFeature {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  icon        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("safety_features")
+}
+
+model Testimonial {
+  id          Int      @id @default(autoincrement())
+  authorName  String
+  authorTitle String
+  text        String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("testimonials")
+}
+
+model TeamMember {
+  id        Int      @id @default(autoincrement())
+  name      String
+  position  String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("team_members")
+}
+
+model HeroSlide {
+  id        Int      @id @default(autoincrement())
+  title1    String
+  title2    String
+  line      String
+  imageUrl  String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("hero_slides")
+}
+
+model Service {
+  id         Int      @id @default(autoincrement())
+  slug       String   @unique
+  indexLabel String
+  title      String
+  lead       String   @db.Text
+  category   String
+  points     Json
+  overview   String   @db.Text
+  approach   Json
+  outcomes   Json
+  heroImage  String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("services")
+}
+
+model Award {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @db.Text
+  icon        String
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("awards")
+}
+
+model NewsItem {
+  id        Int      @id @default(autoincrement())
+  title     String
+  date      String
+  excerpt   String   @db.Text
+  category  String   @default("news") // news | event | announcement
+  imageUrl  String?
+  linkUrl   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("news_items")
+}
+
+model OfficeFacility {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?  @db.Text
+  imageUrl    String
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("office_facilities")
+}
+
+enum VacancyStatus {
+  OPEN
+  CLOSED
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWING
+  SELECTED
+  REJECTED
+}
+
+model JobVacancy {
+  id             Int              @id @default(autoincrement())
+  title          String
+  department     String?
+  location       String?
+  employmentType String?
+  description    String           @db.Text
+  requirements   String?          @db.Text
+  deadline       DateTime?
+  status         VacancyStatus    @default(OPEN)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  applications   JobApplication[]
+
+  @@index([status])
+  @@map("job_vacancies")
+}
+
+model JobApplication {
+  id           Int               @id @default(autoincrement())
+  vacancyId    Int
+  vacancy      JobVacancy        @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  fullName     String
+  email        String
+  phone        String?
+  coverLetter  String?           @db.Text
+  cvUrl        String
+  otherDocsUrl String?
+  status       ApplicationStatus @default(PENDING)
+  adminNotes   String?           @db.Text
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@unique([vacancyId, email])
+  @@index([vacancyId])
+  @@index([status])
+  @@map("job_applications")
+}
+
+model SavedSignature {
+  id        Int      @id @default(autoincrement())
+  name      String
+  imageUrl  String
+  createdBy Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdBy])
+  @@map("saved_signatures")
+}
+
+model StampJob {
+  id           Int      @id @default(autoincrement())
+  originalName String
+  originalUrl  String
+  stampedUrl   String
+  stampUrl     String?
+  signatureUrl String?
+  settings     Json?
+  createdBy    Int?
+  createdAt    DateTime @default(now())
+
+  @@index([createdBy])
+  @@index([createdAt])
+  @@map("stamp_jobs")
+}

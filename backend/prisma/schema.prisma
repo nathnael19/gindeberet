@@ -3,7 +3,8 @@
 
 generator client {
   provider      = "prisma-client-js"
-  // native = local Windows/Mac; others = typical cPanel/CloudLinux hosts
+  // Commit generated client so cPanel does not need `prisma generate` (OOM on shared hosts)
+  output        = "../src/generated/prisma"
   binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x", "rhel-openssl-1.1.x"]
 }
 
