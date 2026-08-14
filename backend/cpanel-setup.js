@@ -1,11 +1,12 @@
 /**
- * cPanel setup WITHOUT prisma generate (OOM on shared hosts).
- * Client is committed under src/generated/prisma.
+ * cPanel one-time setup WITHOUT prisma generate / db push (both OOM on shared hosts).
  *
- * Run JS script: cpanel-setup.js
- * Still needs DATABASE_URL in .env or Node App env vars.
- * For empty DB: import prisma/init-from-empty.sql via phpMyAdmin first,
- * or run db push if memory allows.
+ * Before this script:
+ *   1. Import prisma/init-from-empty.sql in phpMyAdmin (creates tables)
+ *   2. Ensure DATABASE_URL is in .env or Node App env vars
+ *
+ * Prefer running: cpanel-seed.js
+ * Run JS script: cpanel-setup.js  (seed only; same as seed after SQL import)
  */
 const { execSync } = require('child_process');
 const path = require('path');
@@ -31,24 +32,17 @@ try {
     process.exit(1);
   }
   console.log('Prisma client found at src/generated/prisma');
-
-  try {
-    console.log('\n>>> npx prisma db push');
-    execSync('npx prisma db push --skip-generate', {
-      stdio: 'inherit',
-      env: process.env,
-    });
-  } catch (err) {
-    console.error(
-      '\nDB push failed (often OOM). Import prisma/init-from-empty.sql in phpMyAdmin, then re-run seed only.'
-    );
-    console.error(err.message);
-  }
+  console.log(
+    'Skipping prisma db push (OOM on shared cPanel). Tables must come from phpMyAdmin import of prisma/init-from-empty.sql'
+  );
 
   console.log('\n>>> seed');
   execSync('node src/config/seed.js', { stdio: 'inherit', env: process.env });
   console.log('\nOK: setup finished. RESTART the Node app, then open /health');
 } catch (err) {
   console.error('\nSETUP FAILED:', err.message);
+  console.error(
+    'If you see "table does not exist", import prisma/init-from-empty.sql in phpMyAdmin first, then re-run cpanel-seed.js'
+  );
   process.exit(1);
 }
