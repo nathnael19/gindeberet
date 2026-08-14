@@ -1,4 +1,8 @@
-require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+try {
+  require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+} catch (err) {
+  console.warn('dotenv not installed yet; using process.env only:', err.message);
+}
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
