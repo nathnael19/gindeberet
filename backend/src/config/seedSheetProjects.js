@@ -1,8 +1,8 @@
 /**
  * Import remaining company project-history rows (sheet Nos not already in DB)
- * so the system holds all 35 projects. New rows are unpublished (isPublic=false).
+ * so the system holds all 35 projects. New rows are published (isPublic=true).
  *
- * Existing GB001–GB015 stay as-is (already mapped from the same sheet).
+ * Existing GB001–GB015 stay as-is if already present.
  * Run: node src/config/seedSheetProjects.js
  */
 const prisma = require('./database');
@@ -348,7 +348,7 @@ async function main() {
         year: row.year,
         description: row.description,
         image: row.image,
-        isPublic: false,
+        isPublic: true,
         highlights: [
           `Sheet No. ${row.sheetNo}`,
           `Contract: ${row.budget}`,

@@ -2,11 +2,19 @@
  * One-time cPanel content fix after empty-DB seed.
  * Run JS script: cpanel-fix-content.js
  *
- * - Correct phone / email (replace placeholder seed values)
- * - Replace fake awards with real certificates + /images/awards/*
- * Does NOT publish sample PRJ001–005 (those are demo rows — publish real projects in Admin)
+ * Why awards/projects look empty on the live site:
+ * - cPanel MySQL was created fresh (SQL import + sample seed only)
+ * - Local laptop DB was NEVER copied to the server
+ * - Sample awards had no imageUrl; sample projects had isPublic=false
+ *
+ * This script:
+ * - Sets real phone/email
+ * - Replaces awards with certificate images under /images/awards/*
+ * - Removes demo PRJ001–PRJ005 rows
+ * - Imports company sheet projects (GB016+) and publishes them
  */
 const path = require('path');
+const { execSync } = require('child_process');
 
 process.chdir(path.join(__dirname));
 
@@ -77,7 +85,7 @@ const AWARDS = [
 ];
 
 async function main() {
-  console.log('Fixing site settings…');
+  console.log('1) Site settings (phone / email)…');
   await prisma.siteSettings.upsert({
     where: { id: 1 },
     update: {
@@ -97,13 +105,36 @@ async function main() {
     },
   });
 
-  console.log('Replacing awards with real certificates…');
+  console.log('2) Real awards + certificate images…');
   await prisma.award.deleteMany({});
   await prisma.award.createMany({ data: AWARDS });
-  console.log(`Awards: ${await prisma.award.count()}`);
+  console.log('   awards =', await prisma.award.count());
 
-  console.log('OK. RESTART Node app, then hard-refresh the website (Ctrl+F5).');
-  console.log('Next: Admin → publish real projects; edit hero/services if needed.');
+  console.log('3) Remove demo PRJ* sample projects…');
+  const removed = await prisma.project.deleteMany({
+    where: {
+      id: { in: ['PRJ001', 'PRJ002', 'PRJ003', 'PRJ004', 'PRJ005'] },
+    },
+  });
+  console.log('   removed =', removed.count);
+
+  console.log('4) Import sheet projects (GB016+)…');
+  execSync('node src/config/seedSheetProjects.js', {
+    stdio: 'inherit',
+    env: process.env,
+  });
+
+  console.log('5) Publish all remaining projects…');
+  const published = await prisma.project.updateMany({
+    data: { isPublic: true },
+  });
+  console.log('   published rows =', published.count);
+  console.log('   total projects =', await prisma.project.count());
+  console.log('   public projects =', await prisma.project.count({ where: { isPublic: true } }));
+
+  console.log('\nOK. RESTART the Node app, then Ctrl+F5 on the website.');
+  console.log('Note: older GB001–GB015 lived only on your local PC DB and were not on cPanel.');
+  console.log('Re-add those in Admin if you still need them, or restore a local DB dump.');
 }
 
 main()
