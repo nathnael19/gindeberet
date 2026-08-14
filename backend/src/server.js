@@ -3,36 +3,16 @@ try {
 } catch (err) {
   console.warn('dotenv not installed yet; using process.env only:', err.message);
 }
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-// Import routes
-const authRoutes = require('./routes/auth');
-const projectRoutes = require('./routes/projects');
-const activityRoutes = require('./routes/activity');
-const dashboardRoutes = require('./routes/dashboard');
-const uploadRoutes = require('./routes/upload');
-const settingsRoutes = require('./routes/settings');
-const landingRoutes = require('./routes/landing');
-const careersRoutes = require('./routes/careers');
-let stampRoutes;
-try {
-  stampRoutes = require('./routes/stamp');
-} catch (err) {
-  console.error('Stamp routes disabled:', err.message);
-  stampRoutes = null;
-}
-
-// Import middleware
-const errorHandler = require('./middleware/errorHandler');
-
-// Initialize app
 const app = express();
 const PORT = process.env.PORT || 3001;
+const bootErrors = [];
 
-// CORS — allow primary site + optional comma-separated extras (e.g. www)
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
   ...(process.env.FRONTEND_URLS || '')
@@ -41,89 +21,101 @@ const allowedOrigins = [
     .filter(Boolean),
 ].filter(Boolean);
 
-const corsOptions = {
-  origin(origin, callback) {
-    // Allow same-origin / server-to-server / mobile apps with no Origin
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-      return;
-    }
-    callback(new Error(`CORS blocked for origin: ${origin}`));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
-
-// Middleware
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// Serve static files from the backend uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Request logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 
-// Health check endpoint
+// Health must work even when Prisma/routes fail to load
 app.get('/health', (req, res) => {
-  res.json({ 
-    success: true, 
-    message: 'Server is running',
-    timestamp: new Date().toISOString()
+  res.json({
+    success: bootErrors.length === 0,
+    message: bootErrors.length === 0 ? 'Server is running' : 'Server booted with errors',
+    timestamp: new Date().toISOString(),
+    hasDatabaseUrl: Boolean(process.env.DATABASE_URL),
+    bootErrors,
   });
 });
 
-// API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/activity', activityRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/landing', landingRoutes);
-app.use('/api/careers', careersRoutes);
-if (stampRoutes) {
-  app.use('/api/stamp', stampRoutes);
+function mount(name, mountPath, loader) {
+  try {
+    const routes = loader();
+    app.use(mountPath, routes);
+    console.log(`Mounted ${name} at ${mountPath}`);
+  } catch (err) {
+    const msg = `${name}: ${err.message}`;
+    console.error('Failed to mount', msg);
+    bootErrors.push(msg);
+  }
 }
 
-// 404 handler
+mount('auth', '/api/auth', () => require('./routes/auth'));
+mount('projects', '/api/projects', () => require('./routes/projects'));
+mount('activity', '/api/activity', () => require('./routes/activity'));
+mount('dashboard', '/api/dashboard', () => require('./routes/dashboard'));
+mount('upload', '/api/upload', () => require('./routes/upload'));
+mount('settings', '/api/settings', () => require('./routes/settings'));
+mount('landing', '/api/landing', () => require('./routes/landing'));
+mount('careers', '/api/careers', () => require('./routes/careers'));
+mount('stamp', '/api/stamp', () => require('./routes/stamp'));
+
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Route not found'
+    message: 'Route not found',
+    bootErrors,
   });
 });
 
-// Error handling middleware (must be last)
-app.use(errorHandler);
+try {
+  const errorHandler = require('./middleware/errorHandler');
+  app.use(errorHandler);
+} catch (err) {
+  bootErrors.push(`errorHandler: ${err.message}`);
+}
 
-// Graceful shutdown
-const prisma = require('./config/database');
+try {
+  const prisma = require('./config/database');
+  process.on('SIGTERM', async () => {
+    await prisma.$disconnect();
+    process.exit(0);
+  });
+  process.on('SIGINT', async () => {
+    await prisma.$disconnect();
+    process.exit(0);
+  });
+} catch (err) {
+  bootErrors.push(`database: ${err.message}`);
+  console.error('Prisma unavailable at boot:', err.message);
+}
 
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  await prisma.$disconnect();
-  process.exit(0);
-});
-
-process.on('SIGINT', async () => {
-  console.log('SIGINT received, shutting down gracefully');
-  await prisma.$disconnect();
-  process.exit(0);
-});
-
-// Start server — supports cPanel Passenger and normal Node
 const start = () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Frontend URL(s): ${allowedOrigins.join(', ')}`);
+  console.log(`DATABASE_URL set: ${Boolean(process.env.DATABASE_URL)}`);
+  if (bootErrors.length) {
+    console.error('Boot errors:', bootErrors);
+  }
 };
 
-// Phusion Passenger injects a global on some cPanel Node apps
 const passenger = global.PhusionPassenger;
 if (passenger) {
   passenger.configure({ autoInstall: false });
