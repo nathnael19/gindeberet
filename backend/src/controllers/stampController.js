@@ -1,6 +1,11 @@
 const path = require('path');
 const fs = require('fs');
-const sharp = require('sharp');
+let sharp;
+try {
+  sharp = require('sharp');
+} catch {
+  sharp = null;
+}
 const { PDFDocument, degrees, BlendMode } = require('pdf-lib');
 const prisma = require('../config/database');
 
@@ -9,6 +14,15 @@ const stampedDir = path.join(uploadDir, 'stamped');
 
 if (!fs.existsSync(stampedDir)) {
   fs.mkdirSync(stampedDir, { recursive: true });
+}
+
+function requireSharp() {
+  if (!sharp) {
+    const err = new Error('Image stamping requires sharp, which is not installed on this server.');
+    err.statusCode = 503;
+    throw err;
+  }
+  return sharp;
 }
 
 function parsePages(spec, totalPages) {
@@ -92,7 +106,7 @@ function detectImageKind(bytes) {
  */
 async function toEmbeddablePng(bytes, label = 'Image') {
   try {
-    return await sharp(bytes)
+    return await requireSharp()(bytes)
       .rotate() // honor EXIF orientation
       .ensureAlpha()
       .png({ compressionLevel: 6, adaptiveFiltering: true })

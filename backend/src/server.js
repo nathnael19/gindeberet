@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -13,7 +13,13 @@ const uploadRoutes = require('./routes/upload');
 const settingsRoutes = require('./routes/settings');
 const landingRoutes = require('./routes/landing');
 const careersRoutes = require('./routes/careers');
-const stampRoutes = require('./routes/stamp');
+let stampRoutes;
+try {
+  stampRoutes = require('./routes/stamp');
+} catch (err) {
+  console.error('Stamp routes disabled:', err.message);
+  stampRoutes = null;
+}
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -77,7 +83,9 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/landing', landingRoutes);
 app.use('/api/careers', careersRoutes);
-app.use('/api/stamp', stampRoutes);
+if (stampRoutes) {
+  app.use('/api/stamp', stampRoutes);
+}
 
 // 404 handler
 app.use((req, res) => {
