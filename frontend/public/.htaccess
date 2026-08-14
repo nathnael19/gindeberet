@@ -1,0 +1,21 @@
+# Apache SPA fallback for Vite/React (history API routing)
+# Placed in public/ so Vite copies it into dist/ on build.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Keep real files and folders (assets, robots.txt, sitemap, etc.)
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # Admin and public deep links → index.html
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# Optional security / caching headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

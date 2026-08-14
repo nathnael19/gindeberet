@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Keep admin / auth out of search indexes
+Disallow: /admin
+Disallow: /auth
+Disallow: /projects
+Disallow: /settings
+Disallow: /vacancies
+Disallow: /stamp-sign
+Disallow: /forgot-password
+Disallow: /new-password
+
+Sitemap: https://gindeberetconstruction.com/sitemap.xml
