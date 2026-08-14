@@ -1,9 +1,15 @@
 # Apache SPA fallback for Vite/React (history API routing)
 # Placed in public/ so Vite copies it into dist/ on build.
 
+# Prefer the Vite app over cPanel's default Coming Soon (index.php)
+DirectoryIndex index.html index.htm
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # Host "Coming Soon" placeholder — always serve the real SPA instead
+  RewriteRule ^index\.php$ /index.html [L,R=302]
 
   # Keep real files and folders (assets, robots.txt, sitemap, etc.)
   RewriteRule ^index\.html$ - [L]
