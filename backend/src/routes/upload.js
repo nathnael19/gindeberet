@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const router = express.Router();
+const { authenticate, requireAdmin } = require('../middleware/auth');
 
 // Ensure upload directory exists
 const uploadDir = path.join(__dirname, '../../uploads');
@@ -41,13 +42,13 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
+    fileSize: 10 * 1024 * 1024 // 10MB limit
   },
   fileFilter: fileFilter
 });
 
-// Upload single image
-router.post('/image', (req, res) => {
+// Upload single image (admin only)
+router.post('/image', authenticate, requireAdmin, (req, res) => {
   upload.single('image')(req, res, (err) => {
     if (err) {
       // Handle multer errors
@@ -55,7 +56,7 @@ router.post('/image', (req, res) => {
         if (err.code === 'LIMIT_FILE_SIZE') {
           return res.status(400).json({
             success: false,
-            message: 'File size exceeds 5MB limit'
+            message: 'File size exceeds 10MB limit'
           });
         }
         return res.status(400).json({
@@ -93,8 +94,8 @@ router.post('/image', (req, res) => {
   });
 });
 
-// Upload multiple images
-router.post('/images', (req, res) => {
+// Upload multiple images (admin only)
+router.post('/images', authenticate, requireAdmin, (req, res) => {
   upload.array('images', 10)(req, res, (err) => {
     if (err) {
       // Handle multer errors
@@ -102,7 +103,7 @@ router.post('/images', (req, res) => {
         if (err.code === 'LIMIT_FILE_SIZE') {
           return res.status(400).json({
             success: false,
-            message: 'File size exceeds 5MB limit'
+            message: 'File size exceeds 10MB limit'
           });
         }
         if (err.code === 'LIMIT_FILE_COUNT') {
@@ -145,29 +146,86 @@ router.post('/images', (req, res) => {
   });
 });
 
-// Delete image
-router.delete('/image/:filename', (req, res) => {
+// Document upload (CV / PDF / DOC)
+const documentFilter = (req, file, cb) => {
+  const allowedExt = /pdf|doc|docx|jpeg|jpg|png/;
+  const allowedMime = /pdf|msword|officedocument|jpeg|jpg|png/;
+  const extname = allowedExt.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedMime.test(file.mimetype);
+  if (extname && mimetype) {
+    return cb(null, true);
+  }
+  cb(new Error('Only PDF, DOC, DOCX, or image files are allowed for documents'));
+};
+
+const uploadDocument = multer({
+  storage,
+  limits: { fileSize: 8 * 1024 * 1024 },
+  fileFilter: documentFilter,
+});
+
+router.post('/document', (req, res) => {
+  uploadDocument.single('document')(req, res, (err) => {
+    if (err) {
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({
+            success: false,
+            message: 'File size exceeds 8MB limit',
+          });
+        }
+        return res.status(400).json({ success: false, message: err.message });
+      }
+      return res.status(400).json({ success: false, message: err.message });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Document uploaded successfully',
+      data: {
+        url: `/uploads/${req.file.filename}`,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size,
+      },
+    });
+  });
+});
+
+// Delete image (admin only)
+router.delete('/image/:filename', authenticate, requireAdmin, (req, res) => {
   try {
-    const filename = req.params.filename;
-    const filePath = path.join(uploadDir, filename);
+    const filename = path.basename(req.params.filename || '');
+    if (!filename || filename === '.' || filename === '..') {
+      return res.status(400).json({ success: false, message: 'Invalid filename' });
+    }
+
+    const filePath = path.resolve(uploadDir, filename);
+    if (!filePath.startsWith(path.resolve(uploadDir) + path.sep)) {
+      return res.status(400).json({ success: false, message: 'Invalid filename' });
+    }
 
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
-      res.json({
+      return res.json({
         success: true,
-        message: 'File deleted successfully'
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        message: 'File not found'
+        message: 'File deleted successfully',
       });
     }
+
+    return res.status(404).json({
+      success: false,
+      message: 'File not found',
+    });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Error deleting file',
-      error: error.message
+      error: error.message,
     });
   }
 });

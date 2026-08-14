@@ -61,4 +61,25 @@ const requireSuperAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = { authenticate, requireAdmin, requireSuperAdmin };
+/** Attach user when a valid Bearer token is present; never fails the request. */
+const optionalAuthenticate = (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return next();
+    }
+    const decoded = verifyToken(authHeader.substring(7));
+    if (decoded) {
+      req.user = {
+        userId: decoded.userId,
+        email: decoded.email,
+        role: decoded.role ? decoded.role.toUpperCase() : 'ADMIN',
+      };
+    }
+  } catch {
+    // ignore invalid tokens for optional auth
+  }
+  next();
+};
+
+module.exports = { authenticate, optionalAuthenticate, requireAdmin, requireSuperAdmin };

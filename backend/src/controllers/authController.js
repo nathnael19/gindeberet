@@ -127,7 +127,7 @@ const getMe = async (req, res) => {
 // Update current user profile
 const updateMe = async (req, res) => {
   try {
-    const { firstName, lastName, email, currentPassword, newPassword, role } = req.body;
+    const { firstName, lastName, email, currentPassword, newPassword } = req.body;
     const user = await prisma.adminUser.findUnique({
       where: { id: req.user.userId }
     });
@@ -164,9 +164,7 @@ const updateMe = async (req, res) => {
       updateData.email = email;
     }
 
-    if (typeof role !== 'undefined' && role) {
-      updateData.role = convertRole(role);
-    }
+    // Role changes are not allowed via self-service profile update
 
     if (currentPassword || newPassword) {
       if (!currentPassword || !newPassword) {

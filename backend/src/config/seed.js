@@ -25,14 +25,20 @@ async function seed() {
     // Create default site settings
     await prisma.siteSettings.upsert({
       where: { id: 1 },
-      update: {},
+      update: {
+        officeLocation: 'Near Global Hotel Lancha\nAddis Ababa, Ethiopia',
+        phone: '+251 11 000 0000',
+        workingHours: 'Mon-Fri, 8:00am-6:00pm',
+        email: 'info@gindeberet.com',
+        mapUrl: 'https://www.google.com/maps/search/?api=1&query=8.9935718,38.7598685'
+      },
       create: {
         id: 1,
-        officeLocation: '123 Industrial Way, Builder City, BC 12345',
-        phone: '(555) 123-4567',
-        workingHours: 'Mon-Fri, 8am-6pm',
+        officeLocation: 'Near Global Hotel Lancha\nAddis Ababa, Ethiopia',
+        phone: '+251 11 000 0000',
+        workingHours: 'Mon-Fri, 8:00am-6:00pm',
         email: 'info@gindeberet.com',
-        mapUrl: 'https://www.google.com/maps/search/?api=1&query=9.0244,38.7469'
+        mapUrl: 'https://www.google.com/maps/search/?api=1&query=8.9935718,38.7598685'
       }
     });
 
@@ -169,13 +175,214 @@ async function seed() {
       }
     ];
 
-    for (const activity of activities) {
-      await prisma.activityLog.create({
-        data: activity
+    const activityCount = await prisma.activityLog.count();
+    if (activityCount === 0) {
+      for (const activity of activities) {
+        await prisma.activityLog.create({ data: activity });
+      }
+      console.log('Sample activity logs created');
+    } else {
+      console.log('Sample activity logs skipped (already present)');
+    }
+
+    const sampleVacancies = [
+      {
+        title: 'Site Engineer',
+        department: 'Operations',
+        location: 'Addis Ababa',
+        employmentType: 'Full-time',
+        description:
+          'Lead day-to-day site execution for road and civil packages, coordinating crews, quality, and safety.',
+        requirements:
+          'BSc in Civil Engineering\n3+ years site experience\nStrong safety mindset\nAmharic and English',
+        status: 'OPEN',
+      },
+      {
+        title: 'Quantity Surveyor',
+        department: 'Commercial',
+        location: 'Addis Ababa',
+        employmentType: 'Full-time',
+        description:
+          'Prepare BOQs, track variations, and support cost control across active infrastructure projects.',
+        requirements:
+          'Diploma or degree in QS / Construction Management\n2+ years experience\nExcel proficiency',
+        status: 'OPEN',
+      },
+    ];
+
+    for (const vacancy of sampleVacancies) {
+      const existing = await prisma.jobVacancy.findFirst({ where: { title: vacancy.title } });
+      if (!existing) {
+        await prisma.jobVacancy.create({ data: vacancy });
+      }
+    }
+    console.log('Sample vacancies created');
+
+    // Landing page content (only seed when empty so admin edits are kept)
+    if ((await prisma.partner.count()) === 0) {
+      await prisma.partner.createMany({
+        data: [
+          { name: 'Ethiopian Roads Authority' },
+          { name: 'Addis Ababa City Admin' },
+          { name: 'Commercial Bank of Ethiopia' },
+        ],
       });
     }
 
-    console.log('Sample activity logs created');
+    if ((await prisma.safetyFeature.count()) === 0) {
+      await prisma.safetyFeature.createMany({
+        data: [
+          {
+            title: 'Zero-harm sites',
+            description: 'Daily toolbox talks, PPE enforcement, and supervised high-risk work.',
+            icon: '✓',
+          },
+          {
+            title: 'Environmental care',
+            description: 'Dust control, waste segregation, and responsible material sourcing.',
+            icon: '🌿',
+          },
+          {
+            title: 'Quality assurance',
+            description: 'Inspected work packages with traceable checklists at every stage.',
+            icon: '◆',
+          },
+        ],
+      });
+    }
+
+    if ((await prisma.testimonial.count()) === 0) {
+      await prisma.testimonial.createMany({
+        data: [
+          {
+            authorName: 'Abebe Kebede',
+            authorTitle: 'Project Owner',
+            text: 'Gindeberet delivered on schedule with clear communication from foundation to handover.',
+          },
+          {
+            authorName: 'Sara Hailu',
+            authorTitle: 'Facilities Manager',
+            text: 'Professional crew, tidy sites, and finishes that matched the drawings.',
+          },
+          {
+            authorName: 'Getachew Tulu',
+            authorTitle: 'Jimma Zone Roads & Logistics',
+            text: 'Their bridge and road packages were disciplined on programme. Traffic staging stayed clear and handover documents were complete.',
+          },
+          {
+            authorName: 'Aster Mentwab',
+            authorTitle: 'Oromia Construction Works Corporation',
+            text: 'From mobilization to finishing, Gindeberet kept quality checks visible. We trust them on water and building packages alike.',
+          },
+          {
+            authorName: 'Daniel Bekele',
+            authorTitle: 'Shaggar City Project Office',
+            text: 'Corridor works demand coordination with many stakeholders — their site team communicated early and closed issues without drama.',
+          },
+          {
+            authorName: 'Hiwot Alemu',
+            authorTitle: 'Woreda Health Office Representative',
+            text: 'The health office and related buildings were delivered to a standard we can operate from day one. Clean site, clear schedule.',
+          },
+        ],
+      });
+    }
+
+    if ((await prisma.teamMember.count()) === 0) {
+      await prisma.teamMember.createMany({
+        data: [
+          { name: 'Tadesse Bekele', position: 'Managing Director' },
+          { name: 'Hanna Lemma', position: 'Head of Operations' },
+          { name: 'Yonas Alemu', position: 'Chief Engineer' },
+        ],
+      });
+    }
+
+    if ((await prisma.award.count()) === 0) {
+      await prisma.award.createMany({
+        data: [
+          {
+            title: 'Safety Excellence',
+            description: 'Recognized for zero lost-time incidents across active packages.',
+            icon: '🏆',
+          },
+          {
+            title: 'On-time Delivery',
+            description: 'Consistently completing civil works within agreed programmes.',
+            icon: '★',
+          },
+        ],
+      });
+    }
+
+    if ((await prisma.newsItem.count()) === 0) {
+      await prisma.newsItem.createMany({
+        data: [
+          {
+            title: 'New road package underway',
+            date: 'March 2026',
+            category: 'news',
+            excerpt: 'Mobilization started for a new urban connector corridor in West Shewa.',
+            imageUrl: '/images/hero.jpg',
+            sortOrder: 1,
+          },
+          {
+            title: 'Careers: site engineers wanted',
+            date: 'February 2026',
+            category: 'announcement',
+            excerpt: 'We are hiring site engineers and quantity surveyors for active projects.',
+            linkUrl: '/careers',
+            imageUrl: '/images/about.jpg',
+            sortOrder: 2,
+          },
+        ],
+      });
+    }
+
+    if ((await prisma.officeFacility.count()) === 0) {
+      await prisma.officeFacility.createMany({
+        data: [
+          {
+            title: 'Head Office — Addis Ababa',
+            description: 'Near Global Hotel Lancha. Coordination, contracts, and client meetings.',
+            imageUrl:
+              'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
+            sortOrder: 0,
+          },
+          {
+            title: 'Planning & Engineering Room',
+            description: 'Programme control, drawings, and method statements before site launch.',
+            imageUrl:
+              'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=900&q=80',
+            sortOrder: 1,
+          },
+          {
+            title: 'Equipment Yard',
+            description: 'Plant staging and maintenance that keep mobilization on schedule.',
+            imageUrl:
+              'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=900&q=80',
+            sortOrder: 2,
+          },
+          {
+            title: 'Materials Store',
+            description: 'Controlled storage for materials that feed active work packages.',
+            imageUrl:
+              'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80',
+            sortOrder: 3,
+          },
+          {
+            title: 'Active Project Sites',
+            description: 'Field execution across roads, buildings, water, and corridor works.',
+            imageUrl:
+              'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=900&q=80',
+            sortOrder: 4,
+          },
+        ],
+      });
+    }
+
+    console.log('Sample landing content ensured');
+
     console.log('Database seeding completed successfully!');
   } catch (error) {
     console.error('Seeding error:', error);

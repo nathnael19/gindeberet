@@ -1,6 +1,11 @@
 const prisma = require('../config/database');
 const { convertProjectStatus } = require('../middleware/enumConverter');
 
+const isAdminRequest = (req) => {
+  const role = req.user?.role;
+  return role === 'ADMIN' || role === 'SUPER_ADMIN';
+};
+
 // Get all projects with filtering
 const getAllProjects = async (req, res) => {
   try {
@@ -8,6 +13,11 @@ const getAllProjects = async (req, res) => {
     
     // Build where clause
     const where = {};
+
+    // Public site: only published projects
+    if (!isAdminRequest(req)) {
+      where.isPublic = true;
+    }
 
     if (status && status !== 'all' && status !== 'undefined' && status !== '') {
       where.status = convertProjectStatus(status);
@@ -76,6 +86,13 @@ const getProjectById = async (req, res) => {
       });
     }
 
+    if (!isAdminRequest(req) && !project.isPublic) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
     // Convert status to lowercase for frontend compatibility
     const formattedProject = {
       ...project,
@@ -114,7 +131,8 @@ const createProject = async (req, res) => {
       solution,
       highlights,
       image,
-      gallery
+      gallery,
+      isPublic
     } = req.body;
 
     // Validate required fields
@@ -137,7 +155,7 @@ const createProject = async (req, res) => {
       });
     }
 
-    // Create project with gallery
+    // Create project with gallery (unpublished until admin publishes)
     const project = await prisma.project.create({
       data: {
         id,
@@ -154,6 +172,7 @@ const createProject = async (req, res) => {
         solution,
         highlights,
         image,
+        isPublic: isPublic === true || isPublic === 'true',
         createdBy: req.user.userId,
         gallery: gallery && gallery.length > 0 ? {
           create: gallery.map((url, index) => ({
@@ -208,7 +227,8 @@ const updateProject = async (req, res) => {
       solution,
       highlights,
       image,
-      gallery
+      gallery,
+      isPublic
     } = req.body;
 
     // Check if project exists
@@ -239,6 +259,9 @@ const updateProject = async (req, res) => {
     if (solution !== undefined) updateData.solution = solution;
     if (highlights !== undefined) updateData.highlights = highlights;
     if (image !== undefined) updateData.image = image;
+    if (isPublic !== undefined) {
+      updateData.isPublic = isPublic === true || isPublic === 'true';
+    }
 
     if (Object.keys(updateData).length === 0 && gallery === undefined) {
       return res.status(400).json({
@@ -342,6 +365,32 @@ const deleteProject = async (req, res) => {
   }
 };
 
+/** Public counters for homepage / about — full DB totals, not only published rows. */
+const getPublicSummary = async (req, res) => {
+  try {
+    const [completedProjects, totalProjects, awards] = await Promise.all([
+      prisma.project.count({ where: { status: 'COMPLETED' } }),
+      prisma.project.count(),
+      prisma.award.count(),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        completedProjects,
+        totalProjects,
+        awards,
+      },
+    });
+  } catch (error) {
+    console.error('Get public summary error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching summary',
+    });
+  }
+};
+
 // Get project statistics
 const getProjectStats = async (req, res) => {
   try {
@@ -402,5 +451,6 @@ module.exports = {
   createProject,
   updateProject,
   deleteProject,
-  getProjectStats
+  getProjectStats,
+  getPublicSummary,
 };

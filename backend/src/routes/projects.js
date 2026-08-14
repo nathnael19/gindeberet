@@ -6,14 +6,16 @@ const {
   createProject,
   updateProject,
   deleteProject,
-  getProjectStats
+  getProjectStats,
+  getPublicSummary,
 } = require('../controllers/projectController');
-const { authenticate, requireAdmin } = require('../middleware/auth');
+const { authenticate, optionalAuthenticate, requireAdmin } = require('../middleware/auth');
 
-// Public routes (no authentication required)
-router.get('/', getAllProjects);
+// List/detail: public sees published only; admin token sees all
+router.get('/', optionalAuthenticate, getAllProjects);
+router.get('/summary', getPublicSummary);
 router.get('/stats', authenticate, getProjectStats);
-router.get('/:id', getProjectById);
+router.get('/:id', optionalAuthenticate, getProjectById);
 
 // Admin-only routes
 router.post('/', authenticate, requireAdmin, createProject);
