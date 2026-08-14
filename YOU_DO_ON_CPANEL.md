@@ -7,7 +7,7 @@ Auto deploy after push: see **GITHUB_ACTIONS_SETUP.md** (FTP secrets + Restart).
 1. MySQL DB + user (`gindebsx_gindeberet_db` / `gindebsx_gindeberet`)
 2. Subdomain `api.gindeberetconstruction.com` + SSL
 3. Node.js App root = `api.gindeberetconstruction.com`, startup = `src/server.js`
-4. Create `.env` on server (+ same vars in Node App UI)
+4. Create empty `.htaccess` in app root (cPanel Node UI needs it for env vars), then `.env` + Node App env vars
 5. Run NPM Install
 6. phpMyAdmin → import `backend/prisma/init-from-empty.sql`
 7. Run JS script `cpanel-seed.js` → RESTART → `/health`

@@ -47,7 +47,7 @@ That means `FTP_SERVER` is empty for the workflow. Fix:
 2. Only if `package.json` dependencies changed → **Run NPM Install**, then Restart
 3. Do **not** run `prisma generate` on the server
 
-`.env` on the server is **never** overwritten by Actions (excluded).
+`.env` and backend `.htaccess` on the server are **never** overwritten by Actions (excluded).
 
 ## Test the workflow
 
