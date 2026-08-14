@@ -32,8 +32,8 @@ export default function AdminLogin({ isDarkTheme }: { isDarkTheme: boolean }) {
       <div className="admin-login-container">
         <div className="admin-login-header">
           <div className="admin-logo">
-            <img src="/logo.png" alt="Gindeberet Logo" />
-            <span>GINDEBERET<span className="accent">.</span></span>
+            <img src="/logo.png" alt="Gindeberet General Construction PLC" />
+            <span>Gindeberet General Construction PLC</span>
           </div>
           <h2>Admin Portal</h2>
           <p>Secure access for authorized personnel only.</p>

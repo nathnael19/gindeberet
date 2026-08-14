@@ -1,0 +1,13 @@
+.portfolio-page .page-hero-bg {
+  background:
+    linear-gradient(120deg, rgba(9, 9, 11, 0.88) 0%, rgba(9, 9, 11, 0.5) 55%, rgba(9, 9, 11, 0.35) 100%),
+    url('https://images.unsplash.com/photo-1541888087425-ce81dc8ca664?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat;
+}
+
+.portfolio-body {
+  padding: 4rem 0 5rem;
+}
+
+.portfolio-body .filter-container {
+  margin-bottom: 2.5rem;
+}

@@ -1,31 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type MouseEvent } from 'react';
 import { type AdminProject, type ProjectStatus } from './adminData';
 import { projectsApi } from './api';
 import AdminLayout from './AdminLayout';
 import ProjectDetail, { type Project } from './ProjectDetail';
 import { formatBirr } from './format';
+import { getImageUrl } from './imageUrl';
 import './AdminProjects.css';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const BACKEND_BASE_URL = API_BASE_URL.replace('/api', '');
-
-// Helper function to get full image URL
-const getImageUrl = (imagePath: string) => {
-  if (!imagePath) return 'https://images.unsplash.com/photo-1545459720-aac8509eb02c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
-  if (imagePath.startsWith('http')) {
-    try {
-      const parsedUrl = new URL(imagePath);
-      if (parsedUrl.pathname.startsWith('/uploads/')) {
-        return `${BACKEND_BASE_URL}${parsedUrl.pathname}`;
-      }
-    } catch {
-      return imagePath;
-    }
-
-    return imagePath;
-  }
-  return `${BACKEND_BASE_URL}${imagePath}`;
-};
 
 const navigateTo = (path: string) => {
   window.history.pushState({}, '', path);
@@ -120,6 +100,26 @@ export default function AdminProjects({
     setSelectedProject(null);
   };
 
+  const togglePublish = async (project: AdminProject, event: MouseEvent) => {
+    event.stopPropagation();
+    const next = !project.isPublic;
+    try {
+      const response = await projectsApi.update(project.id, { isPublic: next });
+      if (!response.success) throw new Error('Failed to update publish status');
+      setProjects((prev) =>
+        prev.map((p) => (p.id === project.id ? { ...p, isPublic: next } : p))
+      );
+      if (selectedProject?.id === project.id) {
+        setSelectedProject({ ...selectedProject, isPublic: next });
+      }
+    } catch (err) {
+      console.error(err);
+      setError(next ? 'Failed to publish project' : 'Failed to unpublish project');
+    }
+  };
+
+  const publishedCount = projects.filter((p) => p.isPublic).length;
+
   return (
     <AdminLayout isDarkTheme={isDarkTheme} toggleTheme={toggleTheme} activePage="projects">
       {/* Page header */}
@@ -127,7 +127,9 @@ export default function AdminProjects({
         <div>
           <h1 className="page-title" style={{ marginBottom: '0.25rem' }}>Projects</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            {isLoading ? 'Loading...' : `${projects.length} projects total`}
+            {isLoading
+              ? 'Loading...'
+              : `${projects.length} projects total · ${publishedCount} published on website`}
           </p>
         </div>
         <button className="add-project-btn" onClick={() => navigateTo('/projects/add')}>
@@ -181,7 +183,7 @@ export default function AdminProjects({
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="filter-select"
           >
-            {['All', 'Roads', 'Corridors', 'Infrastructure', 'Bridges'].map((c) => (
+            {['All', 'Roads', 'Buildings', 'Water', 'Electro-Mechanical', 'Machinery', 'Corridors', 'Bridges', 'Infrastructure', 'Commercial'].map((c) => (
               <option key={c} value={c}>
                 {c === 'All' ? 'All Categories' : c}
               </option>
@@ -264,10 +266,20 @@ export default function AdminProjects({
                 <span className={`status-badge status-${project.status} admin-project-status`}>
                   {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                 </span>
+                <span className={`publish-badge ${project.isPublic ? 'is-live' : 'is-draft'}`}>
+                  {project.isPublic ? 'Published' : 'Draft'}
+                </span>
               </div>
               <div className="admin-project-body">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
                   <span className="category-tag" style={{ flexShrink: 0 }}>{project.category}</span>
+                  <button
+                    type="button"
+                    className={`publish-toggle-btn ${project.isPublic ? 'is-live' : ''}`}
+                    onClick={(e) => togglePublish(project, e)}
+                  >
+                    {project.isPublic ? 'Unpublish' : 'Publish'}
+                  </button>
                 </div>
                 <p className="admin-project-desc">{project.description}</p>
                 <div className="admin-project-meta">
@@ -305,6 +317,7 @@ export default function AdminProjects({
                   <th>Budget</th>
                   <th>Year</th>
                   <th>Status</th>
+                  <th>Website</th>
                 </tr>
               </thead>
               <tbody>
@@ -318,6 +331,15 @@ export default function AdminProjects({
                     <td style={{ fontFamily: 'var(--font-heading)', fontWeight: 600 }}>{formatBirr(project.budget)}</td>
                     <td style={{ color: 'var(--text-muted)' }}>{project.year}</td>
                     <td><span className={`status-badge status-${project.status}`}>{project.status.charAt(0).toUpperCase() + project.status.slice(1)}</span></td>
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        className={`publish-toggle-btn ${project.isPublic ? 'is-live' : ''}`}
+                        onClick={(e) => togglePublish(project, e)}
+                      >
+                        {project.isPublic ? 'Published' : 'Publish'}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

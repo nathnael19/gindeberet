@@ -246,12 +246,31 @@ export const dashboardApi = {
       onUpdate,
     });
   },
+
+  getAnalytics: async () => {
+    return apiCall<{ success: boolean; data: any }>('/dashboard/analytics');
+  },
+
+  getAnalyticsCached: async (onUpdate?: (value: { success: boolean; data: any }) => void) => {
+    return loadFromCacheWithBackgroundRefresh({
+      key: buildAdminCacheKey('dashboard:analytics'),
+      fetcher: () => dashboardApi.getAnalytics(),
+      onUpdate,
+    });
+  },
 };
 
 // Public API (no authentication required)
 export const publicApi = {
   getProjects: async () => {
     return publicApiCall<{ success: boolean; data: any[] }>('/projects');
+  },
+
+  getSummary: async () => {
+    return publicApiCall<{
+      success: boolean;
+      data: { completedProjects: number; totalProjects: number; awards: number };
+    }>('/projects/summary');
   },
 };
 
@@ -341,6 +360,166 @@ export const uploadApi = {
   deleteImage: async (filename: string) => {
     return apiCall<{ success: boolean }>(`/upload/image/${filename}`, {
       method: 'DELETE',
+    });
+  },
+
+  uploadDocument: async (file: File) => {
+    const formData = new FormData();
+    formData.append('document', file);
+
+    const token = getToken();
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/upload/document`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Document upload failed');
+    }
+
+    return data as { success: boolean; data: { url: string; filename: string; originalName: string; size: number } };
+  },
+};
+
+// Stamp & Sign API (admin)
+export const stampApi = {
+  apply: async (payload: {
+    document: File;
+    stamp?: File;
+    signature?: File;
+    pages: string;
+    signaturePages: string;
+    position: string;
+    signaturePosition: string;
+    opacity: number;
+    rotation: number;
+    size: number;
+    signatureSize: number;
+  }) => {
+    const formData = new FormData();
+    formData.append('document', payload.document);
+    if (payload.stamp) formData.append('stamp', payload.stamp);
+    if (payload.signature) formData.append('signature', payload.signature);
+    formData.append('pages', payload.pages);
+    formData.append('signaturePages', payload.signaturePages);
+    formData.append('position', payload.position);
+    formData.append('signaturePosition', payload.signaturePosition);
+    formData.append('opacity', String(payload.opacity));
+    formData.append('rotation', String(payload.rotation));
+    formData.append('size', String(payload.size));
+    formData.append('signatureSize', String(payload.signatureSize));
+
+    const token = getToken();
+    const headers: HeadersInit = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const response = await fetch(`${API_BASE_URL}/stamp/apply`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Stamp failed');
+    return data as {
+      success: boolean;
+      data: { id: number; url: string; filename: string; downloadName: string; originalName: string };
+    };
+  },
+
+  getSignatures: async () => apiCall<{ success: boolean; data: any[] }>('/stamp/signatures'),
+
+  saveSignature: async (file: File, name?: string) => {
+    const formData = new FormData();
+    formData.append('signature', file);
+    if (name) formData.append('name', name);
+    const token = getToken();
+    const headers: HeadersInit = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const response = await fetch(`${API_BASE_URL}/stamp/signatures`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Save signature failed');
+    return data;
+  },
+
+  deleteSignature: async (id: number | string) =>
+    apiCall<{ success: boolean }>(`/stamp/signatures/${id}`, { method: 'DELETE' }),
+};
+
+// Careers / vacancies API
+export const careersApi = {
+  getOpenVacancies: async () => {
+    return publicApiCall<{ success: boolean; data: any[] }>('/careers/vacancies');
+  },
+
+  apply: async (
+    vacancyId: number | string,
+    payload: {
+      fullName: string;
+      email: string;
+      phone?: string;
+      coverLetter?: string;
+      cvUrl: string;
+      otherDocsUrl?: string;
+    }
+  ) => {
+    return publicApiCall<{ success: boolean; message?: string; data: { id: number } }>(
+      `/careers/vacancies/${vacancyId}/apply`,
+      { method: 'POST', body: JSON.stringify(payload) }
+    );
+  },
+
+  adminListVacancies: async () => {
+    return apiCall<{ success: boolean; data: any[] }>('/careers/admin/vacancies');
+  },
+
+  adminCreateVacancy: async (payload: Record<string, unknown>) => {
+    return apiCall<{ success: boolean; data: any }>('/careers/admin/vacancies', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  adminUpdateVacancy: async (id: number | string, payload: Record<string, unknown>) => {
+    return apiCall<{ success: boolean; data: any }>(`/careers/admin/vacancies/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  adminDeleteVacancy: async (id: number | string) => {
+    return apiCall<{ success: boolean; message: string }>(`/careers/admin/vacancies/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  adminListApplications: async (params?: { vacancyId?: number | string; status?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.vacancyId) query.set('vacancyId', String(params.vacancyId));
+    if (params?.status) query.set('status', params.status);
+    const qs = query.toString();
+    return apiCall<{ success: boolean; data: any[] }>(
+      `/careers/admin/applications${qs ? `?${qs}` : ''}`
+    );
+  },
+
+  adminUpdateApplication: async (
+    id: number | string,
+    payload: { status?: string; adminNotes?: string }
+  ) => {
+    return apiCall<{ success: boolean; data: any }>(`/careers/admin/applications/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
     });
   },
 };

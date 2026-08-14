@@ -1,0 +1,320 @@
+.careers-page {
+  width: 100%;
+}
+
+.careers-page .page-hero {
+  width: 100%;
+}
+
+.careers-page .page-hero-bg {
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(120deg, rgba(9, 9, 11, 0.9) 0%, rgba(9, 9, 11, 0.55) 55%, rgba(9, 9, 11, 0.4) 100%),
+    url('https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.careers-body {
+  padding: 4.5rem 0 5rem;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 0%, color-mix(in srgb, var(--cta) 10%, transparent), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, color-mix(in srgb, var(--cta) 6%, transparent), transparent 50%),
+    var(--bg-color);
+}
+
+.vacancy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.35rem;
+}
+
+.vacancy-col {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-height: 100%;
+  text-align: left;
+  padding: 1.85rem 1.75rem 1.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--bg-offset) 85%, var(--bg-color)) 0%, var(--bg-color) 100%);
+  color: inherit;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color 0.28s ease,
+    transform 0.28s ease,
+    background 0.28s ease;
+}
+
+.vacancy-col::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--cta);
+  transform: scaleX(0.22);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+
+.vacancy-col:hover {
+  border-color: color-mix(in srgb, var(--cta) 45%, var(--border-color));
+  transform: translateY(-4px);
+  background: var(--bg-offset);
+}
+
+.vacancy-col:hover::before {
+  transform: scaleX(1);
+}
+
+.vacancy-col:focus-visible {
+  outline: 2px solid var(--cta);
+  outline-offset: 2px;
+}
+
+.vacancy-col-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.15rem;
+}
+
+.vacancy-index {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--cta);
+  letter-spacing: 0.14em;
+}
+
+.vacancy-arrow {
+  font-size: 1.15rem;
+  color: var(--cta);
+  opacity: 0.35;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.vacancy-col:hover .vacancy-arrow {
+  opacity: 1;
+  transform: translateX(4px);
+}
+
+.vacancy-col h3 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 1.15rem;
+  color: var(--text-main);
+}
+
+.vacancy-meta {
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+  margin: 0 0 1.5rem;
+  padding: 1.15rem 0 0;
+  border-top: 1px solid var(--border-color);
+  flex: 1 1 auto;
+}
+
+.vacancy-meta li {
+  color: var(--text-muted);
+  padding-left: 1.2rem;
+  position: relative;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.vacancy-meta li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.45rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  background: var(--cta);
+}
+
+.vacancy-col .vacancy-cta {
+  display: inline-flex;
+  align-items: center;
+  margin-top: auto;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cta);
+  opacity: 0.75;
+  transition: opacity 0.25s ease;
+}
+
+.vacancy-col:hover .vacancy-cta {
+  opacity: 1;
+}
+
+.careers-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-color);
+  background: var(--bg-offset);
+}
+
+.apply-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+}
+
+.apply-modal {
+  width: min(640px, 100%);
+  max-height: min(90vh, 860px);
+  overflow: auto;
+  background: var(--bg-offset);
+  border: 1px solid var(--border-color);
+  padding: 1.75rem;
+}
+
+.apply-modal h2 {
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.apply-modal .apply-role {
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.apply-modal .form-group {
+  margin-bottom: 1.1rem;
+}
+
+.apply-modal label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.apply-modal .form-control {
+  width: 100%;
+}
+
+.apply-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+
+.apply-detail {
+  margin: 0 0 1.25rem;
+  padding: 1rem;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  white-space: pre-wrap;
+}
+
+.file-name {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.apply-error {
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.apply-success {
+  color: #15803d;
+  font-size: 0.95rem;
+  margin-top: 0.75rem;
+}
+
+.apply-success-panel {
+  text-align: center;
+  padding: 1.25rem 0.5rem 0.5rem;
+}
+
+.apply-success-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  margin: 0 auto 1rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #15803d;
+  background: color-mix(in srgb, #22c55e 16%, transparent);
+  border: 1px solid color-mix(in srgb, #22c55e 35%, transparent);
+}
+
+.apply-success-panel h2 {
+  margin-bottom: 0.35rem;
+  text-transform: none;
+}
+
+.apply-success-text {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  margin: 0 0 0.5rem;
+  max-width: 36rem;
+  margin-inline: auto;
+}
+
+.apply-success-panel .apply-actions {
+  justify-content: center;
+}
+
+@media (max-width: 960px) {
+  .vacancy-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .vacancy-arrow {
+    opacity: 0.7;
+  }
+}
+
+@media (min-width: 1100px) {
+  .vacancy-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.15rem;
+  }
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+  .careers-body {
+    background: var(--bg-color);
+  }
+
+  .vacancy-col {
+    background: var(--bg-offset);
+  }
+
+  .vacancy-col:hover {
+    border-color: var(--cta);
+  }
+}

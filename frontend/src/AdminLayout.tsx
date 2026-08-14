@@ -6,7 +6,7 @@ interface AdminLayoutProps {
   children: ReactNode;
   isDarkTheme: boolean;
   toggleTheme: () => void;
-  activePage: 'overview' | 'projects' | 'settings';
+  activePage: 'overview' | 'projects' | 'careers' | 'stamp' | 'settings';
 }
 
 const navigate = (path: string) => {
@@ -108,6 +108,19 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
     </svg>
   );
 
+  const CareersIcon = () => (
+    <svg className="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+  );
+
+  const StampIcon = () => (
+    <svg className="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 14h14l-1.5 5H6.5L5 14z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14V9a4 4 0 018 0v5" />
+    </svg>
+  );
+
   const SettingsIcon = () => (
     <svg className="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -136,6 +149,8 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
   const navItems = [
     { key: 'overview' as const, label: 'Overview', path: '/admin', Icon: HomeIcon },
     { key: 'projects' as const, label: 'Projects', path: '/projects', Icon: ProjectsIcon },
+    { key: 'careers' as const, label: 'Careers', path: '/vacancies', Icon: CareersIcon },
+    { key: 'stamp' as const, label: 'Stamp & Sign', path: '/stamp-sign', Icon: StampIcon },
     { key: 'settings' as const, label: 'Settings', path: '/settings', Icon: SettingsIcon },
   ];
 
@@ -146,8 +161,8 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
         <div className="sidebar-header" style={{ justifyContent: isCollapsed ? 'center' : 'space-between' }}>
           {!isCollapsed && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-              <img src="/logo.png" alt="Gindeberet Logo" style={{ flexShrink: 0 }} />
-              <span>GINDEBERET<span className="accent">.</span></span>
+              <img src="/logo.png" alt="Gindeberet General Construction PLC" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '0.78rem', lineHeight: 1.2 }}>Gindeberet General Construction PLC</span>
             </div>
           )}
           <button onClick={toggleSidebar} className="icon-btn" aria-label="Toggle Sidebar" style={{ padding: '0.25rem', flexShrink: 0 }}>

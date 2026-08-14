@@ -16,6 +16,8 @@ export interface AdminProject {
   challenge?: string;
   solution?: string;
   highlights?: string[];
+  /** When false, hidden from the public website until published. */
+  isPublic?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

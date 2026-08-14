@@ -1,26 +1,6 @@
 import { useEffect } from 'react';
+import { getImageUrl } from './imageUrl';
 import './ProjectDetail.css';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const BACKEND_BASE_URL = API_BASE_URL.replace('/api', '');
-
-// Helper function to get full image URL
-const getImageUrl = (imagePath: string) => {
-  if (!imagePath) return 'https://images.unsplash.com/photo-1545459720-aac8509eb02c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
-  if (imagePath.startsWith('http')) {
-    try {
-      const parsedUrl = new URL(imagePath);
-      if (parsedUrl.pathname.startsWith('/uploads/')) {
-        return `${BACKEND_BASE_URL}${parsedUrl.pathname}`;
-      }
-    } catch {
-      return imagePath;
-    }
-
-    return imagePath;
-  }
-  return `${BACKEND_BASE_URL}${imagePath}`;
-};
 
 export interface Project {
   id: number;

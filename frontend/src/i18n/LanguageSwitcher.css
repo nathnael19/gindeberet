@@ -1,0 +1,65 @@
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-offset);
+  border-radius: 4px;
+}
+
+.lang-switch__btn {
+  min-width: 2.1rem;
+  padding: 0.35rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  border-radius: 3px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.lang-switch__btn:hover {
+  color: var(--text-main);
+}
+
+.lang-switch__btn.is-active {
+  background: var(--cta);
+  color: #000;
+}
+
+.lang-switch--light {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.lang-switch--light .lang-switch__btn {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.lang-switch--light .lang-switch__btn:hover {
+  color: #fff;
+}
+
+.lang-switch--light .lang-switch__btn.is-active {
+  background: var(--cta);
+  color: #000;
+}
+
+.navbar.glass .lang-switch--light {
+  border-color: var(--border-color);
+  background: var(--bg-offset);
+}
+
+.navbar.glass .lang-switch--light .lang-switch__btn {
+  color: var(--text-muted);
+}
+
+.navbar.glass .lang-switch--light .lang-switch__btn:hover {
+  color: var(--text-main);
+}
+
+.navbar.glass .lang-switch--light .lang-switch__btn.is-active {
+  background: var(--cta);
+  color: #000;
+}

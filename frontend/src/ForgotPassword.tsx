@@ -21,8 +21,8 @@ export default function ForgotPassword({ isDarkTheme }: { isDarkTheme: boolean }
       <div className="admin-login-container">
         <div className="admin-login-header">
           <div className="admin-logo">
-            <img src="/logo.png" alt="Gindeberet Logo" />
-            <span>GINDEBERET<span className="accent">.</span></span>
+            <img src="/logo.png" alt="Gindeberet General Construction PLC" />
+            <span>Gindeberet General Construction PLC</span>
           </div>
           <h2>Reset Password</h2>
           <p>Enter your email to receive a password reset link.</p>

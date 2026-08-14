@@ -36,8 +36,8 @@ export default function NewPassword({ isDarkTheme }: { isDarkTheme: boolean }) {
       <div className="admin-login-container">
         <div className="admin-login-header">
           <div className="admin-logo">
-            <img src="/logo.png" alt="Gindeberet Logo" />
-            <span>GINDEBERET<span className="accent">.</span></span>
+            <img src="/logo.png" alt="Gindeberet General Construction PLC" />
+            <span>Gindeberet General Construction PLC</span>
           </div>
           <h2>Set New Password</h2>
           <p>Please enter your new password below.</p>

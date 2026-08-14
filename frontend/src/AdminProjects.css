@@ -25,3 +25,51 @@
 .search-clear-btn:hover {
   color: var(--text-main);
 }
+
+.publish-badge {
+  position: absolute;
+  left: 0.65rem;
+  bottom: 0.65rem;
+  z-index: 2;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.publish-badge.is-live {
+  color: #052e16;
+  background: #86efac;
+}
+
+.publish-badge.is-draft {
+  color: #422006;
+  background: #fde68a;
+}
+
+.publish-toggle-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  color: var(--text-main);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.publish-toggle-btn:hover {
+  border-color: var(--cta);
+  color: var(--cta);
+}
+
+.publish-toggle-btn.is-live {
+  background: color-mix(in srgb, #22c55e 18%, var(--bg-color));
+  border-color: #16a34a;
+  color: #15803d;
+}

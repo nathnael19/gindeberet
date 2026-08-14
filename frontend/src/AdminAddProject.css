@@ -430,3 +430,24 @@
 .confirm-actions .btn-delete:hover {
   background: #DC2626;
 }
+
+.publish-check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+  font-weight: 500;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.publish-check input {
+  width: auto;
+  margin: 0;
+}
+
+.field-hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}

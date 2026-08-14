@@ -2,34 +2,15 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'r
 import { projectsApi, uploadApi } from './api';
 import AdminLayout from './AdminLayout';
 import { formatNumber } from './format';
+import { getImageUrl } from './imageUrl';
 import './AdminAddProject.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const BACKEND_BASE_URL = API_BASE_URL.replace('/api', '');
-const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1545459720-aac8509eb02c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+const DEFAULT_COVER_IMAGE =
+  'https://images.unsplash.com/photo-1545459720-aac8509eb02c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
 
 const navigateTo = (path: string) => {
   window.history.pushState({}, '', path);
   window.dispatchEvent(new PopStateEvent('popstate'));
-};
-
-const getImageUrl = (imagePath: string) => {
-  if (!imagePath) return DEFAULT_COVER_IMAGE;
-
-  if (imagePath.startsWith('http')) {
-    try {
-      const parsedUrl = new URL(imagePath);
-      if (parsedUrl.pathname.startsWith('/uploads/')) {
-        return `${BACKEND_BASE_URL}${parsedUrl.pathname}`;
-      }
-    } catch {
-      return imagePath;
-    }
-
-    return imagePath;
-  }
-
-  return `${BACKEND_BASE_URL}${imagePath}`;
 };
 
 const createEmptyForm = () => ({
@@ -45,6 +26,7 @@ const createEmptyForm = () => ({
   challenge: '',
   solution: '',
   highlights: '',
+  isPublic: false,
 });
 
 export default function AdminAddProject({
@@ -115,6 +97,7 @@ export default function AdminAddProject({
           challenge: project.challenge || '',
           solution: project.solution || '',
           highlights: Array.isArray(project.highlights) ? project.highlights.join('\n') : (project.highlights || ''),
+          isPublic: Boolean(project.isPublic),
         });
         setExistingImageUrl(project.image || '');
         setCoverPreview(project.image ? getImageUrl(project.image) : '');
@@ -220,6 +203,7 @@ export default function AdminAddProject({
         highlights: formData.highlights.split('\n').map((item) => item.trim()).filter(Boolean),
         image: imageUrl,
         gallery: galleryUrls,
+        isPublic: formData.isPublic,
       };
 
       const response = isEditMode
@@ -313,9 +297,14 @@ export default function AdminAddProject({
                     <label htmlFor="category">Category <span className="required">*</span></label>
                     <select id="category" name="category" value={formData.category} onChange={handleChange} required>
                       <option value="Roads">Roads</option>
+                      <option value="Buildings">Buildings</option>
+                      <option value="Water">Water</option>
+                      <option value="Electro-Mechanical">Electro-Mechanical</option>
+                      <option value="Machinery">Machinery</option>
                       <option value="Corridors">Corridors</option>
-                      <option value="Infrastructure">Infrastructure</option>
                       <option value="Bridges">Bridges</option>
+                      <option value="Infrastructure">Infrastructure</option>
+                      <option value="Commercial">Commercial</option>
                     </select>
                   </div>
                   <div className="form-group">
@@ -325,6 +314,20 @@ export default function AdminAddProject({
                       <option value="completed">Completed</option>
                       <option value="pending">Pending</option>
                     </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="isPublic">Website visibility</label>
+                    <label className="publish-check">
+                      <input
+                        id="isPublic"
+                        name="isPublic"
+                        type="checkbox"
+                        checked={formData.isPublic}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, isPublic: e.target.checked }))}
+                      />
+                      <span>Publish on public website</span>
+                    </label>
+                    <p className="field-hint">Leave unchecked to keep the project in the admin dashboard only.</p>
                   </div>
                 </div>
               </div>
@@ -421,7 +424,7 @@ export default function AdminAddProject({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                           <span>{isEditMode ? 'Click to replace cover image' : 'Click to upload cover image'}</span>
-                          <span className="upload-hint">PNG, JPG, WEBP up to 5MB</span>
+                          <span className="upload-hint">PNG, JPG, WEBP up to 10MB</span>
                         </div>
                       </label>
                     </div>
