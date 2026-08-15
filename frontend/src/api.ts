@@ -418,6 +418,33 @@ export const uploadApi = {
 };
 
 // Stamp & Sign API (admin)
+function savePdfBytes(bytes: Uint8Array, downloadName: string) {
+  const head =
+    bytes.length >= 4
+      ? String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3])
+      : '';
+  if (head !== '%PDF') {
+    throw new Error('Downloaded file is not a valid PDF. Please try again.');
+  }
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = objectUrl;
+  a.download = downloadName.replace(/[^\w.\-]+/g, '_') || 'stamped.pdf';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  // Keep URL alive briefly so the browser can start the download
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 4000);
+}
+
+function base64ToUint8Array(b64: string): Uint8Array {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
 export const stampApi = {
   apply: async (payload: {
     document: File;
@@ -458,17 +485,36 @@ export const stampApi = {
     if (!response.ok) throw new Error(data.message || 'Stamp failed');
     return data as {
       success: boolean;
-      data: { id: number; url: string; filename: string; downloadName: string; originalName: string };
+      data: {
+        id: number;
+        url: string;
+        filename: string;
+        downloadName: string;
+        originalName: string;
+        size?: number;
+        pdfBase64?: string | null;
+      };
     };
   },
 
-  /** Authenticated download of a stamped PDF (forces attachment). */
-  download: async (id: number | string, downloadName?: string) => {
+  /** Save stamped PDF from inline base64 (preferred) or authenticated download. */
+  saveResult: async (data: {
+    id: number;
+    downloadName?: string;
+    pdfBase64?: string | null;
+    url?: string;
+  }) => {
+    const name = (data.downloadName || 'stamped.pdf').replace(/[^\w.\-]+/g, '_');
+    if (data.pdfBase64) {
+      savePdfBytes(base64ToUint8Array(data.pdfBase64), name);
+      return;
+    }
+
     const token = getToken();
     const headers: HeadersInit = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const response = await fetch(`${API_BASE_URL}/stamp/download/${id}`, { headers });
+    const response = await fetch(`${API_BASE_URL}/stamp/download/${data.id}`, { headers });
     if (!response.ok) {
       let message = 'Download failed';
       try {
@@ -479,15 +525,13 @@ export const stampApi = {
       }
       throw new Error(message);
     }
-    const blob = await response.blob();
-    const objectUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = objectUrl;
-    a.download = downloadName || 'stamped.pdf';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(objectUrl);
+    const buf = new Uint8Array(await response.arrayBuffer());
+    savePdfBytes(buf, name);
+  },
+
+  /** Authenticated download of a stamped PDF (forces attachment). */
+  download: async (id: number | string, downloadName?: string) => {
+    await stampApi.saveResult({ id: Number(id), downloadName, pdfBase64: null });
   },
 
   getSignatures: async () => apiCall<{ success: boolean; data: any[] }>('/stamp/signatures'),

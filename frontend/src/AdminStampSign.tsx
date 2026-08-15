@@ -184,6 +184,7 @@ export default function AdminStampSign({ isDarkTheme, toggleTheme }: AdminStampS
   const [resultUrl, setResultUrl] = useState('');
   const [resultName, setResultName] = useState('');
   const [resultId, setResultId] = useState<number | null>(null);
+  const [resultBase64, setResultBase64] = useState<string | null>(null);
 
   const loadSignatures = async () => {
     try {
@@ -198,29 +199,40 @@ export default function AdminStampSign({ isDarkTheme, toggleTheme }: AdminStampS
     loadSignatures();
   }, []);
 
-  const triggerDownload = async (jobId: number, name: string, fallbackUrl?: string) => {
+  const triggerDownload = async (opts: {
+    id: number;
+    name: string;
+    pdfBase64?: string | null;
+    fallbackUrl?: string;
+  }) => {
     try {
-      await stampApi.download(jobId, name);
+      await stampApi.saveResult({
+        id: opts.id,
+        downloadName: opts.name,
+        pdfBase64: opts.pdfBase64,
+      });
       return;
-    } catch {
-      /* fall through to direct URL */
+    } catch (err: any) {
+      if (!opts.fallbackUrl) throw err;
     }
-    if (fallbackUrl) {
-      try {
-        const res = await fetch(fallbackUrl);
-        if (!res.ok) throw new Error('fetch failed');
-        const blob = await res.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = objectUrl;
-        a.download = name || 'stamped.pdf';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(objectUrl);
-      } catch {
-        window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
+    if (opts.fallbackUrl) {
+      const res = await fetch(opts.fallbackUrl);
+      if (!res.ok) throw new Error('Could not download stamped PDF');
+      const buf = new Uint8Array(await res.arrayBuffer());
+      const head =
+        buf.length >= 4 ? String.fromCharCode(buf[0], buf[1], buf[2], buf[3]) : '';
+      if (head !== '%PDF') {
+        throw new Error('Server returned an invalid PDF. Restart the Node app and try again.');
       }
+      const blob = new Blob([buf], { type: 'application/pdf' });
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = opts.name.replace(/[^\w.\-]+/g, '_') || 'stamped.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 4000);
     }
   };
 
@@ -231,6 +243,7 @@ export default function AdminStampSign({ isDarkTheme, toggleTheme }: AdminStampS
     setResultUrl('');
     setResultName('');
     setResultId(null);
+    setResultBase64(null);
     if (!documentFile) {
       setError('Please upload a document PDF.');
       return;
@@ -261,8 +274,14 @@ export default function AdminStampSign({ isDarkTheme, toggleTheme }: AdminStampS
       setResultUrl(url);
       setResultName(name);
       setResultId(res.data.id);
-      await triggerDownload(res.data.id, name, url);
-      setSuccess('Stamped PDF ready. If download did not start, use the Download button below.');
+      setResultBase64(res.data.pdfBase64 || null);
+      await triggerDownload({
+        id: res.data.id,
+        name,
+        pdfBase64: res.data.pdfBase64,
+        fallbackUrl: url,
+      });
+      setSuccess('Stamped PDF ready and downloaded. Open it with any PDF reader.');
     } catch (err: any) {
       setError(err?.message || 'Failed to stamp document');
     } finally {
@@ -497,7 +516,14 @@ export default function AdminStampSign({ isDarkTheme, toggleTheme }: AdminStampS
                     type="button"
                     className="btn btn-primary"
                     style={{ color: '#000' }}
-                    onClick={() => triggerDownload(resultId, resultName, resultUrl)}
+                    onClick={() =>
+                      triggerDownload({
+                        id: resultId,
+                        name: resultName,
+                        pdfBase64: resultBase64,
+                        fallbackUrl: resultUrl,
+                      }).catch((err: any) => setError(err?.message || 'Download failed'))
+                    }
                   >
                     Download stamped PDF
                   </button>

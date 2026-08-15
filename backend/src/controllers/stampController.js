@@ -6,7 +6,7 @@ try {
 } catch {
   sharp = null;
 }
-const { PDFDocument, degrees, BlendMode } = require('pdf-lib');
+const { PDFDocument, degrees } = require('pdf-lib');
 const prisma = require('../config/database');
 
 const uploadDir = path.join(__dirname, '../../uploads');
@@ -153,19 +153,35 @@ async function loadOverlay(pdfDoc, filePath, label = 'Image') {
 }
 
 /**
- * Rubber-stamp look: Multiply keeps stamp ink sharp while text underneath stays readable.
- * Opacity softens ink strength without flattening the stamp into a solid block.
+ * Draw stamp/signature. Use Normal blend — Multiply breaks some viewers (Edge "0 of 0").
  */
 function drawOverlay(page, overlay, opts) {
-  const drawOpts = {
-    ...opts,
-    blendMode: BlendMode.Multiply,
-  };
   if (overlay.kind === 'page') {
-    page.drawPage(overlay.asset, drawOpts);
+    page.drawPage(overlay.asset, opts);
   } else {
-    page.drawImage(overlay.asset, drawOpts);
+    page.drawImage(overlay.asset, opts);
   }
+}
+
+function sanitizeDownloadName(originalName) {
+  const base = path.basename(originalName || 'document', path.extname(originalName || ''));
+  const safe = String(base)
+    .replace(/[^\w.\-]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '')
+    .slice(0, 80);
+  return `stamped-${safe || 'document'}.pdf`;
+}
+
+function assertPdfBuffer(buf, label = 'PDF') {
+  if (!buf || buf.length < 8) {
+    throw new Error(`${label} is empty or too small`);
+  }
+  const head = Buffer.from(buf).subarray(0, 5).toString('ascii');
+  if (!head.startsWith('%PDF')) {
+    throw new Error(`${label} is not a valid PDF (missing %PDF header)`);
+  }
+  return Buffer.from(buf);
 }
 
 exports.applyStamp = async (req, res, next) => {
@@ -206,7 +222,11 @@ exports.applyStamp = async (req, res, next) => {
     const signatureSize = Math.max(20, Math.min(300, parseFloat(req.body.signatureSize ?? '50') || 50));
 
     const pdfBytes = fs.readFileSync(documentFile.path);
-    const pdfDoc = await PDFDocument.load(pdfBytes, { updateMetadata: false });
+    assertPdfBuffer(pdfBytes, 'Uploaded document');
+    const pdfDoc = await PDFDocument.load(pdfBytes, {
+      updateMetadata: false,
+      ignoreEncryption: true,
+    });
     pdfDoc.setTitle('');
     pdfDoc.setAuthor('');
     pdfDoc.setSubject('');
@@ -215,6 +235,9 @@ exports.applyStamp = async (req, res, next) => {
     pdfDoc.setCreator('Gindeberet Admin');
 
     const pages = pdfDoc.getPages();
+    if (!pages.length) {
+      return res.status(400).json({ success: false, message: 'PDF has no pages' });
+    }
     const stampIndexes = stampFile ? parsePages(pagesSpec, pages.length) : [];
     const signIndexes = signatureFile ? parsePages(signaturePagesSpec, pages.length) : [];
 
@@ -289,15 +312,22 @@ exports.applyStamp = async (req, res, next) => {
       }
     }
 
-    const stampedBytes = await pdfDoc.save({ useObjectStreams: false });
+    const stampedBytes = assertPdfBuffer(
+      await pdfDoc.save({ useObjectStreams: false, addDefaultPage: false }),
+      'Stamped PDF'
+    );
     const outName = `stamped-${Date.now()}-${Math.round(Math.random() * 1e9)}.pdf`;
     const outPath = path.join(stampedDir, outName);
     fs.writeFileSync(outPath, stampedBytes);
+
+    // Re-read and verify what we wrote to disk
+    assertPdfBuffer(fs.readFileSync(outPath), 'Saved stamped PDF');
 
     const stampedUrl = `/uploads/stamped/${outName}`;
     const originalUrl = `/uploads/${documentFile.filename}`;
     const stampUrl = stampFile ? `/uploads/${stampFile.filename}` : null;
     const signatureUrl = signatureFile ? `/uploads/${signatureFile.filename}` : null;
+    const downloadName = sanitizeDownloadName(documentFile.originalname);
 
     const settings = {
       pages: pagesSpec,
@@ -308,7 +338,7 @@ exports.applyStamp = async (req, res, next) => {
       rotation,
       size: stampSize,
       signatureSize,
-      blendMode: 'Multiply',
+      blendMode: 'Normal',
     };
 
     const job = await prisma.stampJob.create({
@@ -323,19 +353,26 @@ exports.applyStamp = async (req, res, next) => {
       },
     });
 
+    // Embed PDF in JSON so the browser saves real bytes (avoids proxy/HTML corruption).
+    // Cap size so huge files still use the download endpoint.
+    const MAX_INLINE = 12 * 1024 * 1024;
+    const payload = {
+      id: job.id,
+      url: stampedUrl,
+      filename: outName,
+      originalName: documentFile.originalname,
+      downloadName,
+      size: stampedBytes.length,
+      pdfBase64: stampedBytes.length <= MAX_INLINE ? stampedBytes.toString('base64') : null,
+    };
+
     res.json({
       success: true,
       message: 'Document stamped successfully',
-      data: {
-        id: job.id,
-        url: stampedUrl,
-        filename: outName,
-        originalName: documentFile.originalname,
-        downloadName: `stamped-${path.basename(documentFile.originalname, path.extname(documentFile.originalname))}.pdf`,
-      },
+      data: payload,
     });
   } catch (error) {
-    if (error?.message && /could not be read|SOI not found|is WEBP|is GIF|PNG|JPG/i.test(error.message)) {
+    if (error?.message && /could not be read|SOI not found|is WEBP|is GIF|PNG|JPG|not a valid PDF|empty or too small|no pages|Encrypted/i.test(error.message)) {
       return res.status(400).json({ success: false, message: error.message });
     }
     next(error);
@@ -400,9 +437,19 @@ exports.downloadStamped = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Stamped file missing on disk' });
     }
 
-    const baseName = path.basename(job.originalName || 'document', path.extname(job.originalName || ''));
-    const downloadName = `stamped-${baseName || 'document'}.pdf`;
-    res.download(filePath, downloadName);
+    let buf;
+    try {
+      buf = assertPdfBuffer(fs.readFileSync(filePath), 'Stored stamped PDF');
+    } catch (err) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+
+    const downloadName = sanitizeDownloadName(job.originalName);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', String(buf.length));
+    res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
+    res.setHeader('Cache-Control', 'no-store');
+    res.end(buf);
   } catch (error) {
     next(error);
   }
