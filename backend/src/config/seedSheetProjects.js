@@ -1,9 +1,7 @@
 /**
- * Import remaining company project-history rows (sheet Nos not already in DB)
- * so the system holds all 35 projects. New rows are published (isPublic=true).
- *
- * Existing GB001–GB015 stay as-is if already present.
+ * Full company project-history sheet (35 projects), published on import.
  * Run: node src/config/seedSheetProjects.js
+ * Prefer phpMyAdmin: prisma/fix-all-projects.sql (no Prisma on cPanel).
  */
 const prisma = require('./database');
 
@@ -30,11 +28,223 @@ function statusFromProgress(progress) {
   return 'PENDING';
 }
 
+/** Sheet Nos 2,8,18–22,25,27,29–32,34,35 → GB001–GB015 (were local-only before). */
+const CORE_PROJECTS = [
+  {
+    id: 'GB001',
+    sheetNo: 35,
+    name: 'Degalo–Halaba Exit Corridor',
+    client: 'Shashamane City Administration',
+    budget: 'ETB 3,102,826,609.25',
+    location: 'Shashamane, Oromia',
+    category: 'Corridors',
+    duration: '730 Days',
+    year: '2026',
+    status: 'ACTIVE',
+    image: IMG.corridors,
+    description:
+      'Major exit corridor works linking Degalo to Halaba for Shashamane city administration.',
+  },
+  {
+    id: 'GB002',
+    sheetNo: 34,
+    name: 'Furii Corridor LOT 2 (Hiwot Fana–NOC)',
+    client: 'Shaggar City, Furii Sub-City Municipality',
+    budget: 'ETB 2,663,657,876.71',
+    location: 'Furii, Shaggar',
+    category: 'Corridors',
+    duration: '730 Days',
+    year: '2025',
+    status: 'ACTIVE',
+    image: IMG.corridors,
+    description: 'Furii corridor LOT 2 works between Hiwot Fana and NOC for Shaggar city.',
+  },
+  {
+    id: 'GB003',
+    sheetNo: 19,
+    name: 'Qare Tule–Ajo DC-2 Rural Gravel Road',
+    client: 'Oromia Irrigation and Pastoralist Development Bureau (LLRP)',
+    budget: 'ETB 162,703,547.55',
+    location: 'Qare Tule–Ajo, Oromia',
+    category: 'Roads',
+    duration: '365 Days',
+    year: '2023',
+    status: 'COMPLETED',
+    image: IMG.roads,
+    description: 'DC-2 rural gravel road package under the LLRP programme.',
+  },
+  {
+    id: 'GB004',
+    sheetNo: 25,
+    name: 'Shaggar Roadside Corridor — Koyye Feche LOT 1',
+    client: 'Shaggar City Real Estate and Construction Corporation (sub-contract)',
+    budget: 'ETB 162,703,547.55',
+    location: 'Koyye Feche, Shaggar',
+    category: 'Corridors',
+    duration: '365 Days',
+    year: '2024',
+    status: 'ACTIVE',
+    image: IMG.corridors,
+    description: 'Roadside corridor LOT 1 at Koyye Feche for Shaggar city.',
+  },
+  {
+    id: 'GB005',
+    sheetNo: 32,
+    name: 'Ambelia Small-Scale Irrigation',
+    client: 'Oromia Irrigation and Pastoralist Development Bureau (LLRP)',
+    budget: 'ETB 77,810,265.00',
+    location: 'Ambelta, Oromia',
+    category: 'Water',
+    duration: '365 Days',
+    year: '2025',
+    status: 'ACTIVE',
+    image: IMG.water,
+    description: 'Small-scale irrigation works under the LLRP programme.',
+  },
+  {
+    id: 'GB006',
+    sheetNo: 29,
+    name: 'Abbichuu Model Primary School',
+    client: 'Shaggar City Education Office',
+    budget: 'ETB 67,429,045.26',
+    location: 'Furii Sub-City, Shaggar',
+    category: 'Buildings',
+    duration: '365 Days',
+    year: '2024',
+    status: 'COMPLETED',
+    image: IMG.buildings,
+    description: 'Construction of Abbichuu model primary school for Shaggar city education office.',
+  },
+  {
+    id: 'GB007',
+    sheetNo: 31,
+    name: 'Birqicha River Bridge',
+    client: 'Wajjira Abba Alangaa, Horro Guduru Wallaga',
+    budget: 'ETB 67,282,013.15',
+    location: 'Horro Guduru Wallaga, Oromia',
+    category: 'Bridges',
+    duration: '365 Days',
+    year: '2025',
+    status: 'ACTIVE',
+    image: IMG.bridges,
+    description: 'River bridge construction at Birqicha in Horro Guduru Wallaga.',
+  },
+  {
+    id: 'GB008',
+    sheetNo: 18,
+    name: 'Horro Guduru Wallaga Health Office (G+4)',
+    client: 'Horro Guduru Wallaga Zone Health Office',
+    budget: 'ETB 60,555,741.40',
+    location: 'Horro Guduru Wallaga, Oromia',
+    category: 'Buildings',
+    duration: '540 Days',
+    year: '2022',
+    status: 'COMPLETED',
+    image: IMG.buildings,
+    description: 'G+4 zone health office building for Horro Guduru Wallaga.',
+  },
+  {
+    id: 'GB009',
+    sheetNo: 21,
+    name: 'Dero Hara Gura DC-2 Rural Road',
+    client: 'Oromia Irrigation and Pastoralist Development Bureau (LLRP)',
+    budget: 'ETB 46,056,343.39',
+    location: 'Dero Hara Gura, Oromia',
+    category: 'Roads',
+    duration: '365 Days',
+    year: '2023',
+    status: 'COMPLETED',
+    image: IMG.roads,
+    description: 'DC-2 rural road package at Dero Hara Gura under LLRP.',
+  },
+  {
+    id: 'GB010',
+    sheetNo: 20,
+    name: 'Chora Woreda Health Office',
+    client: 'Chora Woreda Health Office',
+    budget: 'ETB 40,473,247.03',
+    location: 'Chora, Oromia',
+    category: 'Buildings',
+    duration: '365 Days',
+    year: '2023',
+    status: 'COMPLETED',
+    image: IMG.buildings,
+    description: 'Woreda health office building in Chora district.',
+  },
+  {
+    id: 'GB011',
+    sheetNo: 22,
+    name: 'Jimma Earth-Pressed Municipal Road',
+    client: 'Jimma City Administration',
+    budget: 'ETB 38,895,650.00',
+    location: 'Jimma, Oromia',
+    category: 'Roads',
+    duration: '365 Days',
+    year: '2023',
+    status: 'COMPLETED',
+    image: IMG.roads,
+    description: 'Earth-pressed municipal road works for Jimma city administration.',
+  },
+  {
+    id: 'GB012',
+    sheetNo: 27,
+    name: 'Furniture & Electro-Mechanical Works — Chora Health G+4',
+    client: 'Chora Woreda Health Office',
+    budget: 'ETB 37,199,040.71',
+    location: 'Chora, Oromia',
+    category: 'Electro-Mechanical',
+    duration: '180 Days',
+    year: '2024',
+    status: 'COMPLETED',
+    image: IMG.electro,
+    description: 'Furniture and electro-mechanical package for Chora G+4 health facility.',
+  },
+  {
+    id: 'GB013',
+    sheetNo: 30,
+    name: 'Gudannee Community Health Post (CHP)',
+    client: 'Borecha Health Office',
+    budget: 'ETB 36,904,922.17',
+    location: 'Gudannee / Borecha, Oromia',
+    category: 'Buildings',
+    duration: '240 Days',
+    year: '2024',
+    status: 'COMPLETED',
+    image: IMG.buildings,
+    description: 'Community health post construction at Gudannee for Borecha health office.',
+  },
+  {
+    id: 'GB014',
+    sheetNo: 8,
+    name: 'Bonga Pressure Lines & Electro-Mechanical Works',
+    client: 'Bonga Town (sub-contract)',
+    budget: 'ETB 22,357,873.82',
+    location: 'Bonga, Ethiopia',
+    category: 'Electro-Mechanical',
+    duration: '365 Days',
+    year: '2019',
+    status: 'COMPLETED',
+    image: IMG.electro,
+    description: 'Pressure lines and electro-mechanical works for Bonga town.',
+  },
+  {
+    id: 'GB015',
+    sheetNo: 2,
+    name: 'Mako Water Treatment Plant Package',
+    client: 'Oromia Regional State Construction Works Corporation',
+    budget: 'ETB 24,813,202.34',
+    location: 'Mako / Meko, Oromia',
+    category: 'Water',
+    duration: '365 Days',
+    year: '2017',
+    status: 'COMPLETED',
+    image: IMG.water,
+    description: 'Water treatment plant package delivered for Oromia Construction Works Corporation.',
+  },
+];
+
 /**
- * Sheet rows missing from DB (Nos 1,3–7,9–17,23,24,26,28,33).
- * Nos already present: 2→GB015, 8→GB014, 18→GB008, 19→GB003, 20→GB010,
- * 21→GB009, 22→GB011, 25→GB004, 27→GB012, 29→GB006, 30→GB013,
- * 31→GB007, 32→GB005, 34→GB002, 35→GB001.
+ * Remaining sheet rows (Nos 1,3–7,9–17,23,24,26,28,33) → GB016–GB035.
  */
 const NEW_PROJECTS = [
   {
@@ -323,50 +533,61 @@ const NEW_PROJECTS = [
   },
 ];
 
+const ALL_PROJECTS = [...CORE_PROJECTS, ...NEW_PROJECTS];
+
 async function seedSheetProjects(client = prisma) {
   let created = 0;
-  let skipped = 0;
+  let updated = 0;
 
-  for (const row of NEW_PROJECTS) {
+  for (const row of ALL_PROJECTS) {
+    const data = {
+      name: row.name,
+      client: row.client,
+      status: row.status,
+      budget: row.budget,
+      location: row.location,
+      category: row.category,
+      duration: row.duration,
+      year: row.year,
+      description: row.description,
+      image: row.image,
+      isPublic: true,
+      highlights: [
+        `Sheet No. ${row.sheetNo}`,
+        `Contract: ${row.budget}`,
+        `Duration: ${row.duration}`,
+      ],
+    };
+
     const existing = await client.project.findUnique({ where: { id: row.id } });
     if (existing) {
-      skipped += 1;
-      console.log('skip', row.id, row.name);
-      continue;
+      await client.project.update({ where: { id: row.id }, data });
+      updated += 1;
+      console.log('updated', row.id, row.name);
+    } else {
+      await client.project.create({
+        data: { id: row.id, ...data },
+      });
+      created += 1;
+      console.log('created', row.id, '(sheet', row.sheetNo + ')', row.name);
     }
-
-    await client.project.create({
-      data: {
-        id: row.id,
-        name: row.name,
-        client: row.client,
-        status: row.status,
-        budget: row.budget,
-        location: row.location,
-        category: row.category,
-        duration: row.duration,
-        year: row.year,
-        description: row.description,
-        image: row.image,
-        isPublic: true,
-        highlights: [
-          `Sheet No. ${row.sheetNo}`,
-          `Contract: ${row.budget}`,
-          `Duration: ${row.duration}`,
-        ],
-      },
-    });
-    created += 1;
-    console.log('created', row.id, '(sheet', row.sheetNo + ')', row.name);
   }
 
   const total = await client.project.count();
   const published = await client.project.count({ where: { isPublic: true } });
-  console.log(`Done. created=${created} skipped=${skipped} total=${total} published=${published}`);
-  return { created, skipped, total, published };
+  console.log(`Done. created=${created} updated=${updated} total=${total} published=${published}`);
+  return { created, updated, total, published };
 }
 
-module.exports = { NEW_PROJECTS, seedSheetProjects, IMG, gcYear, statusFromProgress };
+module.exports = {
+  NEW_PROJECTS,
+  CORE_PROJECTS,
+  ALL_PROJECTS,
+  seedSheetProjects,
+  IMG,
+  gcYear,
+  statusFromProgress,
+};
 
 if (require.main === module) {
   seedSheetProjects()
