@@ -293,21 +293,15 @@ ALTER TABLE `activity_log` ADD CONSTRAINT `activity_log_projectId_fkey` FOREIGN 
 -- AddForeignKey
 ALTER TABLE `job_applications` ADD CONSTRAINT `job_applications_vacancyId_fkey` FOREIGN KEY (`vacancyId`) REFERENCES `job_vacancies`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-node.exe : ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
-At C:\Program Files\nodejs\npx.ps1:29 char:3
-+   & $NODE_EXE $NPX_CLI_JS $args
-+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (ΓöîΓöÇΓöÇΓöÇΓöÇ...ΓöÇΓöÇΓöÇΓöÇΓöÉ:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-Γöé  Update available 5.22.0 -> 7.9.1                       Γöé
-Γöé                                                         Γöé
-Γöé  This is a major update - please follow the guide at    Γöé
-Γöé  https://pris.ly/d/major-version-upgrade                Γöé
-Γöé                                                         Γöé
-Γöé  Run the following to update                            Γöé
-Γöé    npm i --save-dev prisma@latest                       Γöé
-Γöé    npm i @prisma/client@latest                          Γöé
-ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö
-ÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+-- Password reset OTP tokens
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `email` VARCHAR(191) NOT NULL,
+    `otpHash` VARCHAR(191) NOT NULL,
+    `expiresAt` DATETIME(3) NOT NULL,
+    `usedAt` DATETIME(3) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `password_reset_tokens_email_idx`(`email`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

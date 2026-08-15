@@ -90,6 +90,20 @@ export const authApi = {
     return data;
   },
 
+  forgotPassword: async (email: string) => {
+    return apiCall<{ success: boolean; message?: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  resetPassword: async (email: string, otp: string, newPassword: string) => {
+    return apiCall<{ success: boolean; message?: string }>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ email, otp, newPassword }),
+    });
+  },
+
   getMe: async () => {
     return apiCall<{ success: boolean; data: any }>('/auth/me');
   },

@@ -47,7 +47,7 @@ export default function AdminLogin({ isDarkTheme }: { isDarkTheme: boolean }) {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@gindeberet.com"
+              placeholder="gindeberetconstruction278@gmail.com"
               required 
             />
           </div>

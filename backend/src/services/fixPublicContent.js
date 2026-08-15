@@ -1,5 +1,11 @@
 const prisma = require('../config/database');
+const bcrypt = require('bcryptjs');
 const { seedSheetProjects } = require('../config/seedSheetProjects');
+const { ensureResetTable } = require('../controllers/passwordResetController');
+
+const ADMIN_EMAIL =
+  process.env.ADMIN_EMAIL || 'gindeberetconstruction278@gmail.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Gindeberetplc@246';
 
 const AWARDS = [
   {
@@ -62,7 +68,67 @@ const AWARDS = [
 /**
  * Runs inside the live Passenger process (avoids cPanel "Run JS" Prisma panic).
  */
+async function ensureAdminAccount() {
+  const email = ADMIN_EMAIL.trim().toLowerCase();
+  const password = await bcrypt.hash(ADMIN_PASSWORD, 10);
+
+  const byEmail = await prisma.adminUser.findUnique({ where: { email } });
+  if (byEmail) {
+    await prisma.adminUser.update({
+      where: { id: byEmail.id },
+      data: {
+        password,
+        role: 'SUPER_ADMIN',
+        isActive: true,
+        firstName: byEmail.firstName || 'Admin',
+        lastName: byEmail.lastName || 'Gindeberet',
+      },
+    });
+  } else {
+    const legacy = await prisma.adminUser.findUnique({
+      where: { email: 'admin@gindeberet.com' },
+    });
+    if (legacy) {
+      await prisma.adminUser.update({
+        where: { id: legacy.id },
+        data: {
+          email,
+          password,
+          role: 'SUPER_ADMIN',
+          isActive: true,
+          firstName: legacy.firstName || 'Admin',
+          lastName: legacy.lastName || 'Gindeberet',
+        },
+      });
+    } else {
+      await prisma.adminUser.create({
+        data: {
+          email,
+          password,
+          firstName: 'Admin',
+          lastName: 'Gindeberet',
+          role: 'SUPER_ADMIN',
+          isActive: true,
+        },
+      });
+    }
+  }
+
+  await prisma.adminUser.updateMany({
+    where: {
+      email: { not: email },
+      role: 'SUPER_ADMIN',
+    },
+    data: { isActive: false },
+  });
+
+  return { email };
+}
+
 async function fixPublicContent() {
+  await ensureResetTable();
+  const admin = await ensureAdminAccount();
+
   await prisma.siteSettings.upsert({
     where: { id: 1 },
     update: {
@@ -94,6 +160,7 @@ async function fixPublicContent() {
   const published = await prisma.project.updateMany({ data: { isPublic: true } });
 
   return {
+    admin,
     awards: await prisma.award.count(),
     removedDemo: removedDemo.count,
     sheet,
@@ -102,4 +169,4 @@ async function fixPublicContent() {
   };
 }
 
-module.exports = { fixPublicContent, AWARDS };
+module.exports = { fixPublicContent, ensureAdminAccount, AWARDS };

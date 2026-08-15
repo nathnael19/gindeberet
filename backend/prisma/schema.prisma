@@ -31,6 +31,18 @@ model AdminUser {
   @@map("admin_users")
 }
 
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  email     String
+  otpHash   String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+  @@map("password_reset_tokens")
+}
+
 model Project {
   id          String      @id
   name        String

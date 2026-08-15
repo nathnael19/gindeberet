@@ -32,6 +32,19 @@ Repo → **Settings** → **Secrets and variables** → **Actions** → **Reposi
 2. **RESTART** Node app (loads `/api/setup`)
 3. GitHub → **Actions** → **Fix cPanel content** → **Run workflow**
 
+That workflow also upserts the production admin login (`ADMIN_EMAIL` / `ADMIN_PASSWORD` on server, or defaults in code).
+
+### Forgot password (OTP email)
+
+Set these on cPanel Node App (and optionally in `.env`):
+
+- `SMTP_HOST` (e.g. `mail.gindeberetconstruction.com`)
+- `SMTP_PORT` (`465`)
+- `SMTP_USER` / `SMTP_PASS` (cPanel email account)
+- `SMTP_FROM` (optional)
+
+Then restart Node. Users open `/forgot-password`, receive a 6-digit OTP, and set a new password.
+
 Optional (defaults are already cPanel-friendly: `ftp` on port `21`):
 
 | Secret name | Example value |

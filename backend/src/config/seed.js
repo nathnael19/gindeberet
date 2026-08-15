@@ -6,18 +6,28 @@ async function seed() {
     console.log('Starting database seeding...');
 
     // Create admin user
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const hashedPassword = await bcrypt.hash('Gindeberetplc@246', 10);
     
     const adminUser = await prisma.adminUser.upsert({
-      where: { email: 'admin@gindeberet.com' },
-      update: {},
+      where: { email: 'gindeberetconstruction278@gmail.com' },
+      update: {
+        password: hashedPassword,
+        role: 'SUPER_ADMIN',
+        isActive: true,
+      },
       create: {
-        email: 'admin@gindeberet.com',
+        email: 'gindeberetconstruction278@gmail.com',
         password: hashedPassword,
         firstName: 'Admin',
-        lastName: 'User',
+        lastName: 'Gindeberet',
         role: 'SUPER_ADMIN'
       }
+    });
+
+    // Prefer the production admin email; keep legacy inactive if present
+    await prisma.adminUser.updateMany({
+      where: { email: 'admin@gindeberet.com' },
+      data: { isActive: false },
     });
 
     console.log('Admin user created/updated');

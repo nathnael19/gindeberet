@@ -135,6 +135,15 @@ exports.Prisma.AdminUserScalarFieldEnum = {
   lastLogin: 'lastLogin'
 };
 
+exports.Prisma.PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  otpHash: 'otpHash',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.ProjectScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -381,6 +390,7 @@ exports.ApplicationStatus = exports.$Enums.ApplicationStatus = {
 
 exports.Prisma.ModelName = {
   AdminUser: 'AdminUser',
+  PasswordResetToken: 'PasswordResetToken',
   Project: 'Project',
   ProjectGallery: 'ProjectGallery',
   SiteSettings: 'SiteSettings',
