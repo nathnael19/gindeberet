@@ -426,7 +426,10 @@ function savePdfBytes(bytes: Uint8Array, downloadName: string) {
   if (head !== '%PDF') {
     throw new Error('Downloaded file is not a valid PDF. Please try again.');
   }
-  const blob = new Blob([bytes], { type: 'application/pdf' });
+  // Copy into a plain ArrayBuffer so BlobPart typing is happy under TS 5.x DOM libs
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  const blob = new Blob([copy], { type: 'application/pdf' });
   const objectUrl = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = objectUrl;

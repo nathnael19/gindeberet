@@ -224,7 +224,9 @@ export default function AdminStampSign({ isDarkTheme, toggleTheme }: AdminStampS
       if (head !== '%PDF') {
         throw new Error('Server returned an invalid PDF. Restart the Node app and try again.');
       }
-      const blob = new Blob([buf], { type: 'application/pdf' });
+      const copy = new Uint8Array(buf.byteLength);
+      copy.set(buf);
+      const blob = new Blob([copy], { type: 'application/pdf' });
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = objectUrl;
