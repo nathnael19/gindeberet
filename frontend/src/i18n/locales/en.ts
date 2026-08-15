@@ -48,8 +48,8 @@ const en = {
     slide3a: 'Delivering',
     slide3b: 'Lasting Assets',
     subtitle:
-      'Construction company PLC in Ethiopia and Addis Ababa — roads, buildings, water works, and electro-mechanical packages with safety, discipline, and lasting quality.',
-    rotate1: 'Roads, buildings, and water works nationwide across Ethiopia',
+      'Construction company PLC in Ethiopia, Oromia, and Addis Ababa — roads, buildings, water works, corridors, and electro-mechanical packages with safety, discipline, and lasting quality.',
+    rotate1: 'Roads, buildings, and water works nationwide across Ethiopia and Oromia',
     rotate2: 'Safety, quality, and on-time delivery from Addis Ababa',
     rotate3: 'A trusted construction company in Ethiopia since 2012',
   },
@@ -100,7 +100,7 @@ const en = {
   homeServices: {
     kicker: 'Our Services',
     title: 'What We Do',
-    subtitle: 'Professional construction services for Ethiopian sites — roads, buildings, water works, and electro-mechanical packages from a construction company PLC based in Addis Ababa.',
+    subtitle: 'Professional construction services across Ethiopia and Oromia — roads, buildings, water works, corridors, and electro-mechanical packages from a construction company PLC based in Addis Ababa.',
     details: 'Service details',
   },
   homeProjects: {
