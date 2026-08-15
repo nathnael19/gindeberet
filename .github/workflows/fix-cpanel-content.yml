@@ -2,6 +2,7 @@
 # Requires SETUP_SECRET on the server (.env / Node App env) AND as a GitHub Actions secret.
 #
 # Before first run: cPanel Node app RESTART (so /api/setup is mounted).
+# Prefer Admin → Projects → "Import 35 sheet projects" if this workflow is blocked by WAF.
 
 name: Fix cPanel content
 
@@ -30,13 +31,22 @@ jobs:
           set -e
           url="https://api.gindeberetconstruction.com/api/setup/fix-content"
           echo "Calling $url"
+          # Empty body + Content-Type: application/json causes Express to return HTTP 400.
+          # Always send a JSON object. Also send browser-like headers to reduce WAF blocks.
           code=$(curl -sS -o /tmp/fix-content.json -w "%{http_code}" \
             -X POST "$url" \
             -H "Content-Type: application/json" \
-            -H "User-Agent: Mozilla/5.0 (compatible; GindeberetFixBot/1.0)" \
             -H "Accept: application/json" \
-            -H "x-setup-secret: ${SETUP_SECRET}")
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36" \
+            -H "x-setup-secret: ${SETUP_SECRET}" \
+            --data '{}')
           echo "HTTP $code"
-          cat /tmp/fix-content.json
+          echo "----- response body -----"
+          cat /tmp/fix-content.json || true
           echo
-          test "$code" = "200"
+          echo "----- end response -----"
+          if [ "$code" != "200" ]; then
+            echo "::error::fix-content failed with HTTP $code. Prefer Admin → Projects → Import 35 sheet projects, or check SETUP_SECRET + Node RESTART."
+            exit 1
+          fi
+          echo "fix-content OK"
