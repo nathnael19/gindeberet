@@ -148,12 +148,13 @@ const en = {
   },
   news: {
     title: 'Latest Updates',
-    subtitle: 'Company news, events, and announcements.',
+    subtitle: 'Company news, open vacancies, events, and announcements.',
     empty: 'No news updates yet.',
     readMore: 'Read More →',
     catNews: 'News',
     catEvent: 'Event',
     catAnnouncement: 'Announcement',
+    catVacancy: 'Vacancy',
   },
   homeContact: {
     title: 'Experience construction done right',

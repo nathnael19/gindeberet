@@ -693,7 +693,9 @@ export default function HomePage({
                     ? t('news.catEvent')
                     : cat === 'announcement'
                       ? t('news.catAnnouncement')
-                      : t('news.catNews');
+                      : cat === 'vacancy'
+                        ? t('news.catVacancy')
+                        : t('news.catNews');
                 const cardInner = (
                   <>
                     {news.imageUrl ? (

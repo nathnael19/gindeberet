@@ -150,12 +150,13 @@ const om: TranslationKeys = {
   },
   news: {
     title: 'Odeeffannoo haaraa',
-    subtitle: 'Odeeffannoo dhaabbataa, taateewwan, fi beeksisa.',
+    subtitle: 'Odeeffannoo dhaabbataa, carraa hojii, taateewwan, fi beeksisa.',
     empty: 'Odeeffannoon haaraan hin jiru.',
     readMore: 'Caalaa dubbisi →',
     catNews: 'Odeeffannoo',
     catEvent: 'Taatee',
     catAnnouncement: 'Beeksisa',
+    catVacancy: 'Carraa hojii',
   },
   homeContact: {
     title: 'Ijaarsa sirrii waliin muuxadhaa',

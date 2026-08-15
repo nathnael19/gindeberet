@@ -1,5 +1,57 @@
 const prisma = require('../config/database');
 
+/** End of calendar day for a deadline (local server time). */
+function endOfDeadlineDay(value) {
+  if (!value) return null;
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
+    const [y, m, d] = value.trim().split('-').map(Number);
+    return new Date(y, m - 1, d, 23, 59, 59, 999);
+  }
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) return null;
+  return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), 23, 59, 59, 999);
+}
+
+/** Start of tomorrow (local) — earliest allowed new deadline. */
+function startOfTomorrow() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + 1);
+  return d;
+}
+
+function isDeadlinePast(deadline) {
+  if (!deadline) return false;
+  const end = endOfDeadlineDay(deadline);
+  return end ? end < new Date() : false;
+}
+
+async function closeExpiredVacancies() {
+  const now = new Date();
+  await prisma.jobVacancy.updateMany({
+    where: {
+      status: 'OPEN',
+      deadline: { not: null, lt: now },
+    },
+    data: { status: 'CLOSED' },
+  });
+}
+
+function validateDeadlineOrError(deadline, { requiredForOpen = false } = {}) {
+  if (!deadline) {
+    if (requiredForOpen) {
+      return 'Deadline is required for open vacancies';
+    }
+    return null;
+  }
+  const end = endOfDeadlineDay(deadline);
+  if (!end) return 'Invalid deadline date';
+  if (end < startOfTomorrow()) {
+    return 'Deadline must be a future date (after today)';
+  }
+  return null;
+}
+
 const toPublicVacancy = (v) => ({
   id: v.id,
   title: v.title,
@@ -14,11 +66,17 @@ const toPublicVacancy = (v) => ({
   _count: v._count,
 });
 
-// Public: list open vacancies
+const openWhere = () => ({
+  status: 'OPEN',
+  OR: [{ deadline: null }, { deadline: { gte: new Date() } }],
+});
+
+// Public: list open vacancies (auto-hides after deadline)
 const getOpenVacancies = async (req, res) => {
   try {
+    await closeExpiredVacancies();
     const vacancies = await prisma.jobVacancy.findMany({
-      where: { status: 'OPEN' },
+      where: openWhere(),
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -43,9 +101,10 @@ const getOpenVacancies = async (req, res) => {
 // Public: single open vacancy
 const getOpenVacancy = async (req, res) => {
   try {
+    await closeExpiredVacancies();
     const id = parseInt(req.params.id, 10);
     const vacancy = await prisma.jobVacancy.findFirst({
-      where: { id, status: 'OPEN' },
+      where: { id, ...openWhere() },
     });
     if (!vacancy) {
       return res.status(404).json({ success: false, message: 'Vacancy not found' });
@@ -70,14 +129,16 @@ const applyToVacancy = async (req, res) => {
       });
     }
 
+    await closeExpiredVacancies();
+
     const vacancy = await prisma.jobVacancy.findFirst({
-      where: { id: vacancyId, status: 'OPEN' },
+      where: { id: vacancyId, ...openWhere() },
     });
     if (!vacancy) {
       return res.status(404).json({ success: false, message: 'This vacancy is not open for applications' });
     }
 
-    if (vacancy.deadline && new Date(vacancy.deadline) < new Date()) {
+    if (isDeadlinePast(vacancy.deadline)) {
       return res.status(400).json({ success: false, message: 'The application deadline has passed' });
     }
 
@@ -127,6 +188,7 @@ const applyToVacancy = async (req, res) => {
 // Admin: list all vacancies
 const adminListVacancies = async (req, res) => {
   try {
+    await closeExpiredVacancies();
     const vacancies = await prisma.jobVacancy.findMany({
       orderBy: { createdAt: 'desc' },
       include: { _count: { select: { applications: true } } },
@@ -152,6 +214,12 @@ const adminCreateVacancy = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Title and description are required' });
     }
 
+    const nextStatus = status === 'closed' || status === 'CLOSED' ? 'CLOSED' : 'OPEN';
+    const deadlineErr = validateDeadlineOrError(deadline, { requiredForOpen: nextStatus === 'OPEN' });
+    if (deadlineErr) {
+      return res.status(400).json({ success: false, message: deadlineErr });
+    }
+
     const vacancy = await prisma.jobVacancy.create({
       data: {
         title: String(title).trim(),
@@ -160,8 +228,8 @@ const adminCreateVacancy = async (req, res) => {
         employmentType: employmentType || null,
         description: String(description).trim(),
         requirements: requirements || null,
-        deadline: deadline ? new Date(deadline) : null,
-        status: status === 'closed' || status === 'CLOSED' ? 'CLOSED' : 'OPEN',
+        deadline: deadline ? endOfDeadlineDay(deadline) : null,
+        status: nextStatus,
       },
     });
 
@@ -178,6 +246,11 @@ const adminUpdateVacancy = async (req, res) => {
     const { title, department, location, employmentType, description, requirements, deadline, status } =
       req.body;
 
+    const existing = await prisma.jobVacancy.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Vacancy not found' });
+    }
+
     const data = {};
     if (title !== undefined) data.title = String(title).trim();
     if (department !== undefined) data.department = department || null;
@@ -185,9 +258,44 @@ const adminUpdateVacancy = async (req, res) => {
     if (employmentType !== undefined) data.employmentType = employmentType || null;
     if (description !== undefined) data.description = String(description).trim();
     if (requirements !== undefined) data.requirements = requirements || null;
-    if (deadline !== undefined) data.deadline = deadline ? new Date(deadline) : null;
     if (status !== undefined) {
       data.status = status === 'closed' || status === 'CLOSED' ? 'CLOSED' : 'OPEN';
+    }
+
+    const nextStatus = data.status || existing.status;
+    if (deadline !== undefined) {
+      if (!deadline) {
+        if (nextStatus === 'OPEN') {
+          return res.status(400).json({
+            success: false,
+            message: 'Deadline is required for open vacancies',
+          });
+        }
+        data.deadline = null;
+      } else {
+        const end = endOfDeadlineDay(deadline);
+        if (!end) {
+          return res.status(400).json({ success: false, message: 'Invalid deadline date' });
+        }
+        const existingEnd = existing.deadline ? endOfDeadlineDay(existing.deadline) : null;
+        const sameDay =
+          existingEnd &&
+          existingEnd.getFullYear() === end.getFullYear() &&
+          existingEnd.getMonth() === end.getMonth() &&
+          existingEnd.getDate() === end.getDate();
+        if (!sameDay && end < startOfTomorrow()) {
+          return res.status(400).json({
+            success: false,
+            message: 'Deadline must be a future date (after today)',
+          });
+        }
+        data.deadline = end;
+      }
+    } else if (nextStatus === 'OPEN' && !existing.deadline) {
+      return res.status(400).json({
+        success: false,
+        message: 'Deadline is required for open vacancies',
+      });
     }
 
     const vacancy = await prisma.jobVacancy.update({ where: { id }, data });

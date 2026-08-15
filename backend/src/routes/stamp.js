@@ -82,4 +82,6 @@ router.post(
 
 router.delete('/signatures/:id', authenticate, requireAdmin, stampController.deleteSignature);
 
+router.get('/download/:id', authenticate, requireAdmin, stampController.downloadStamped);
+
 module.exports = router;

@@ -13,7 +13,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -24,7 +24,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -35,7 +35,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -46,7 +46,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -57,7 +57,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -68,7 +68,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -79,7 +79,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -90,7 +90,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -101,7 +101,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -112,7 +112,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -123,7 +123,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -134,7 +134,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -145,7 +145,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -156,7 +156,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -167,7 +167,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -178,7 +178,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -189,7 +189,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -200,7 +200,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -211,7 +211,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -222,7 +222,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -233,7 +233,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -244,7 +244,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -255,7 +255,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -266,7 +266,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -277,7 +277,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -288,7 +288,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -299,7 +299,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -310,7 +310,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -321,7 +321,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -332,7 +332,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -343,7 +343,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -354,7 +354,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -365,7 +365,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -376,7 +376,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -387,6 +387,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
 
-UPDATE projects SET isPublic = 1 WHERE id LIKE 'GB%';
+-- New GB rows insert as public; existing isPublic preserved on update.
+-- Public site only shows projects with isPublic=1 (Admin Publish/Unpublish).

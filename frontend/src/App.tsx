@@ -16,7 +16,7 @@ import ContactPage from './ContactPage';
 import CareersPage from './CareersPage';
 import AdminCareers from './AdminCareers';
 import AdminStampSign from './AdminStampSign';
-import { publicApi, settingsApi, landingApi, getToken } from './api';
+import { publicApi, settingsApi, landingApi, careersApi, getToken } from './api';
 import { OFFICE, officePlaceUrl } from './contactLocation';
 import { getImageUrl } from './imageUrl';
 import { useI18n } from './i18n/I18nContext';
@@ -207,6 +207,32 @@ function App() {
           console.error(`Error fetching landing/${sections[i][0]}:`, result.reason);
         }
       });
+
+      try {
+        const vacRes = await careersApi.getOpenVacancies();
+        if (vacRes.success && Array.isArray(vacRes.data)) {
+          const vacancyCards = vacRes.data.slice(0, 6).map((v: any) => ({
+            id: `vacancy-${v.id}`,
+            title: v.title,
+            excerpt: v.department
+              ? `${v.department}${v.location ? ` · ${v.location}` : ''}`
+              : v.location || v.employmentType || 'Open position',
+            date: v.deadline
+              ? `Deadline ${String(v.deadline).slice(0, 10)}`
+              : 'Open vacancy',
+            category: 'vacancy',
+            linkUrl: '/careers',
+            sortOrder: -1,
+            createdAt: v.createdAt,
+          }));
+          setNewsItems((prev) => {
+            const withoutVac = prev.filter((n) => n.category !== 'vacancy' && !String(n.id).startsWith('vacancy-'));
+            return [...vacancyCards, ...withoutVac];
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching vacancies for home:', err);
+      }
     };
     fetchLandingData();
   }, []);

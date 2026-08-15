@@ -16,11 +16,11 @@ let src = fs.readFileSync(sheetPath, 'utf8');
 src = src.replace(/const prisma = require\(.+?\);/, '');
 src = src.replace(
   /async function main[\s\S]*$/,
-  'module.exports = { NEW_PROJECTS };'
+  'module.exports = { ALL_PROJECTS, NEW_PROJECTS, CORE_PROJECTS };'
 );
 const tmp = path.join(__dirname, '../_tmp_sheet.js');
 fs.writeFileSync(tmp, src);
-const { NEW_PROJECTS } = require(tmp);
+const { ALL_PROJECTS } = require(tmp);
 fs.unlinkSync(tmp);
 
 const awards = [
@@ -106,7 +106,7 @@ sql.push(
 );
 sql.push('');
 
-for (const row of NEW_PROJECTS) {
+for (const row of ALL_PROJECTS) {
   const highlights = JSON.stringify([
     `Sheet No. ${row.sheetNo}`,
     `Contract: ${row.budget}`,
@@ -134,14 +134,14 @@ for (const row of NEW_PROJECTS) {
     '  location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),'
   );
   sql.push(
-    `  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=${now};`
+    `  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=${now};`
   );
   sql.push('');
 }
 
-sql.push("UPDATE projects SET isPublic = 1 WHERE id LIKE 'GB%';");
+sql.push('-- New rows insert as public; existing isPublic is preserved on update.');
 sql.push('');
 
 const out = path.join(__dirname, '../prisma/fix-awards-projects.sql');
 fs.writeFileSync(out, sql.join('\n'), 'utf8');
-console.log('Wrote', out, 'projects=', NEW_PROJECTS.length);
+console.log('Wrote', out, 'projects=', ALL_PROJECTS.length);

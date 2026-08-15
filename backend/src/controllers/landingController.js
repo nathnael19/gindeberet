@@ -65,6 +65,19 @@ const pickFields = (section, body = {}, { partial = false } = {}) => {
   if (!cfg) return {};
   const data = {};
 
+  const toLines = (value) => {
+    if (Array.isArray(value)) {
+      return value.map((v) => String(v).trim()).filter(Boolean);
+    }
+    if (typeof value === 'string') {
+      return value
+        .split(/\r?\n/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+    return [];
+  };
+
   for (const key of cfg.required) {
     if (body[key] === undefined) {
       if (!partial) data[key] = '';
@@ -80,6 +93,14 @@ const pickFields = (section, body = {}, { partial = false } = {}) => {
       data[key] = trimmed === '' ? null : trimmed;
     } else {
       data[key] = body[key];
+    }
+  }
+
+  if (section === 'services') {
+    for (const listKey of ['points', 'approach', 'outcomes']) {
+      if (data[listKey] !== undefined) {
+        data[listKey] = toLines(data[listKey]);
+      }
     }
   }
 
@@ -123,7 +144,11 @@ const create = async (req, res) => {
   try {
     const cfg = SECTION_FIELDS[section];
     const data = pickFields(section, req.body);
-    const missing = cfg.required.filter((key) => !data[key]);
+    const missing = cfg.required.filter((key) => {
+      const val = data[key];
+      if (Array.isArray(val)) return val.length === 0;
+      return val === undefined || val === null || val === '';
+    });
     if (missing.length) {
       return res.status(400).json({
         success: false,

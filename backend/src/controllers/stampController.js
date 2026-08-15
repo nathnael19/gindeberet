@@ -380,3 +380,30 @@ exports.deleteSignature = async (req, res, next) => {
     next(error);
   }
 };
+
+/** Stream stamped PDF with Content-Disposition so browsers download reliably. */
+exports.downloadStamped = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid job id' });
+    }
+
+    const job = await prisma.stampJob.findUnique({ where: { id } });
+    if (!job || !job.stampedUrl) {
+      return res.status(404).json({ success: false, message: 'Stamped file not found' });
+    }
+
+    const relative = String(job.stampedUrl).replace(/^\/+/, '');
+    const filePath = path.join(__dirname, '../..', relative);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ success: false, message: 'Stamped file missing on disk' });
+    }
+
+    const baseName = path.basename(job.originalName || 'document', path.extname(job.originalName || ''));
+    const downloadName = `stamped-${baseName || 'document'}.pdf`;
+    res.download(filePath, downloadName);
+  } catch (error) {
+    next(error);
+  }
+};

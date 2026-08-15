@@ -462,6 +462,34 @@ export const stampApi = {
     };
   },
 
+  /** Authenticated download of a stamped PDF (forces attachment). */
+  download: async (id: number | string, downloadName?: string) => {
+    const token = getToken();
+    const headers: HeadersInit = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const response = await fetch(`${API_BASE_URL}/stamp/download/${id}`, { headers });
+    if (!response.ok) {
+      let message = 'Download failed';
+      try {
+        const err = await response.json();
+        message = err.message || message;
+      } catch {
+        /* ignore */
+      }
+      throw new Error(message);
+    }
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = downloadName || 'stamped.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(objectUrl);
+  },
+
   getSignatures: async () => apiCall<{ success: boolean; data: any[] }>('/stamp/signatures'),
 
   saveSignature: async (file: File, name?: string) => {

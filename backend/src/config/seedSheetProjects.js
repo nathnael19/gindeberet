@@ -551,7 +551,6 @@ async function seedSheetProjects(client = prisma) {
       year: row.year,
       description: row.description,
       image: row.image,
-      isPublic: true,
       highlights: [
         `Sheet No. ${row.sheetNo}`,
         `Contract: ${row.budget}`,
@@ -561,12 +560,13 @@ async function seedSheetProjects(client = prisma) {
 
     const existing = await client.project.findUnique({ where: { id: row.id } });
     if (existing) {
+      // Preserve admin publish/unpublish; only restore missing sheet fields
       await client.project.update({ where: { id: row.id }, data });
       updated += 1;
       console.log('updated', row.id, row.name);
     } else {
       await client.project.create({
-        data: { id: row.id, ...data },
+        data: { id: row.id, ...data, isPublic: true },
       });
       created += 1;
       console.log('created', row.id, '(sheet', row.sheetNo + ')', row.name);

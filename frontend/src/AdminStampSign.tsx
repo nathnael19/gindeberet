@@ -181,6 +181,10 @@ export default function AdminStampSign({ isDarkTheme, toggleTheme }: AdminStampS
   const [success, setSuccess] = useState('');
   const [signatures, setSignatures] = useState<any[]>([]);
 
+  const [resultUrl, setResultUrl] = useState('');
+  const [resultName, setResultName] = useState('');
+  const [resultId, setResultId] = useState<number | null>(null);
+
   const loadSignatures = async () => {
     try {
       const s = await stampApi.getSignatures();
@@ -194,10 +198,39 @@ export default function AdminStampSign({ isDarkTheme, toggleTheme }: AdminStampS
     loadSignatures();
   }, []);
 
+  const triggerDownload = async (jobId: number, name: string, fallbackUrl?: string) => {
+    try {
+      await stampApi.download(jobId, name);
+      return;
+    } catch {
+      /* fall through to direct URL */
+    }
+    if (fallbackUrl) {
+      try {
+        const res = await fetch(fallbackUrl);
+        if (!res.ok) throw new Error('fetch failed');
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = name || 'stamped.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(objectUrl);
+      } catch {
+        window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
+      }
+    }
+  };
+
   const applyStamp = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setResultUrl('');
+    setResultName('');
+    setResultId(null);
     if (!documentFile) {
       setError('Please upload a document PDF.');
       return;
@@ -224,16 +257,12 @@ export default function AdminStampSign({ isDarkTheme, toggleTheme }: AdminStampS
       });
 
       const url = fileUrl(res.data.url);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = res.data.downloadName || 'stamped.pdf';
-      a.target = '_blank';
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      setSuccess('Stamped PDF ready — download started.');
+      const name = res.data.downloadName || 'stamped.pdf';
+      setResultUrl(url);
+      setResultName(name);
+      setResultId(res.data.id);
+      await triggerDownload(res.data.id, name, url);
+      setSuccess('Stamped PDF ready. If download did not start, use the Download button below.');
     } catch (err: any) {
       setError(err?.message || 'Failed to stamp document');
     } finally {
@@ -462,6 +491,23 @@ export default function AdminStampSign({ isDarkTheme, toggleTheme }: AdminStampS
 
               {error && <p className="stamp-error">{error}</p>}
               {success && <p className="stamp-success">{success}</p>}
+              {resultId != null && (
+                <div className="stamp-download-row" style={{ marginTop: '0.75rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ color: '#000' }}
+                    onClick={() => triggerDownload(resultId, resultName, resultUrl)}
+                  >
+                    Download stamped PDF
+                  </button>
+                  {resultUrl && (
+                    <a className="btn btn-outline" href={resultUrl} target="_blank" rel="noopener noreferrer">
+                      Open in new tab
+                    </a>
+                  )}
+                </div>
+              )}
 
               <button type="submit" className="stamp-apply-btn" disabled={busy}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

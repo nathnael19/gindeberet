@@ -71,14 +71,28 @@ function linesToText(value: unknown) {
 }
 
 function prepareItemForEdit(section: SectionId, item: any) {
-  if (section !== 'services') return { ...item };
-  return {
-    ...item,
-    indexLabel: item.indexLabel || item.index || '',
-    points: linesToText(item.points),
-    approach: linesToText(item.approach),
-    outcomes: linesToText(item.outcomes),
-  };
+  if (section === 'services') {
+    return {
+      ...item,
+      indexLabel: item.indexLabel || item.index || '',
+      points: linesToText(item.points),
+      approach: linesToText(item.approach),
+      outcomes: linesToText(item.outcomes),
+      heroImage: item.heroImage || '',
+      sortOrder: item.sortOrder ?? 0,
+    };
+  }
+  if (section === 'hero') {
+    return {
+      ...item,
+      title1: item.title1 || '',
+      title2: item.title2 || '',
+      line: item.line || '',
+      imageUrl: item.imageUrl || '',
+      sortOrder: item.sortOrder ?? 0,
+    };
+  }
+  return { ...item };
 }
 
 function itemLabel(item: any) {
@@ -113,12 +127,21 @@ function itemSubtitle(section: SectionId, item: any) {
 }
 
 function toPayload(section: SectionId, item: any) {
-  const payload: Record<string, string> = {};
+  const payload: Record<string, string | number> = {};
   for (const key of EDITABLE[section]) {
+    if (section === 'services' && (key === 'points' || key === 'approach' || key === 'outcomes')) {
+      payload[key] = linesToText(item[key]);
+      continue;
+    }
+    if (key === 'sortOrder') {
+      const n = parseInt(String(item[key] ?? '0'), 10);
+      payload[key] = Number.isNaN(n) ? 0 : n;
+      continue;
+    }
     payload[key] = item[key] != null ? String(item[key]) : '';
   }
   if (section === 'services' && !payload.slug && payload.title) {
-    payload.slug = payload.title
+    payload.slug = String(payload.title)
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9]+/g, '-')
@@ -300,7 +323,7 @@ export default function AdminLandingSettings() {
                 className="settings-input"
                 required
                 rows={4}
-                value={currentItem.points || ''}
+                value={linesToText(currentItem.points)}
                 onChange={(e) => setCurrentItem({ ...currentItem, points: e.target.value })}
               />
             </div>
@@ -310,7 +333,7 @@ export default function AdminLandingSettings() {
                 className="settings-input"
                 required
                 rows={4}
-                value={currentItem.approach || ''}
+                value={linesToText(currentItem.approach)}
                 onChange={(e) => setCurrentItem({ ...currentItem, approach: e.target.value })}
               />
             </div>
@@ -320,7 +343,7 @@ export default function AdminLandingSettings() {
                 className="settings-input"
                 required
                 rows={3}
-                value={currentItem.outcomes || ''}
+                value={linesToText(currentItem.outcomes)}
                 onChange={(e) => setCurrentItem({ ...currentItem, outcomes: e.target.value })}
               />
             </div>

@@ -23,6 +23,15 @@ const emptyVacancy = {
   status: 'open',
 };
 
+function tomorrowDateInput() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 const fileUrl = (path: string) => {
   if (!path) return '#';
   if (path.startsWith('http')) return path;
@@ -113,6 +122,18 @@ export default function AdminCareers({ isDarkTheme, toggleTheme }: AdminCareersP
   const saveVacancy = async (e: FormEvent) => {
     e.preventDefault();
     try {
+      if (form.status === 'open') {
+        if (!form.deadline) {
+          setMessage('Deadline is required for open vacancies');
+          return;
+        }
+        const existingDay = current?.deadline ? String(current.deadline).slice(0, 10) : '';
+        const unchanged = Boolean(existingDay && existingDay === form.deadline);
+        if (!unchanged && form.deadline < tomorrowDateInput()) {
+          setMessage('Deadline must be after today');
+          return;
+        }
+      }
       const payload = {
         ...form,
         deadline: form.deadline || null,
@@ -282,12 +303,19 @@ export default function AdminCareers({ isDarkTheme, toggleTheme }: AdminCareersP
                       </select>
                     </div>
                     <div className="careers-field">
-                      <label>Deadline</label>
+                      <label>Deadline *</label>
                       <input
                         type="date"
+                        required={form.status === 'open'}
+                        min={
+                          current?.deadline && String(current.deadline).slice(0, 10) === form.deadline
+                            ? form.deadline || tomorrowDateInput()
+                            : tomorrowDateInput()
+                        }
                         value={form.deadline}
                         onChange={(e) => setForm({ ...form, deadline: e.target.value })}
                       />
+                      <small style={{ opacity: 0.7 }}>Must be after today. Hidden from public when the date passes.</small>
                     </div>
                     <div className="careers-field">
                       <label>Status</label>

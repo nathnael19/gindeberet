@@ -61,12 +61,13 @@ for (const row of ALL_PROJECTS) {
     '  location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),'
   );
   sql.push(
-    `  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=${now};`
+    `  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=${now};`
   );
   sql.push('');
 }
 
-sql.push("UPDATE projects SET isPublic = 1 WHERE id LIKE 'GB%';");
+sql.push('-- New GB rows insert as public; existing isPublic preserved on update.');
+sql.push('-- Public site only shows projects with isPublic=1 (Admin Publish/Unpublish).');
 sql.push('');
 
 const out = path.join(__dirname, '../prisma/fix-all-projects.sql');

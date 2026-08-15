@@ -157,14 +157,14 @@ async function fixPublicContent() {
 
   const sheet = await seedSheetProjects(prisma);
 
-  const published = await prisma.project.updateMany({ data: { isPublic: true } });
-
+  // Do not force every project public — only sheet projects that exist keep
+  // their prior isPublic; newly created sheet rows default to public in seed.
   return {
     admin,
     awards: await prisma.award.count(),
     removedDemo: removedDemo.count,
     sheet,
-    published: published.count,
+    projects: await prisma.project.count(),
     publicProjects: await prisma.project.count({ where: { isPublic: true } }),
   };
 }
