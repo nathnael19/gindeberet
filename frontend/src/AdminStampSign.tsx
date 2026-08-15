@@ -394,6 +394,9 @@ export default function AdminStampSign({ isDarkTheme, toggleTheme }: AdminStampS
                         <span>{opacity}%</span>
                       </div>
                       <input type="range" min={35} max={100} value={opacity} onChange={(e) => setOpacity(Number(e.target.value))} />
+                      <div className="hint" style={{ marginTop: '0.35rem' }}>
+                        Stamp ink uses multiply blend — document text stays readable under the stamp.
+                      </div>
                     </div>
                     <div className="stamp-slider">
                       <div className="slider-head">

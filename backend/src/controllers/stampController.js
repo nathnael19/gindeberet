@@ -6,7 +6,7 @@ try {
 } catch {
   sharp = null;
 }
-const { PDFDocument, degrees } = require('pdf-lib');
+const { PDFDocument, degrees, BlendMode } = require('pdf-lib');
 const prisma = require('../config/database');
 
 const uploadDir = path.join(__dirname, '../../uploads');
@@ -101,15 +101,40 @@ function detectImageKind(bytes) {
 }
 
 /**
- * Normalize any common image (JPG quirks, WebP, mislabeled PNG, etc.) to a
- * clean PNG buffer that pdf-lib can embed reliably.
+ * Normalize stamp/signature images for a real rubber-stamp look:
+ * - honor EXIF orientation
+ * - strip near-white backgrounds to alpha (so text under the stamp stays visible)
+ * - keep ink pixels opaque enough for Multiply blend
  */
-async function toEmbeddablePng(bytes, label = 'Image') {
+async function toRubberStampPng(bytes, label = 'Image') {
   try {
-    return await requireSharp()(bytes)
-      .rotate() // honor EXIF orientation
+    const s = requireSharp();
+    const { data, info } = await s(bytes)
+      .rotate()
       .ensureAlpha()
-      .png({ compressionLevel: 6, adaptiveFiltering: true })
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const a = data[i + 3];
+      if (a === 0) continue;
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      if (lum >= 248) {
+        data[i + 3] = 0;
+      } else if (lum >= 230) {
+        // Soft fade on near-white edges (paper / JPEG artifacts)
+        const t = (248 - lum) / 18;
+        data[i + 3] = Math.max(0, Math.min(255, Math.round(a * t)));
+      }
+    }
+
+    return await s(data, {
+      raw: { width: info.width, height: info.height, channels: 4 },
+    })
+      .png({ compressionLevel: 6 })
       .toBuffer();
   } catch (err) {
     throw new Error(
@@ -125,41 +150,35 @@ async function loadOverlay(pdfDoc, filePath, label = 'Image') {
 
   if (kind === 'pdf' || (ext === '.pdf' && kind !== 'png' && kind !== 'jpg' && kind !== 'webp')) {
     try {
-      const source = await PDFDocument.load(bytes);
+      const source = await PDFDocument.load(bytes, { ignoreEncryption: true });
       const [embeddedPage] = await pdfDoc.embedPdf(source, [0]);
       return { kind: 'page', asset: embeddedPage, width: embeddedPage.width, height: embeddedPage.height };
     } catch (err) {
-      // Some "PDF" uploads are mislabeled images — fall through to sharp
       if (kind === 'pdf') {
         throw new Error(`${label} PDF could not be read (${err.message || 'invalid PDF'}).`);
       }
     }
   }
 
-  // Direct embed first for clean PNGs (fast path)
-  if (kind === 'png') {
-    try {
-      const image = await pdfDoc.embedPng(bytes);
-      return { kind: 'image', asset: image, width: image.width, height: image.height };
-    } catch {
-      /* normalize below */
-    }
-  }
-
-  // pdf-lib rejects many real-world JPEGs ("SOI not found"); sharp fixes them.
-  const pngBytes = await toEmbeddablePng(bytes, label);
+  // Always normalize images → transparent background PNG for ink-like stamps
+  const pngBytes = await toRubberStampPng(bytes, label);
   const image = await pdfDoc.embedPng(pngBytes);
   return { kind: 'image', asset: image, width: image.width, height: image.height };
 }
 
 /**
- * Draw stamp/signature. Use Normal blend — Multiply breaks some viewers (Edge "0 of 0").
+ * Rubber-stamp look: Multiply lets document text show through blue/red ink
+ * (same effect as a real wet stamp on paper).
  */
 function drawOverlay(page, overlay, opts) {
+  const drawOpts = {
+    ...opts,
+    blendMode: BlendMode.Multiply,
+  };
   if (overlay.kind === 'page') {
-    page.drawPage(overlay.asset, opts);
+    page.drawPage(overlay.asset, drawOpts);
   } else {
-    page.drawImage(overlay.asset, opts);
+    page.drawImage(overlay.asset, drawOpts);
   }
 }
 
@@ -338,7 +357,7 @@ exports.applyStamp = async (req, res, next) => {
       rotation,
       size: stampSize,
       signatureSize,
-      blendMode: 'Normal',
+      blendMode: 'Multiply',
     };
 
     const job = await prisma.stampJob.create({
