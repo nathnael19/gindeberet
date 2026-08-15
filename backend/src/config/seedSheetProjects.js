@@ -540,6 +540,7 @@ const ALL_PROJECTS = [...CORE_PROJECTS, ...NEW_PROJECTS];
 async function seedSheetProjects(client = prisma) {
   let created = 0;
   let updated = 0;
+  const errors = [];
 
   for (const row of ALL_PROJECTS) {
     const data = {
@@ -561,30 +562,40 @@ async function seedSheetProjects(client = prisma) {
       ],
     };
 
-    const existing = await client.project.findUnique({ where: { id: row.id } });
-    if (existing) {
-      await client.project.update({ where: { id: row.id }, data });
-      updated += 1;
-      console.log('updated', row.id, row.name);
-    } else {
-      await client.project.create({
-        data: { id: row.id, ...data },
-      });
-      created += 1;
-      console.log('created', row.id, '(sheet', row.sheetNo + ')', row.name);
+    try {
+      const existing = await client.project.findUnique({ where: { id: row.id } });
+      if (existing) {
+        await client.project.update({ where: { id: row.id }, data });
+        updated += 1;
+        console.log('updated', row.id, row.name);
+      } else {
+        await client.project.create({
+          data: { id: row.id, ...data },
+        });
+        created += 1;
+        console.log('created', row.id, '(sheet', row.sheetNo + ')', row.name);
+      }
+    } catch (err) {
+      const msg = `${row.id}: ${err.message || err}`;
+      console.error('seed row failed', msg);
+      errors.push(msg);
     }
   }
 
   const sheetIds = ALL_PROJECTS.map((p) => p.id);
-  await client.project.updateMany({
-    where: { id: { in: sheetIds } },
-    data: { isPublic: true },
-  });
+  try {
+    await client.project.updateMany({
+      where: { id: { in: sheetIds } },
+      data: { isPublic: true },
+    });
+  } catch (err) {
+    console.warn('publish updateMany failed:', err.message);
+  }
 
   const total = await client.project.count();
   const published = await client.project.count({ where: { isPublic: true } });
   console.log(`Done. created=${created} updated=${updated} total=${total} published=${published}`);
-  return { created, updated, total, published, sheetCount: ALL_PROJECTS.length };
+  return { created, updated, total, published, sheetCount: ALL_PROJECTS.length, errors };
 }
 
 module.exports = {

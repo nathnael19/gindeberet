@@ -130,8 +130,12 @@ export default function AdminProjects({
     try {
       const res = await projectsApi.syncSheet();
       if (!res.success) throw new Error(res.message || 'Sync failed');
+      const errNote =
+        res.data.errors && res.data.errors.length
+          ? ` · ${res.data.errors.length} row warning(s)`
+          : '';
       setMessage(
-        `Done: ${res.data.created} created, ${res.data.updated} updated · ${res.data.total} total · ${res.data.published} published`
+        `Done: ${res.data.created} created, ${res.data.updated} updated · ${res.data.total} total · ${res.data.published} published${errNote}`
       );
       await fetchProjects();
     } catch (err: any) {

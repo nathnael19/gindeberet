@@ -19,16 +19,32 @@ const allowedOrigins = [
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
+  'https://gindeberetconstruction.com',
+  'https://www.gindeberetconstruction.com',
+  'http://gindeberetconstruction.com',
+  'http://www.gindeberetconstruction.com',
 ].filter(Boolean);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  try {
+    const host = new URL(origin).hostname.replace(/^www\./, '');
+    return host === 'gindeberetconstruction.com' || host === 'localhost';
+  } catch {
+    return false;
+  }
+}
 
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
         return;
       }
-      callback(new Error(`CORS blocked for origin: ${origin}`));
+      console.warn('CORS blocked origin:', origin);
+      callback(null, false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

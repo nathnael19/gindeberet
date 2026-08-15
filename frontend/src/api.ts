@@ -231,21 +231,62 @@ export const projectsApi = {
 
   /** Upsert all 35 company sheet projects (GB001–GB035) and publish. */
   syncSheet: async () => {
-    const response = await apiCall<{
-      success: boolean;
-      message?: string;
-      data: {
-        created: number;
-        updated: number;
-        total: number;
-        published: number;
-        sheetCount?: number;
+    const token = getToken();
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 120000);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/projects/sync-sheet`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({}),
+        signal: controller.signal,
+      });
+      const text = await response.text();
+      let data: any = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        throw new Error(
+          response.ok
+            ? 'Server returned invalid JSON'
+            : `API error ${response.status}: server did not return JSON. Restart the Node app and try again.`
+        );
+      }
+      if (!response.ok) {
+        throw new Error(data?.message || `Sync failed (HTTP ${response.status})`);
+      }
+      if (data?.success) {
+        invalidateAdminData();
+      }
+      return data as {
+        success: boolean;
+        message?: string;
+        data: {
+          created: number;
+          updated: number;
+          total: number;
+          published: number;
+          sheetCount?: number;
+          errors?: string[];
+        };
       };
-    }>('/projects/sync-sheet', { method: 'POST', body: JSON.stringify({}) });
-    if (response.success) {
-      invalidateAdminData();
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        throw new Error('Import timed out. Restart the Node app, then try again.');
+      }
+      if (String(err?.message || '').toLowerCase().includes('failed to fetch')) {
+        throw new Error(
+          'Cannot reach API (Failed to fetch). Restart the Node.js app in cPanel, wait 30 seconds, then try Import again.'
+        );
+      }
+      throw err;
+    } finally {
+      window.clearTimeout(timer);
     }
-    return response;
   },
 };
 
