@@ -38,7 +38,7 @@ const CORE_PROJECTS = [
     budget: 'ETB 3,102,826,609.25',
     location: 'Shashamane, Oromia',
     category: 'Corridors',
-    duration: '730 Days',
+    duration: '365 Days',
     year: '2026',
     status: 'ACTIVE',
     image: IMG.corridors,
@@ -53,7 +53,7 @@ const CORE_PROJECTS = [
     budget: 'ETB 2,663,657,876.71',
     location: 'Furii, Shaggar',
     category: 'Corridors',
-    duration: '730 Days',
+    duration: '365 Days',
     year: '2025',
     status: 'ACTIVE',
     image: IMG.corridors,
@@ -93,9 +93,9 @@ const CORE_PROJECTS = [
     name: 'Ambelia Small-Scale Irrigation',
     client: 'Oromia Irrigation and Pastoralist Development Bureau (LLRP)',
     budget: 'ETB 77,810,265.00',
-    location: 'Ambelta, Oromia',
+    location: 'Ambelia, Oromia',
     category: 'Water',
-    duration: '365 Days',
+    duration: '360 Days',
     year: '2025',
     status: 'ACTIVE',
     image: IMG.water,
@@ -137,7 +137,7 @@ const CORE_PROJECTS = [
     budget: 'ETB 60,555,741.40',
     location: 'Horro Guduru Wallaga, Oromia',
     category: 'Buildings',
-    duration: '540 Days',
+    duration: '550 Days',
     year: '2022',
     status: 'COMPLETED',
     image: IMG.buildings,
@@ -151,7 +151,7 @@ const CORE_PROJECTS = [
     budget: 'ETB 46,056,343.39',
     location: 'Dero Hara Gura, Oromia',
     category: 'Roads',
-    duration: '365 Days',
+    duration: '180 Days',
     year: '2023',
     status: 'COMPLETED',
     image: IMG.roads,
@@ -161,7 +161,7 @@ const CORE_PROJECTS = [
     id: 'GB010',
     sheetNo: 20,
     name: 'Chora Woreda Health Office',
-    client: 'Chora Woreda Health Office',
+    client: 'Chora Woreda Health Office / Jimma City Education Office',
     budget: 'ETB 40,473,247.03',
     location: 'Chora, Oromia',
     category: 'Buildings',
@@ -179,7 +179,7 @@ const CORE_PROJECTS = [
     budget: 'ETB 38,895,650.00',
     location: 'Jimma, Oromia',
     category: 'Roads',
-    duration: '365 Days',
+    duration: '180 Days',
     year: '2023',
     status: 'COMPLETED',
     image: IMG.roads,
@@ -193,7 +193,7 @@ const CORE_PROJECTS = [
     budget: 'ETB 37,199,040.71',
     location: 'Chora, Oromia',
     category: 'Electro-Mechanical',
-    duration: '180 Days',
+    duration: '365 Days',
     year: '2024',
     status: 'COMPLETED',
     image: IMG.electro,
@@ -207,7 +207,7 @@ const CORE_PROJECTS = [
     budget: 'ETB 36,904,922.17',
     location: 'Gudannee / Borecha, Oromia',
     category: 'Buildings',
-    duration: '240 Days',
+    duration: '360 Days',
     year: '2024',
     status: 'COMPLETED',
     image: IMG.buildings,
@@ -221,25 +221,27 @@ const CORE_PROJECTS = [
     budget: 'ETB 22,357,873.82',
     location: 'Bonga, Ethiopia',
     category: 'Electro-Mechanical',
-    duration: '365 Days',
+    duration: '720 Days',
     year: '2019',
     status: 'COMPLETED',
     image: IMG.electro,
-    description: 'Pressure lines and electro-mechanical works for Bonga town.',
+    description:
+      'Civil works, supply and installation of main pressure lines, fittings and electro-mechanical works for Bonga town.',
   },
   {
     id: 'GB015',
     sheetNo: 2,
-    name: 'Mako Water Treatment Plant Package',
+    name: 'Meko Water Treatment Plant Package',
     client: 'Oromia Regional State Construction Works Corporation',
     budget: 'ETB 24,813,202.34',
-    location: 'Mako / Meko, Oromia',
+    location: 'Meko, Oromia',
     category: 'Water',
     duration: '365 Days',
     year: '2017',
     status: 'COMPLETED',
     image: IMG.water,
-    description: 'Water treatment plant package delivered for Oromia Construction Works Corporation.',
+    description:
+      'Water treatment plant, fence, store, guard house and rotto stand at Meko for Oromia Construction Works Corporation.',
   },
 ];
 
@@ -520,8 +522,8 @@ const NEW_PROJECTS = [
     id: 'GB035',
     sheetNo: 33,
     name: 'Solid Waste Transfer Station — Sululta Sub-City, Shaggar',
-    client: 'Shaggar City Real Estate',
-    budget: 'ETB 15,200,000.00',
+    client: 'Shaggar City Real Estate and Construction Corporation (sub-contract)',
+    budget: 'ETB 15,275,275.00',
     location: 'Sululta Sub-City, Shaggar',
     category: 'Infrastructure',
     duration: '365 Days',
@@ -551,6 +553,7 @@ async function seedSheetProjects(client = prisma) {
       year: row.year,
       description: row.description,
       image: row.image,
+      isPublic: true,
       highlights: [
         `Sheet No. ${row.sheetNo}`,
         `Contract: ${row.budget}`,
@@ -560,23 +563,28 @@ async function seedSheetProjects(client = prisma) {
 
     const existing = await client.project.findUnique({ where: { id: row.id } });
     if (existing) {
-      // Preserve admin publish/unpublish; only restore missing sheet fields
       await client.project.update({ where: { id: row.id }, data });
       updated += 1;
       console.log('updated', row.id, row.name);
     } else {
       await client.project.create({
-        data: { id: row.id, ...data, isPublic: true },
+        data: { id: row.id, ...data },
       });
       created += 1;
       console.log('created', row.id, '(sheet', row.sheetNo + ')', row.name);
     }
   }
 
+  const sheetIds = ALL_PROJECTS.map((p) => p.id);
+  await client.project.updateMany({
+    where: { id: { in: sheetIds } },
+    data: { isPublic: true },
+  });
+
   const total = await client.project.count();
   const published = await client.project.count({ where: { isPublic: true } });
   console.log(`Done. created=${created} updated=${updated} total=${total} published=${published}`);
-  return { created, updated, total, published };
+  return { created, updated, total, published, sheetCount: ALL_PROJECTS.length };
 }
 
 module.exports = {

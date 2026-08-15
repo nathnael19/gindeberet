@@ -7,24 +7,24 @@ DELETE FROM projects WHERE id IN ('PRJ001','PRJ002','PRJ003','PRJ004','PRJ005');
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
   'GB001', 'Degalo–Halaba Exit Corridor', 'Shashamane City Administration', 'ACTIVE', 'ETB 3,102,826,609.25',
-  'Shashamane, Oromia', 'Corridors', '730 Days', '2026',
-  'Major exit corridor works linking Degalo to Halaba for Shashamane city administration.', NULL, NULL, '["Sheet No. 35","Contract: ETB 3,102,826,609.25","Duration: 730 Days"]', 'https://images.unsplash.com/photo-1465447142348-e9952c393450?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
+  'Shashamane, Oromia', 'Corridors', '365 Days', '2026',
+  'Major exit corridor works linking Degalo to Halaba for Shashamane city administration.', NULL, NULL, '["Sheet No. 35","Contract: ETB 3,102,826,609.25","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1465447142348-e9952c393450?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
   'GB002', 'Furii Corridor LOT 2 (Hiwot Fana–NOC)', 'Shaggar City, Furii Sub-City Municipality', 'ACTIVE', 'ETB 2,663,657,876.71',
-  'Furii, Shaggar', 'Corridors', '730 Days', '2025',
-  'Furii corridor LOT 2 works between Hiwot Fana and NOC for Shaggar city.', NULL, NULL, '["Sheet No. 34","Contract: ETB 2,663,657,876.71","Duration: 730 Days"]', 'https://images.unsplash.com/photo-1465447142348-e9952c393450?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
+  'Furii, Shaggar', 'Corridors', '365 Days', '2025',
+  'Furii corridor LOT 2 works between Hiwot Fana and NOC for Shaggar city.', NULL, NULL, '["Sheet No. 34","Contract: ETB 2,663,657,876.71","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1465447142348-e9952c393450?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -35,7 +35,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -46,18 +46,18 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
   'GB005', 'Ambelia Small-Scale Irrigation', 'Oromia Irrigation and Pastoralist Development Bureau (LLRP)', 'ACTIVE', 'ETB 77,810,265.00',
-  'Ambelta, Oromia', 'Water', '365 Days', '2025',
-  'Small-scale irrigation works under the LLRP programme.', NULL, NULL, '["Sheet No. 32","Contract: ETB 77,810,265.00","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
+  'Ambelia, Oromia', 'Water', '360 Days', '2025',
+  'Small-scale irrigation works under the LLRP programme.', NULL, NULL, '["Sheet No. 32","Contract: ETB 77,810,265.00","Duration: 360 Days"]', 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -68,7 +68,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -79,95 +79,95 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
   'GB008', 'Horro Guduru Wallaga Health Office (G+4)', 'Horro Guduru Wallaga Zone Health Office', 'COMPLETED', 'ETB 60,555,741.40',
-  'Horro Guduru Wallaga, Oromia', 'Buildings', '540 Days', '2022',
-  'G+4 zone health office building for Horro Guduru Wallaga.', NULL, NULL, '["Sheet No. 18","Contract: ETB 60,555,741.40","Duration: 540 Days"]', 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
+  'Horro Guduru Wallaga, Oromia', 'Buildings', '550 Days', '2022',
+  'G+4 zone health office building for Horro Guduru Wallaga.', NULL, NULL, '["Sheet No. 18","Contract: ETB 60,555,741.40","Duration: 550 Days"]', 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
   'GB009', 'Dero Hara Gura DC-2 Rural Road', 'Oromia Irrigation and Pastoralist Development Bureau (LLRP)', 'COMPLETED', 'ETB 46,056,343.39',
-  'Dero Hara Gura, Oromia', 'Roads', '365 Days', '2023',
-  'DC-2 rural road package at Dero Hara Gura under LLRP.', NULL, NULL, '["Sheet No. 21","Contract: ETB 46,056,343.39","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
+  'Dero Hara Gura, Oromia', 'Roads', '180 Days', '2023',
+  'DC-2 rural road package at Dero Hara Gura under LLRP.', NULL, NULL, '["Sheet No. 21","Contract: ETB 46,056,343.39","Duration: 180 Days"]', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
-  'GB010', 'Chora Woreda Health Office', 'Chora Woreda Health Office', 'COMPLETED', 'ETB 40,473,247.03',
+  'GB010', 'Chora Woreda Health Office', 'Chora Woreda Health Office / Jimma City Education Office', 'COMPLETED', 'ETB 40,473,247.03',
   'Chora, Oromia', 'Buildings', '365 Days', '2023',
   'Woreda health office building in Chora district.', NULL, NULL, '["Sheet No. 20","Contract: ETB 40,473,247.03","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
   'GB011', 'Jimma Earth-Pressed Municipal Road', 'Jimma City Administration', 'COMPLETED', 'ETB 38,895,650.00',
-  'Jimma, Oromia', 'Roads', '365 Days', '2023',
-  'Earth-pressed municipal road works for Jimma city administration.', NULL, NULL, '["Sheet No. 22","Contract: ETB 38,895,650.00","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
+  'Jimma, Oromia', 'Roads', '180 Days', '2023',
+  'Earth-pressed municipal road works for Jimma city administration.', NULL, NULL, '["Sheet No. 22","Contract: ETB 38,895,650.00","Duration: 180 Days"]', 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
   'GB012', 'Furniture & Electro-Mechanical Works — Chora Health G+4', 'Chora Woreda Health Office', 'COMPLETED', 'ETB 37,199,040.71',
-  'Chora, Oromia', 'Electro-Mechanical', '180 Days', '2024',
-  'Furniture and electro-mechanical package for Chora G+4 health facility.', NULL, NULL, '["Sheet No. 27","Contract: ETB 37,199,040.71","Duration: 180 Days"]', 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
+  'Chora, Oromia', 'Electro-Mechanical', '365 Days', '2024',
+  'Furniture and electro-mechanical package for Chora G+4 health facility.', NULL, NULL, '["Sheet No. 27","Contract: ETB 37,199,040.71","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
   'GB013', 'Gudannee Community Health Post (CHP)', 'Borecha Health Office', 'COMPLETED', 'ETB 36,904,922.17',
-  'Gudannee / Borecha, Oromia', 'Buildings', '240 Days', '2024',
-  'Community health post construction at Gudannee for Borecha health office.', NULL, NULL, '["Sheet No. 30","Contract: ETB 36,904,922.17","Duration: 240 Days"]', 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
+  'Gudannee / Borecha, Oromia', 'Buildings', '360 Days', '2024',
+  'Community health post construction at Gudannee for Borecha health office.', NULL, NULL, '["Sheet No. 30","Contract: ETB 36,904,922.17","Duration: 360 Days"]', 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
   'GB014', 'Bonga Pressure Lines & Electro-Mechanical Works', 'Bonga Town (sub-contract)', 'COMPLETED', 'ETB 22,357,873.82',
-  'Bonga, Ethiopia', 'Electro-Mechanical', '365 Days', '2019',
-  'Pressure lines and electro-mechanical works for Bonga town.', NULL, NULL, '["Sheet No. 8","Contract: ETB 22,357,873.82","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
+  'Bonga, Ethiopia', 'Electro-Mechanical', '720 Days', '2019',
+  'Civil works, supply and installation of main pressure lines, fittings and electro-mechanical works for Bonga town.', NULL, NULL, '["Sheet No. 8","Contract: ETB 22,357,873.82","Duration: 720 Days"]', 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
-  'GB015', 'Mako Water Treatment Plant Package', 'Oromia Regional State Construction Works Corporation', 'COMPLETED', 'ETB 24,813,202.34',
-  'Mako / Meko, Oromia', 'Water', '365 Days', '2017',
-  'Water treatment plant package delivered for Oromia Construction Works Corporation.', NULL, NULL, '["Sheet No. 2","Contract: ETB 24,813,202.34","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
+  'GB015', 'Meko Water Treatment Plant Package', 'Oromia Regional State Construction Works Corporation', 'COMPLETED', 'ETB 24,813,202.34',
+  'Meko, Oromia', 'Water', '365 Days', '2017',
+  'Water treatment plant, fence, store, guard house and rotto stand at Meko for Oromia Construction Works Corporation.', NULL, NULL, '["Sheet No. 2","Contract: ETB 24,813,202.34","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -178,7 +178,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -189,7 +189,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -200,7 +200,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -211,7 +211,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -222,7 +222,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -233,7 +233,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -244,7 +244,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -255,7 +255,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -266,7 +266,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -277,7 +277,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -288,7 +288,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -299,7 +299,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -310,7 +310,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -321,7 +321,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -332,7 +332,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -343,7 +343,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -354,7 +354,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -365,7 +365,7 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
@@ -376,18 +376,18 @@ VALUES (
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
 INSERT INTO projects (id, name, client, status, budget, location, category, duration, year, description, challenge, solution, highlights, image, isPublic, createdBy, createdAt, updatedAt)
 VALUES (
-  'GB035', 'Solid Waste Transfer Station — Sululta Sub-City, Shaggar', 'Shaggar City Real Estate', 'ACTIVE', 'ETB 15,200,000.00',
+  'GB035', 'Solid Waste Transfer Station — Sululta Sub-City, Shaggar', 'Shaggar City Real Estate and Construction Corporation (sub-contract)', 'ACTIVE', 'ETB 15,275,275.00',
   'Sululta Sub-City, Shaggar', 'Infrastructure', '365 Days', '2025',
-  'Construction of a solid waste transfer station at Sululta sub-city, Shaggar city.', NULL, NULL, '["Sheet No. 33","Contract: ETB 15,200,000.00","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
+  'Construction of a solid waste transfer station at Sululta sub-city, Shaggar city.', NULL, NULL, '["Sheet No. 33","Contract: ETB 15,275,275.00","Duration: 365 Days"]', 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80', 1, NULL, NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), client=VALUES(client), status=VALUES(status), budget=VALUES(budget),
   location=VALUES(location), category=VALUES(category), duration=VALUES(duration), year=VALUES(year),
-  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), updatedAt=NOW(3);
+  description=VALUES(description), highlights=VALUES(highlights), image=VALUES(image), isPublic=1, updatedAt=NOW(3);
 
--- New GB rows insert as public; existing isPublic preserved on update.
--- Public site only shows projects with isPublic=1 (Admin Publish/Unpublish).
+-- Publish all 35 sheet projects (GB001–GB035) on the public site.
+UPDATE projects SET isPublic = 1 WHERE id LIKE 'GB%';
