@@ -228,6 +228,25 @@ export const projectsApi = {
       onUpdate,
     });
   },
+
+  /** Upsert all 35 company sheet projects (GB001–GB035) and publish. */
+  syncSheet: async () => {
+    const response = await apiCall<{
+      success: boolean;
+      message?: string;
+      data: {
+        created: number;
+        updated: number;
+        total: number;
+        published: number;
+        sheetCount?: number;
+      };
+    }>('/projects/sync-sheet', { method: 'POST', body: JSON.stringify({}) });
+    if (response.success) {
+      invalidateAdminData();
+    }
+    return response;
+  },
 };
 
 // Activity API

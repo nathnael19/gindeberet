@@ -45,12 +45,36 @@ export default function AdminProjects({
   const [projects, setProjects] = useState<AdminProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [syncing, setSyncing] = useState(false);
+
+  const fetchProjects = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const response = await projectsApi.getAll({
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        category: categoryFilter === 'All' ? undefined : categoryFilter,
+        search: search || undefined,
+      });
+      if (response.success) {
+        setProjects(response.data);
+      } else {
+        setError('Failed to load projects');
+      }
+    } catch (err) {
+      setError('Failed to load projects');
+      console.error('Error fetching projects:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Fetch projects from API
   useEffect(() => {
     let isActive = true;
 
-    const fetchProjects = async () => {
+    const run = async () => {
       try {
         setIsLoading(true);
         setError('');
@@ -85,12 +109,37 @@ export default function AdminProjects({
       }
     };
 
-    fetchProjects();
+    run();
 
     return () => {
       isActive = false;
     };
   }, [statusFilter, categoryFilter, search]);
+
+  const syncSheetProjects = async () => {
+    if (
+      !window.confirm(
+        'Import / update all 35 company sheet projects (GB001–GB035) and publish them on the website?'
+      )
+    ) {
+      return;
+    }
+    setSyncing(true);
+    setError('');
+    setMessage('');
+    try {
+      const res = await projectsApi.syncSheet();
+      if (!res.success) throw new Error(res.message || 'Sync failed');
+      setMessage(
+        `Done: ${res.data.created} created, ${res.data.updated} updated · ${res.data.total} total · ${res.data.published} published`
+      );
+      await fetchProjects();
+    } catch (err: any) {
+      setError(err?.message || 'Failed to sync sheet projects');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const openDetail = (project: AdminProject) => {
     setSelectedProject(project);
@@ -132,13 +181,31 @@ export default function AdminProjects({
               : `${projects.length} projects total · ${publishedCount} published on website`}
           </p>
         </div>
-        <button className="add-project-btn" onClick={() => navigateTo('/projects/add')}>
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add Project
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <button
+            type="button"
+            className="btn btn-outline"
+            disabled={syncing}
+            onClick={syncSheetProjects}
+            title="Upsert all 35 sheet projects into the database"
+          >
+            {syncing ? 'Importing…' : 'Import 35 sheet projects'}
+          </button>
+          <button className="add-project-btn" onClick={() => navigateTo('/projects/add')}>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Project
+          </button>
+        </div>
       </div>
+
+      {message && (
+        <p style={{ color: 'var(--primary)', margin: '0 0 1rem', fontWeight: 600 }}>{message}</p>
+      )}
+      {error && (
+        <p style={{ color: '#b42318', margin: '0 0 1rem', fontWeight: 600 }}>{error}</p>
+      )}
 
       {/* Status pills */}
       <div className="project-stats-bar">

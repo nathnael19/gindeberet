@@ -445,6 +445,34 @@ const getProjectStats = async (req, res) => {
   }
 };
 
+/**
+ * Upsert all 35 company sheet projects (GB001–GB035) and publish them.
+ * Admin-only — use from Admin → Projects when Fix cPanel content Actions is blocked.
+ */
+const syncSheetProjects = async (req, res) => {
+  try {
+    const { seedSheetProjects } = require('../config/seedSheetProjects');
+    const sheet = await seedSheetProjects(prisma);
+    const total = await prisma.project.count();
+    const published = await prisma.project.count({ where: { isPublic: true } });
+    res.json({
+      success: true,
+      message: `Sheet projects synced (${sheet.sheetCount || 35} rows).`,
+      data: {
+        ...sheet,
+        total,
+        published,
+      },
+    });
+  } catch (error) {
+    console.error('Sync sheet projects error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to sync sheet projects',
+    });
+  }
+};
+
 module.exports = {
   getAllProjects,
   getProjectById,
@@ -453,4 +481,5 @@ module.exports = {
   deleteProject,
   getProjectStats,
   getPublicSummary,
+  syncSheetProjects,
 };

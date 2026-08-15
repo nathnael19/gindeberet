@@ -33,6 +33,8 @@ jobs:
           code=$(curl -sS -o /tmp/fix-content.json -w "%{http_code}" \
             -X POST "$url" \
             -H "Content-Type: application/json" \
+            -H "User-Agent: Mozilla/5.0 (compatible; GindeberetFixBot/1.0)" \
+            -H "Accept: application/json" \
             -H "x-setup-secret: ${SETUP_SECRET}")
           echo "HTTP $code"
           cat /tmp/fix-content.json
