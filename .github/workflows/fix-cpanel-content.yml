@@ -1,8 +1,8 @@
-# Apply awards + projects via the live API (no phpMyAdmin, no cPanel Run JS).
-# Requires SETUP_SECRET on the server (.env / Node App env) AND as a GitHub Actions secret.
+# Queue awards + 35 projects via FTP (no live API call).
+# Imunify360 blocks GitHub → api.gindeberetconstruction.com, so we do not curl the API.
 #
-# Before first run: cPanel Node app RESTART (so /api/setup is mounted).
-# Prefer Admin → Projects → "Import 35 sheet projects" if this workflow is blocked by WAF.
+# After this workflow is green: cPanel → Node.js App → RESTART once.
+# On boot, Node reads data/pending-fix-content and runs fixPublicContent.
 
 name: Fix cPanel content
 
@@ -10,43 +10,52 @@ on:
   workflow_dispatch:
 
 jobs:
-  fix-content:
-    name: POST /api/setup/fix-content
+  queue-fix:
+    name: FTP pending-fix-content flag
     runs-on: ubuntu-latest
     steps:
-      - name: Verify SETUP_SECRET
-        env:
-          SETUP_SECRET: ${{ secrets.SETUP_SECRET }}
-        run: |
-          if [ -z "$SETUP_SECRET" ]; then
-            echo "::error::Add repository secret SETUP_SECRET (same value as cPanel Node App env SETUP_SECRET)."
-            exit 1
-          fi
-          echo "SETUP_SECRET is set (${#SETUP_SECRET} chars)"
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Apply awards and projects
+      - name: Verify FTP secrets
         env:
-          SETUP_SECRET: ${{ secrets.SETUP_SECRET }}
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_BACKEND_DIR: ${{ secrets.FTP_BACKEND_DIR }}
         run: |
-          set -e
-          url="https://api.gindeberetconstruction.com/api/setup/fix-content"
-          echo "Calling $url"
-          # Empty body + Content-Type: application/json causes Express to return HTTP 400.
-          # Always send a JSON object. Also send browser-like headers to reduce WAF blocks.
-          code=$(curl -sS -o /tmp/fix-content.json -w "%{http_code}" \
-            -X POST "$url" \
-            -H "Content-Type: application/json" \
-            -H "Accept: application/json" \
-            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36" \
-            -H "x-setup-secret: ${SETUP_SECRET}" \
-            --data '{}')
-          echo "HTTP $code"
-          echo "----- response body -----"
-          cat /tmp/fix-content.json || true
-          echo
-          echo "----- end response -----"
-          if [ "$code" != "200" ]; then
-            echo "::error::fix-content failed with HTTP $code. Prefer Admin → Projects → Import 35 sheet projects, or check SETUP_SECRET + Node RESTART."
-            exit 1
-          fi
-          echo "fix-content OK"
+          missing=0
+          for name in FTP_SERVER FTP_USERNAME FTP_PASSWORD FTP_BACKEND_DIR; do
+            eval "val=\$$name"
+            if [ -z "$val" ]; then
+              echo "::error::$name is missing. Same secrets as Deploy to cPanel."
+              missing=1
+            else
+              echo "$name is set (${#val} chars)"
+            fi
+          done
+          exit $missing
+
+      - name: Create pending-fix-content flag
+        run: |
+          mkdir -p backend/data
+          date -u +"queued-by-github-actions %Y-%m-%dT%H:%M:%SZ" > backend/data/pending-fix-content
+          ls -la backend/data/
+
+      - name: Upload flag via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          security: loose
+          local-dir: ./backend/data/
+          server-dir: ${{ secrets.FTP_BACKEND_DIR }}data/
+          dangerous-clean-slate: false
+
+      - name: Next step
+        run: |
+          echo "::notice::Flag uploaded. cPanel → Setup Node.js App → RESTART now."
+          echo "After restart, awards + 35 sheet projects are applied automatically."

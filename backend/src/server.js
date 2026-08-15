@@ -125,6 +125,42 @@ try {
   console.error('Prisma unavailable at boot:', err.message);
 }
 
+/**
+ * After Restart: seed 35 sheet projects (no SETUP_SECRET / no outbound API).
+ * If Actions dropped data/pending-fix-content, run full awards+admin+projects fix.
+ */
+async function runBootMaintenance() {
+  const flagPath = path.join(__dirname, '../data/pending-fix-content');
+  try {
+    const fs = require('fs');
+    const prisma = require('./config/database');
+    if (fs.existsSync(flagPath)) {
+      const { fixPublicContent } = require('./services/fixPublicContent');
+      const result = await fixPublicContent();
+      console.log('pending-fix-content applied:', JSON.stringify(result));
+      try {
+        fs.unlinkSync(flagPath);
+      } catch (_) {
+        /* ignore */
+      }
+      return;
+    }
+    if (process.env.SEED_SHEET_ON_BOOT === '0') {
+      console.log('SEED_SHEET_ON_BOOT=0 — skipping sheet seed');
+      return;
+    }
+    const { seedSheetProjects } = require('./config/seedSheetProjects');
+    const sheet = await seedSheetProjects(prisma);
+    console.log(
+      `Boot sheet seed: upserted=${sheet.upserted || 0} total=${sheet.sheetCount || 35} errors=${(sheet.errors && sheet.errors.length) || 0}`
+    );
+  } catch (err) {
+    const msg = `bootMaintenance: ${err.message}`;
+    console.error(msg);
+    bootErrors.push(msg);
+  }
+}
+
 const start = () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Frontend URL(s): ${allowedOrigins.join(', ')}`);
@@ -132,6 +168,7 @@ const start = () => {
   if (bootErrors.length) {
     console.error('Boot errors:', bootErrors);
   }
+  void runBootMaintenance();
 };
 
 const passenger = global.PhusionPassenger;

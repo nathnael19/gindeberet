@@ -24,15 +24,18 @@ Repo → **Settings** → **Secrets and variables** → **Actions** → **Reposi
 | `FTP_FRONTEND_DIR` | `/public_html/` |
 | `VITE_API_URL` | `https://api.gindeberetconstruction.com/api` |
 | `VITE_SITE_URL` | `https://gindeberetconstruction.com` |
-| `SETUP_SECRET` | long random string (same value in cPanel Node App env) |
 
-## Fix awards/projects without phpMyAdmin
+`SETUP_SECRET` is **optional** (API `/api/setup/fix-content`). Prefer the FTP workflow below — Imunify360 often blocks GitHub from calling the API.
 
-1. Add `SETUP_SECRET` to **cPanel Node App env** + **GitHub Repository secrets** (same value)
-2. **RESTART** Node app (loads `/api/setup`)
-3. GitHub → **Actions** → **Fix cPanel content** → **Run workflow**
+## Fix awards/projects (simple — no SETUP_SECRET)
 
-That workflow also upserts the production admin login (`ADMIN_EMAIL` / `ADMIN_PASSWORD` on server, or defaults in code).
+1. GitHub → **Actions** → **Fix cPanel content** → **Run workflow** (uses FTP only)
+2. Wait for green
+3. cPanel → **Setup Node.js App** → **RESTART**
+
+On restart, Node applies awards + **35 sheet projects** automatically.
+
+**Even simpler:** every Deploy + Restart also seeds the 35 projects on boot (no Fix workflow needed for projects only).
 
 ### Forgot password (OTP email)
 

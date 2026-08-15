@@ -12,6 +12,10 @@ yarn-error.log*
 # Uploads directory (will be created on server)
 uploads/
 
+# Actions drops this flag on the server; keep folder, ignore local flags
+data/pending-fix-content
+data/setup-secret.txt
+
 # IDE
 .vscode/
 .idea/

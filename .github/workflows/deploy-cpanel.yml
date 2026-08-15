@@ -8,6 +8,7 @@
 #   FTP_PROTOCOL (ftp|ftps|ftps-legacy), FTP_PORT
 #
 # After backend deploy: cPanel → Node.js App → Restart
+# Restart also auto-seeds the 35 sheet projects (no API / SETUP_SECRET).
 # (NPM Install only when package.json dependencies change)
 
 name: Deploy to cPanel
