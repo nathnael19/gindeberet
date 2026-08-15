@@ -1,9 +1,12 @@
 /**
- * Seed only — no prisma generate / db push (those OOM on shared cPanel).
- * Import prisma/init-from-empty.sql in phpMyAdmin first.
+ * DO NOT run seed via cPanel "Run JS script".
+ * Use GitHub Actions → "Fix cPanel content" after Node RESTART.
  */
-try {
-  require('dotenv').config({ path: require('path').join(__dirname, '.env') });
-} catch (_) {}
+console.error(`
+STOPPED: cpanel-seed.js crashes Prisma on this host (timer has gone away).
 
-require('./src/config/seed.js');
+Use instead:
+  1) Node App → NPM Install → RESTART
+  2) Actions → Fix cPanel content → Run workflow
+`);
+process.exit(1);

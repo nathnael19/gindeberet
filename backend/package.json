@@ -10,8 +10,9 @@
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:studio": "prisma studio",
-    "seed": "node src/config/seed.js",
+    "seed": "node -e \"console.error('Do not seed on cPanel via npm. Use Actions Fix cPanel content.'); process.exit(1)\"",
     "cpanel:setup": "node cpanel-setup.js",
+    "cpanel:seed": "node cpanel-seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

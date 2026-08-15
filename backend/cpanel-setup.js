@@ -1,48 +1,31 @@
 /**
- * cPanel one-time setup WITHOUT prisma generate / db push (both OOM on shared hosts).
+ * DO NOT use cPanel "Run JS script" / npm run cpanel:setup for seeding.
+ * A second Prisma engine process panics on this host: "timer has gone away".
  *
- * Before this script:
- *   1. Import prisma/init-from-empty.sql in phpMyAdmin (creates tables)
- *   2. Ensure DATABASE_URL is in .env or Node App env vars
+ * Correct path:
+ * 1) Node App → Run NPM Install → RESTART
+ * 2) GitHub Actions → "Fix cPanel content" → Run workflow
+ *    (POST /api/setup/fix-content with SETUP_SECRET)
  *
- * Prefer running: cpanel-seed.js
- * Run JS script: cpanel-setup.js  (seed only; same as seed after SQL import)
+ * Or phpMyAdmin import: prisma/fix-awards-projects.sql
  */
-const { execSync } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+console.error(`
+============================================================
+STOPPED: cpanel:setup / seed must NOT run on this cPanel host.
+============================================================
 
-process.chdir(path.join(__dirname));
+Prisma "Run JS script" crashes here (PANIC: timer has gone away).
 
-try {
-  try {
-    require('dotenv').config({ path: path.join(__dirname, '.env') });
-  } catch (_) {
-    /* optional */
-  }
+Do this instead:
+  1. Setup Node.js App → Run NPM Install → RESTART
+  2. GitHub → Actions → "Fix cPanel content" → Run workflow
+     (requires SETUP_SECRET on cPanel env + GitHub secrets)
 
-  if (!process.env.DATABASE_URL) {
-    console.error('ERROR: DATABASE_URL missing');
-    process.exit(1);
-  }
+Admin login after fix-content:
+  email: gindeberetconstruction278@gmail.com
+  (password set by ADMIN_PASSWORD / defaults in deploy)
 
-  const clientPath = path.join(__dirname, 'src/generated/prisma');
-  if (!fs.existsSync(clientPath)) {
-    console.error('ERROR: src/generated/prisma missing. Upload it from GitHub.');
-    process.exit(1);
-  }
-  console.log('Prisma client found at src/generated/prisma');
-  console.log(
-    'Skipping prisma db push (OOM on shared cPanel). Tables must come from phpMyAdmin import of prisma/init-from-empty.sql'
-  );
-
-  console.log('\n>>> seed');
-  execSync('node src/config/seed.js', { stdio: 'inherit', env: process.env });
-  console.log('\nOK: setup finished. RESTART the Node app, then open /health');
-} catch (err) {
-  console.error('\nSETUP FAILED:', err.message);
-  console.error(
-    'If you see "table does not exist", import prisma/init-from-empty.sql in phpMyAdmin first, then re-run cpanel-seed.js'
-  );
-  process.exit(1);
-}
+Forgot-password OTP needs SMTP_* env vars, then RESTART.
+============================================================
+`);
+process.exit(1);
