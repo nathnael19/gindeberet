@@ -280,7 +280,7 @@ export const projectsApi = {
       }
       if (String(err?.message || '').toLowerCase().includes('failed to fetch')) {
         throw new Error(
-          'Cannot reach API (Failed to fetch). Restart the Node.js app in cPanel, wait 30 seconds, then try Import again.'
+          'Cannot reach API (Failed to fetch). Usually Imunify360 bot-protection on api.gindeberetconstruction.com — ask host to whitelist that subdomain / disable JS challenge for the API, then Restart Node and retry.'
         );
       }
       throw err;
