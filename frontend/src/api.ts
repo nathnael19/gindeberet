@@ -288,6 +288,21 @@ export const publicApi = {
   },
 };
 
+export const contactApi = {
+  send: async (payload: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    projectType?: string;
+    message: string;
+  }) => {
+    return publicApiCall<{ success: boolean; message?: string }>('/contact', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+};
+
 // Site settings API (public contact info shown on the landing page)
 export const settingsApi = {
   getSite: async () => {

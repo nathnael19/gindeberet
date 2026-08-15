@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import PublicShell from './PublicShell';
-import { settingsApi } from './api';
+import { settingsApi, contactApi } from './api';
 import {
   OFFICE,
   STADIUM_DIRECTIONS_URL,
@@ -44,6 +44,13 @@ export default function ContactPage({ isDarkTheme, toggleTheme }: ContactPagePro
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [geoStatus, setGeoStatus] = useState('');
   const [geoError, setGeoError] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [formSuccess, setFormSuccess] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const PROJECT_OPTIONS = [
@@ -201,25 +208,73 @@ export default function ContactPage({ isDarkTheme, toggleTheme }: ContactPagePro
             <div className="cp-form-card reveal-up" style={{ transitionDelay: '0.1s' }}>
               <h3>{t('contact.formTitle')}</h3>
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
-                  alert(t('contact.thanks'));
+                  setFormError('');
+                  setFormSuccess('');
+                  if (!projectType) {
+                    setFormError(t('contact.selectOption'));
+                    return;
+                  }
+                  setIsSubmitting(true);
+                  try {
+                    await contactApi.send({
+                      firstName: firstName.trim(),
+                      lastName: lastName.trim(),
+                      email: email.trim(),
+                      projectType,
+                      message: message.trim(),
+                    });
+                    setFormSuccess(t('contact.thanks'));
+                    setFirstName('');
+                    setLastName('');
+                    setEmail('');
+                    setProjectType('');
+                    setMessage('');
+                  } catch (err) {
+                    setFormError(
+                      err instanceof Error ? err.message : 'Could not send your message'
+                    );
+                  } finally {
+                    setIsSubmitting(false);
+                  }
                 }}
               >
                 <div className="cp-form-row">
                   <div className="form-group">
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('contact.firstName')}</label>
-                    <input type="text" className="form-control" required style={{ width: '100%' }} />
+                    <input
+                      type="text"
+                      className="form-control"
+                      required
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      style={{ width: '100%' }}
+                    />
                   </div>
                   <div className="form-group">
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('contact.lastName')}</label>
-                    <input type="text" className="form-control" required style={{ width: '100%' }} />
+                    <input
+                      type="text"
+                      className="form-control"
+                      required
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      style={{ width: '100%' }}
+                    />
                   </div>
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '1.25rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>{t('contact.email')}</label>
-                  <input type="email" className="form-control" required style={{ width: '100%' }} />
+                  <input
+                    type="email"
+                    className="form-control"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    style={{ width: '100%' }}
+                  />
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '1.25rem', position: 'relative' }}>
@@ -254,13 +309,27 @@ export default function ContactPage({ isDarkTheme, toggleTheme }: ContactPagePro
                   <textarea
                     className="form-control"
                     required
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     placeholder={t('contact.messagePlaceholder')}
                     style={{ width: '100%', minHeight: '130px', resize: 'vertical' }}
                   />
                 </div>
 
-                <button type="submit" className="btn btn-primary" style={{ color: '#000', fontWeight: 700, width: '100%' }}>
-                  {t('common.sendMessage')}
+                {formError && (
+                  <p style={{ color: '#b91c1c', marginBottom: '1rem', fontWeight: 600 }}>{formError}</p>
+                )}
+                {formSuccess && (
+                  <p style={{ color: '#15803d', marginBottom: '1rem', fontWeight: 600 }}>{formSuccess}</p>
+                )}
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={isSubmitting}
+                  style={{ color: '#000', fontWeight: 700, width: '100%' }}
+                >
+                  {isSubmitting ? '…' : t('common.sendMessage')}
                 </button>
               </form>
             </div>
