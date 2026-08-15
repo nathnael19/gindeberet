@@ -78,9 +78,10 @@ export default function AdminCareers({ isDarkTheme, toggleTheme }: AdminCareersP
     try {
       await loadVacancies();
       await loadApplications();
-    } catch (e) {
+      setMessage('');
+    } catch (e: any) {
       console.error(e);
-      setMessage('Failed to load careers data');
+      setMessage(e?.message || 'Failed to load careers data');
     } finally {
       setLoading(false);
     }

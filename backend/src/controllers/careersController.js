@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { ensureCareersTables } = require('../services/ensureCareersTables');
 
 /** End of calendar day for a deadline (local server time). */
 function endOfDeadlineDay(value) {
@@ -27,14 +28,19 @@ function isDeadlinePast(deadline) {
 }
 
 async function closeExpiredVacancies() {
-  const now = new Date();
-  await prisma.jobVacancy.updateMany({
-    where: {
-      status: 'OPEN',
-      deadline: { not: null, lt: now },
-    },
-    data: { status: 'CLOSED' },
-  });
+  try {
+    const now = new Date();
+    // `lt` alone excludes NULL deadlines in SQL
+    await prisma.jobVacancy.updateMany({
+      where: {
+        status: 'OPEN',
+        deadline: { lt: now },
+      },
+      data: { status: 'CLOSED' },
+    });
+  } catch (err) {
+    console.warn('closeExpiredVacancies skipped:', err.message);
+  }
 }
 
 function validateDeadlineOrError(deadline, { requiredForOpen = false } = {}) {
@@ -71,36 +77,47 @@ const openWhere = () => ({
   OR: [{ deadline: null }, { deadline: { gte: new Date() } }],
 });
 
+async function withCareersDb(handler) {
+  await ensureCareersTables();
+  return handler();
+}
+
 // Public: list open vacancies (auto-hides after deadline)
 const getOpenVacancies = async (req, res) => {
   try {
-    await closeExpiredVacancies();
-    const vacancies = await prisma.jobVacancy.findMany({
-      where: openWhere(),
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        title: true,
-        department: true,
-        location: true,
-        employmentType: true,
-        description: true,
-        requirements: true,
-        deadline: true,
-        status: true,
-        createdAt: true,
-      },
+    await withCareersDb(async () => {
+      await closeExpiredVacancies();
+      const vacancies = await prisma.jobVacancy.findMany({
+        where: openWhere(),
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          title: true,
+          department: true,
+          location: true,
+          employmentType: true,
+          description: true,
+          requirements: true,
+          deadline: true,
+          status: true,
+          createdAt: true,
+        },
+      });
+      res.json({ success: true, data: vacancies.map(toPublicVacancy) });
     });
-    res.json({ success: true, data: vacancies.map(toPublicVacancy) });
   } catch (error) {
     console.error('Get open vacancies error:', error);
-    res.status(500).json({ success: false, message: 'Failed to load vacancies' });
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to load vacancies',
+    });
   }
 };
 
 // Public: single open vacancy
 const getOpenVacancy = async (req, res) => {
   try {
+    await ensureCareersTables();
     await closeExpiredVacancies();
     const id = parseInt(req.params.id, 10);
     const vacancy = await prisma.jobVacancy.findFirst({
@@ -112,13 +129,14 @@ const getOpenVacancy = async (req, res) => {
     res.json({ success: true, data: toPublicVacancy(vacancy) });
   } catch (error) {
     console.error('Get vacancy error:', error);
-    res.status(500).json({ success: false, message: 'Failed to load vacancy' });
+    res.status(500).json({ success: false, message: error.message || 'Failed to load vacancy' });
   }
 };
 
 // Public: apply
 const applyToVacancy = async (req, res) => {
   try {
+    await ensureCareersTables();
     const vacancyId = parseInt(req.params.id, 10);
     const { fullName, email, phone, coverLetter, cvUrl, otherDocsUrl } = req.body;
 
@@ -181,13 +199,14 @@ const applyToVacancy = async (req, res) => {
         message: 'You have already submitted an application for this vacancy with this email',
       });
     }
-    res.status(500).json({ success: false, message: 'Failed to submit application' });
+    res.status(500).json({ success: false, message: error.message || 'Failed to submit application' });
   }
 };
 
 // Admin: list all vacancies
 const adminListVacancies = async (req, res) => {
   try {
+    await ensureCareersTables();
     await closeExpiredVacancies();
     const vacancies = await prisma.jobVacancy.findMany({
       orderBy: { createdAt: 'desc' },
@@ -202,12 +221,16 @@ const adminListVacancies = async (req, res) => {
     });
   } catch (error) {
     console.error('Admin list vacancies error:', error);
-    res.status(500).json({ success: false, message: 'Failed to load vacancies' });
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to load vacancies',
+    });
   }
 };
 
 const adminCreateVacancy = async (req, res) => {
   try {
+    await ensureCareersTables();
     const { title, department, location, employmentType, description, requirements, deadline, status } =
       req.body;
     if (!title || !description) {
@@ -236,12 +259,13 @@ const adminCreateVacancy = async (req, res) => {
     res.status(201).json({ success: true, data: toPublicVacancy(vacancy) });
   } catch (error) {
     console.error('Create vacancy error:', error);
-    res.status(500).json({ success: false, message: 'Failed to create vacancy' });
+    res.status(500).json({ success: false, message: error.message || 'Failed to create vacancy' });
   }
 };
 
 const adminUpdateVacancy = async (req, res) => {
   try {
+    await ensureCareersTables();
     const id = parseInt(req.params.id, 10);
     const { title, department, location, employmentType, description, requirements, deadline, status } =
       req.body;
@@ -302,24 +326,26 @@ const adminUpdateVacancy = async (req, res) => {
     res.json({ success: true, data: toPublicVacancy(vacancy) });
   } catch (error) {
     console.error('Update vacancy error:', error);
-    res.status(500).json({ success: false, message: 'Failed to update vacancy' });
+    res.status(500).json({ success: false, message: error.message || 'Failed to update vacancy' });
   }
 };
 
 const adminDeleteVacancy = async (req, res) => {
   try {
+    await ensureCareersTables();
     const id = parseInt(req.params.id, 10);
     await prisma.jobVacancy.delete({ where: { id } });
     res.json({ success: true, message: 'Vacancy deleted' });
   } catch (error) {
     console.error('Delete vacancy error:', error);
-    res.status(500).json({ success: false, message: 'Failed to delete vacancy' });
+    res.status(500).json({ success: false, message: error.message || 'Failed to delete vacancy' });
   }
 };
 
 // Admin: applications
 const adminListApplications = async (req, res) => {
   try {
+    await ensureCareersTables();
     const vacancyId = req.query.vacancyId ? parseInt(req.query.vacancyId, 10) : undefined;
     const status = req.query.status ? String(req.query.status).toUpperCase() : undefined;
 
@@ -345,12 +371,16 @@ const adminListApplications = async (req, res) => {
     });
   } catch (error) {
     console.error('List applications error:', error);
-    res.status(500).json({ success: false, message: 'Failed to load applications' });
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to load applications',
+    });
   }
 };
 
 const adminUpdateApplication = async (req, res) => {
   try {
+    await ensureCareersTables();
     const id = parseInt(req.params.id, 10);
     const { status, adminNotes } = req.body;
 
@@ -376,7 +406,10 @@ const adminUpdateApplication = async (req, res) => {
     });
   } catch (error) {
     console.error('Update application error:', error);
-    res.status(500).json({ success: false, message: 'Failed to update application' });
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to update application',
+    });
   }
 };
 

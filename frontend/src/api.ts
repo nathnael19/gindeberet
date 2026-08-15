@@ -32,10 +32,20 @@ async function apiCall<T>(
     headers,
   });
 
-  const data = await response.json();
+  const text = await response.text();
+  let data: any = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    throw new Error(
+      response.ok
+        ? 'Server returned invalid JSON'
+        : `API error ${response.status}: server did not return JSON`
+    );
+  }
 
   if (!response.ok) {
-    throw new Error(data.message || 'API request failed');
+    throw new Error(data?.message || 'API request failed');
   }
 
   return data as T;
