@@ -32,7 +32,7 @@ app.use(
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-setup-secret'],
   })
 );
 app.use(bodyParser.json());
@@ -76,6 +76,7 @@ mount('settings', '/api/settings', () => require('./routes/settings'));
 mount('landing', '/api/landing', () => require('./routes/landing'));
 mount('careers', '/api/careers', () => require('./routes/careers'));
 mount('stamp', '/api/stamp', () => require('./routes/stamp'));
+mount('setup', '/api/setup', () => require('./routes/setup'));
 
 app.use((req, res) => {
   res.status(404).json({

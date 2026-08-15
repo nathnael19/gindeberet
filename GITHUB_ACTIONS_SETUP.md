@@ -24,6 +24,13 @@ Repo → **Settings** → **Secrets and variables** → **Actions** → **Reposi
 | `FTP_FRONTEND_DIR` | `/public_html/` |
 | `VITE_API_URL` | `https://api.gindeberetconstruction.com/api` |
 | `VITE_SITE_URL` | `https://gindeberetconstruction.com` |
+| `SETUP_SECRET` | long random string (same value in cPanel Node App env) |
+
+## Fix awards/projects without phpMyAdmin
+
+1. Add `SETUP_SECRET` to **cPanel Node App env** + **GitHub Repository secrets** (same value)
+2. **RESTART** Node app (loads `/api/setup`)
+3. GitHub → **Actions** → **Fix cPanel content** → **Run workflow**
 
 Optional (defaults are already cPanel-friendly: `ftp` on port `21`):
 

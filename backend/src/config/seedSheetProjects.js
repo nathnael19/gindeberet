@@ -323,19 +323,19 @@ const NEW_PROJECTS = [
   },
 ];
 
-async function main() {
+async function seedSheetProjects(client = prisma) {
   let created = 0;
   let skipped = 0;
 
   for (const row of NEW_PROJECTS) {
-    const existing = await prisma.project.findUnique({ where: { id: row.id } });
+    const existing = await client.project.findUnique({ where: { id: row.id } });
     if (existing) {
       skipped += 1;
       console.log('skip', row.id, row.name);
       continue;
     }
 
-    await prisma.project.create({
+    await client.project.create({
       data: {
         id: row.id,
         name: row.name,
@@ -360,16 +360,21 @@ async function main() {
     console.log('created', row.id, '(sheet', row.sheetNo + ')', row.name);
   }
 
-  const total = await prisma.project.count();
-  const published = await prisma.project.count({ where: { isPublic: true } });
+  const total = await client.project.count();
+  const published = await client.project.count({ where: { isPublic: true } });
   console.log(`Done. created=${created} skipped=${skipped} total=${total} published=${published}`);
+  return { created, skipped, total, published };
 }
 
-main()
-  .catch((err) => {
-    console.error(err);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+module.exports = { NEW_PROJECTS, seedSheetProjects, IMG, gcYear, statusFromProgress };
+
+if (require.main === module) {
+  seedSheetProjects()
+    .catch((err) => {
+      console.error(err);
+      process.exitCode = 1;
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}

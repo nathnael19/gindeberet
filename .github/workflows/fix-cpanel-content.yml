@@ -1,0 +1,40 @@
+# Apply awards + projects via the live API (no phpMyAdmin, no cPanel Run JS).
+# Requires SETUP_SECRET on the server (.env / Node App env) AND as a GitHub Actions secret.
+#
+# Before first run: cPanel Node app RESTART (so /api/setup is mounted).
+
+name: Fix cPanel content
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix-content:
+    name: POST /api/setup/fix-content
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify SETUP_SECRET
+        env:
+          SETUP_SECRET: ${{ secrets.SETUP_SECRET }}
+        run: |
+          if [ -z "$SETUP_SECRET" ]; then
+            echo "::error::Add repository secret SETUP_SECRET (same value as cPanel Node App env SETUP_SECRET)."
+            exit 1
+          fi
+          echo "SETUP_SECRET is set (${#SETUP_SECRET} chars)"
+
+      - name: Apply awards and projects
+        env:
+          SETUP_SECRET: ${{ secrets.SETUP_SECRET }}
+        run: |
+          set -e
+          url="https://api.gindeberetconstruction.com/api/setup/fix-content"
+          echo "Calling $url"
+          code=$(curl -sS -o /tmp/fix-content.json -w "%{http_code}" \
+            -X POST "$url" \
+            -H "Content-Type: application/json" \
+            -H "x-setup-secret: ${SETUP_SECRET}")
+          echo "HTTP $code"
+          cat /tmp/fix-content.json
+          echo
+          test "$code" = "200"
