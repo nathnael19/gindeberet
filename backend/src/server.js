@@ -152,7 +152,7 @@ async function runBootMaintenance() {
     const { seedSheetProjects } = require('./config/seedSheetProjects');
     const sheet = await seedSheetProjects(prisma);
     console.log(
-      `Boot sheet seed: upserted=${sheet.upserted || 0} total=${sheet.sheetCount || 35} errors=${(sheet.errors && sheet.errors.length) || 0}`
+      `Boot sheet seed: created=${sheet.created || 0} updated=${sheet.updated || 0} total=${sheet.sheetCount || 35} errors=${(sheet.errors && sheet.errors.length) || 0}`
     );
   } catch (err) {
     const msg = `bootMaintenance: ${err.message}`;
