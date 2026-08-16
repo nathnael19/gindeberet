@@ -123,8 +123,8 @@ export default function AboutPage({ isDarkTheme, toggleTheme, completedProjectsC
           </div>
           <div className="about-story-media reveal-up" style={{ transitionDelay: '0.15s' }}>
             <img
-              src="/images/about.jpg"
-              alt="Gindeberet construction team on site"
+              src="/images/about-general.png"
+              alt="Gindeberet survey and construction team on site"
               onError={(e) => {
                 (e.target as HTMLImageElement).src =
                   'https://images.unsplash.com/photo-1541888087425-ce81dc8ca664?auto=format&fit=crop&w=1000&q=80';
