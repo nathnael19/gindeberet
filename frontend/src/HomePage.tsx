@@ -144,7 +144,7 @@ export default function HomePage({
     setHeroPhase(-1);
     setTextLeaving(false);
     clearLeaveTimer();
-    const phaseDelays = [80, 420, 780, 1140, 1480, 1820];
+    const phaseDelays = [80, 380, 720, 1100, 1450];
     const phaseTimers = phaseDelays.map((delay, i) =>
       window.setTimeout(() => setHeroPhase(i), delay)
     );
@@ -304,10 +304,10 @@ export default function HomePage({
               className={`hero-title ${textLeaving ? 'is-leaving' : ''}`}
               aria-live="polite"
             >
-              <span key={`${lang}-${slideIndex}-t1`} className="hero-title-swap">
+              <span key={`${lang}-${slideIndex}-t1`} className="hero-title-swap hero-title-one">
                 {slide.title1}
               </span>
-              <span key={`${lang}-${slideIndex}-t2`} className="hero-title-swap hero-title-swap-delay">
+              <span key={`${lang}-${slideIndex}-t2`} className="hero-title-swap hero-title-two">
                 {slide.title2}
               </span>
             </h1>
@@ -316,13 +316,10 @@ export default function HomePage({
                 {slide.line}
               </span>
             </p>
-            <p className={`hero-subtitle hero-seq ${heroPhase >= 4 ? 'is-in' : ''}`}>
-              {t('hero.subtitle')}
-            </p>
             <div className="hero-buttons">
               <a
                 href="/services"
-                className={`btn btn-primary hero-seq hero-seq-btn ${heroPhase >= 5 ? 'is-in' : ''}`}
+                className={`btn btn-primary hero-seq hero-seq-btn ${heroPhase >= 4 ? 'is-in' : ''}`}
                 style={{ transitionDelay: '0s' }}
                 onClick={(e) => {
                   e.preventDefault();
@@ -333,7 +330,7 @@ export default function HomePage({
               </a>
               <a
                 href="/contact"
-                className={`btn btn-hero-outline hero-seq hero-seq-btn ${heroPhase >= 5 ? 'is-in' : ''}`}
+                className={`btn btn-hero-outline hero-seq hero-seq-btn ${heroPhase >= 4 ? 'is-in' : ''}`}
                 style={{ transitionDelay: '0.12s' }}
                 onClick={(e) => {
                   e.preventDefault();
