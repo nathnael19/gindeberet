@@ -378,7 +378,11 @@ export default function HomePage({
       <section className="why-section" id="about">
         <div className="container why-grid">
           <div className="why-media reveal-up">
-            <img src="/images/about.jpg" alt="Gindeberet construction site" className="img-kenburns" />
+            <img
+              src="/images/solutions-handshake.png"
+              alt="Gindeberet partnership and project agreement"
+              className="img-kenburns"
+            />
           </div>
           <div className="why-content reveal-up" style={{ transitionDelay: '0.12s' }}>
             <span className="section-kicker">{t('homeWhy.kicker')}</span>
