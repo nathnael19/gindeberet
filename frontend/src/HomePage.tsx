@@ -377,14 +377,14 @@ export default function HomePage({
 
       <section className="why-section" id="about">
         <div className="container why-grid">
-          <div className="why-media reveal-up">
+          <div className="why-media reveal-up why-media--in">
             <img
               src="/images/solutions-handshake.png"
               alt="Gindeberet partnership and project agreement"
-              className="img-kenburns"
+              className="why-media-img"
             />
           </div>
-          <div className="why-content reveal-up" style={{ transitionDelay: '0.12s' }}>
+          <div className="why-content reveal-up why-content--in" style={{ transitionDelay: '0.1s' }}>
             <span className="section-kicker">{t('homeWhy.kicker')}</span>
             <h2 className="section-title">{t('homeWhy.title')}</h2>
             <p className="why-body">{t('homeWhy.body')}</p>
