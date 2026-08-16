@@ -42,23 +42,59 @@
   to { opacity: 1; }
 }
 
-/* Hero: start slightly zoomed (full frame readable), then slowly ease out */
-@keyframes heroKenBurnsOut {
+/* Cinematic pan: right → left (video-like drift) */
+@keyframes heroPanRtl {
   0% {
-    transform: scale(1.12) translate3d(0, 0, 0);
+    opacity: 0;
+    transform: scale(1.12) translate3d(6%, 0, 0);
+  }
+  10% {
+    opacity: 1;
+    transform: scale(1.12) translate3d(4.5%, 0, 0);
   }
   100% {
-    transform: scale(1) translate3d(0, 0, 0);
+    opacity: 1;
+    transform: scale(1.06) translate3d(-5%, 0, 0);
   }
 }
 
-/* Kept for legacy class names — same gentle motion */
-@keyframes heroAerialOrbit {
+/* Cinematic pan: left → right */
+@keyframes heroPanLtr {
   0% {
-    transform: scale(1.12) translate3d(0, 0, 0);
+    opacity: 0;
+    transform: scale(1.12) translate3d(-6%, 0, 0);
+  }
+  10% {
+    opacity: 1;
+    transform: scale(1.12) translate3d(-4.5%, 0, 0);
   }
   100% {
-    transform: scale(1) translate3d(0, 0, 0);
+    opacity: 1;
+    transform: scale(1.06) translate3d(5%, 0, 0);
+  }
+}
+
+/* Legacy aliases */
+@keyframes heroKenBurnsOut {
+  0% {
+    opacity: 0;
+    transform: scale(1.12) translate3d(5%, 0, 0);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.06) translate3d(-4%, 0, 0);
+  }
+}
+
+@keyframes heroAerialOrbit {
+  0% {
+    transform: scale(1.12) translate3d(4%, 0, 0);
+  }
+  100% {
+    transform: scale(1.06) translate3d(-4%, 0, 0);
   }
 }
 
@@ -517,7 +553,7 @@ html[lang='am'] .logo span {
 
 .hero-bg-slide {
   position: absolute;
-  inset: -4%;
+  inset: -10%;
   background-position: center center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -525,24 +561,31 @@ html[lang='am'] .logo span {
   pointer-events: none;
   transform-origin: center center;
   will-change: opacity, transform;
-  filter: saturate(1.05) contrast(1.02);
+  /* Brighter, clearer photos */
+  filter: brightness(1.14) saturate(1.1) contrast(1.04);
 }
 
 .hero-bg-slide.is-active {
   z-index: 1;
   pointer-events: auto;
-  animation:
-    heroAerialFade 0.9s ease both,
-    heroKenBurnsOut 7.5s ease-out forwards;
+}
+
+.hero-bg-slide.is-active.pan-rtl {
+  animation: heroPanRtl 8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.hero-bg-slide.is-active.pan-ltr {
+  animation: heroPanLtr 8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 .hero-bg-zoom {
   position: absolute;
-  inset: -4%;
+  inset: -10%;
   background: url('/images/hero.jpg') center/cover no-repeat;
-  animation: heroKenBurnsOut 7.5s ease-out forwards;
+  animation: heroPanRtl 8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
   will-change: transform;
   transform-origin: center center;
+  filter: brightness(1.14) saturate(1.1) contrast(1.04);
 }
 
 .hero-overlay {
@@ -551,7 +594,13 @@ html[lang='am'] .logo span {
   right: 0;
   bottom: 0;
   left: 0;
-  background: linear-gradient(90deg, rgba(24,24,27,0.95) 0%, rgba(24,24,27,0.7) 50%, rgba(24,24,27,0.4) 100%);
+  /* Lighter veil so hero photos stay bright and readable */
+  background: linear-gradient(
+    90deg,
+    rgba(18, 18, 20, 0.62) 0%,
+    rgba(18, 18, 20, 0.38) 42%,
+    rgba(18, 18, 20, 0.18) 100%
+  );
   z-index: 1;
 }
 
@@ -2268,6 +2317,13 @@ html[lang='am'] .logo span {
   .hero-bg-slide.is-active {
     opacity: 1;
     transform: none;
+  }
+
+  .hero-bg-slide.is-active.pan-rtl,
+  .hero-bg-slide.is-active.pan-ltr {
+    animation: none !important;
+    opacity: 1;
+    transform: scale(1.06);
   }
 
   .why-media.reveal-up.active .img-kenburns,

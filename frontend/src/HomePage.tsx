@@ -156,7 +156,7 @@ export default function HomePage({
         setTextLeaving(false);
         leaveTimerRef.current = null;
       }, 380);
-    }, 7500);
+    }, 8000);
     return () => {
       phaseTimers.forEach((id) => window.clearTimeout(id));
       window.clearInterval(slideTimer);
@@ -287,7 +287,9 @@ export default function HomePage({
           {heroSlides.map((s, i) => (
             <div
               key={s.id ?? `${s.image}-${i}`}
-              className={`hero-bg-slide ${i === slideIndex ? 'is-active' : ''}`}
+              className={`hero-bg-slide ${i === slideIndex ? 'is-active' : ''} ${
+                i % 2 === 0 ? 'pan-rtl' : 'pan-ltr'
+              }`}
               style={{ backgroundImage: `url(${s.image})` }}
             />
           ))}
