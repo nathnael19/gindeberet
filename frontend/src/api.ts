@@ -696,11 +696,54 @@ export const careersApi = {
       body: JSON.stringify(payload),
     });
   },
+
+  /** Open CV / other docs as blob (auth + correct Content-Type for PDF). */
+  openApplicationFile: async (id: number | string, which: 'cv' | 'other' = 'cv') => {
+    const token = getToken();
+    const response = await fetch(
+      `${API_BASE_URL}/careers/admin/applications/${id}/file/${which}`,
+      {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      }
+    );
+    if (!response.ok) {
+      let message = `Could not open file (${response.status})`;
+      try {
+        const data = await response.json();
+        if (data?.message) message = data.message;
+      } catch {
+        /* ignore */
+      }
+      throw new Error(message);
+    }
+    const blob = await response.blob();
+    const type = response.headers.get('Content-Type') || blob.type || 'application/octet-stream';
+    const typed = blob.type ? blob : new Blob([blob], { type });
+    const objectUrl = URL.createObjectURL(typed);
+    const win = window.open(objectUrl, '_blank', 'noopener,noreferrer');
+    if (!win) {
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.download = which === 'cv' ? 'cv' : 'document';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+    return true;
+  },
 };
 
 // Landing Page dynamic sections API
 export const landingApi = {
   getSection: async (section: string) => {
+    // Prefer authenticated call in admin so empty/errors are clearer; fall back to public.
+    const token = getToken();
+    if (token) {
+      return apiCall<{ success: boolean; data: any[] }>(`/landing/${section}`);
+    }
     return publicApiCall<{ success: boolean; data: any[] }>(`/landing/${section}`);
   },
   

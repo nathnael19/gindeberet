@@ -1,5 +1,42 @@
+const fs = require('fs');
+const path = require('path');
 const prisma = require('../config/database');
 const { ensureCareersTables } = require('../services/ensureCareersTables');
+
+const uploadDir = path.join(__dirname, '../../uploads');
+
+function resolveUploadPath(storedUrl) {
+  if (!storedUrl || typeof storedUrl !== 'string') return null;
+  let pathname = storedUrl.trim();
+  try {
+    if (/^https?:\/\//i.test(pathname)) {
+      pathname = new URL(pathname).pathname;
+    }
+  } catch {
+    return null;
+  }
+  const marker = '/uploads/';
+  const idx = pathname.indexOf(marker);
+  const relative = idx >= 0 ? pathname.slice(idx + marker.length) : pathname.replace(/^\/+/, '');
+  const filename = path.basename(relative);
+  if (!filename || filename === '.' || filename === '..') return null;
+  const filePath = path.resolve(uploadDir, filename);
+  if (!filePath.startsWith(path.resolve(uploadDir) + path.sep)) return null;
+  return { filePath, filename };
+}
+
+function contentTypeFor(filename) {
+  const ext = path.extname(filename).toLowerCase();
+  const map = {
+    '.pdf': 'application/pdf',
+    '.doc': 'application/msword',
+    '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.png': 'image/png',
+  };
+  return map[ext] || 'application/octet-stream';
+}
 
 /** End of calendar day for a deadline (local server time). */
 function endOfDeadlineDay(value) {
@@ -413,6 +450,57 @@ const adminUpdateApplication = async (req, res) => {
   }
 };
 
+/** Stream CV / other docs with auth so admin can open PDF even when /uploads is blocked. */
+const adminDownloadApplicationFile = async (req, res) => {
+  try {
+    await ensureCareersTables();
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid application id' });
+    }
+
+    const which = String(req.params.which || 'cv').toLowerCase();
+    const application = await prisma.jobApplication.findUnique({ where: { id } });
+    if (!application) {
+      return res.status(404).json({ success: false, message: 'Application not found' });
+    }
+
+    const stored =
+      which === 'other' || which === 'docs' || which === 'otherdocs'
+        ? application.otherDocsUrl
+        : application.cvUrl;
+
+    if (!stored) {
+      return res.status(404).json({ success: false, message: 'No file on this application' });
+    }
+
+    const resolved = resolveUploadPath(stored);
+    if (!resolved || !fs.existsSync(resolved.filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'File missing on server (upload may have been deleted)',
+      });
+    }
+
+    const type = contentTypeFor(resolved.filename);
+    res.setHeader('Content-Type', type);
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="${resolved.filename.replace(/"/g, '')}"`
+    );
+    res.setHeader('Cache-Control', 'private, no-store');
+    fs.createReadStream(resolved.filePath).pipe(res);
+  } catch (error) {
+    console.error('Download application file error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to open file',
+      });
+    }
+  }
+};
+
 module.exports = {
   getOpenVacancies,
   getOpenVacancy,
@@ -423,4 +511,5 @@ module.exports = {
   adminDeleteVacancy,
   adminListApplications,
   adminUpdateApplication,
+  adminDownloadApplicationFile,
 };

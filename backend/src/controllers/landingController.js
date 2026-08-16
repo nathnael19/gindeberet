@@ -123,6 +123,10 @@ const getAll = async (req, res) => {
   const model = getModel(section);
   if (!model) return res.status(400).json({ success: false, message: 'Invalid section' });
   try {
+    if (section === 'hero' || section === 'services') {
+      const { ensureLandingDefaults } = require('../services/ensureLandingDefaults');
+      await ensureLandingDefaults();
+    }
     const orderBy =
       section === 'news'
         ? [{ sortOrder: 'asc' }, { id: 'desc' }]

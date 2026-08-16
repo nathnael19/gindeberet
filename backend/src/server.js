@@ -147,13 +147,20 @@ async function runBootMaintenance() {
     }
     if (process.env.SEED_SHEET_ON_BOOT === '0') {
       console.log('SEED_SHEET_ON_BOOT=0 — skipping sheet seed');
-      return;
+    } else {
+      const { seedSheetProjects } = require('./config/seedSheetProjects');
+      const sheet = await seedSheetProjects(prisma);
+      console.log(
+        `Boot sheet seed: created=${sheet.created || 0} updated=${sheet.updated || 0} total=${sheet.sheetCount || 35} errors=${(sheet.errors && sheet.errors.length) || 0}`
+      );
     }
-    const { seedSheetProjects } = require('./config/seedSheetProjects');
-    const sheet = await seedSheetProjects(prisma);
-    console.log(
-      `Boot sheet seed: created=${sheet.created || 0} updated=${sheet.updated || 0} total=${sheet.sheetCount || 35} errors=${(sheet.errors && sheet.errors.length) || 0}`
-    );
+    const { ensureLandingDefaults } = require('./services/ensureLandingDefaults');
+    const landing = await ensureLandingDefaults();
+    if (landing.heroCreated || landing.servicesCreated) {
+      console.log(
+        `Boot landing defaults: hero=${landing.heroCreated} services=${landing.servicesCreated}`
+      );
+    }
   } catch (err) {
     const msg = `bootMaintenance: ${err.message}`;
     console.error(msg);

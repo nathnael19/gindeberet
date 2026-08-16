@@ -229,6 +229,9 @@ async function seed() {
     console.log('Sample vacancies created');
 
     // Landing page content (only seed when empty so admin edits are kept)
+    const { ensureLandingDefaults } = require('../services/ensureLandingDefaults');
+    await ensureLandingDefaults();
+
     if ((await prisma.partner.count()) === 0) {
       await prisma.partner.createMany({
         data: [

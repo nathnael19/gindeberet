@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import AdminLayout from './AdminLayout';
 import { careersApi } from './api';
-import { BACKEND_BASE_URL } from './imageUrl';
 import './AdminDashboard.css';
 import './AdminCareers.css';
 
@@ -32,12 +31,6 @@ function tomorrowDateInput() {
   return `${y}-${m}-${day}`;
 }
 
-const fileUrl = (path: string) => {
-  if (!path) return '#';
-  if (path.startsWith('http')) return path;
-  return `${BACKEND_BASE_URL}${path}`;
-};
-
 export default function AdminCareers({ isDarkTheme, toggleTheme }: AdminCareersProps) {
   const [tab, setTab] = useState<Tab>('vacancies');
   const [vacancies, setVacancies] = useState<any[]>([]);
@@ -51,6 +44,20 @@ export default function AdminCareers({ isDarkTheme, toggleTheme }: AdminCareersP
   const [filterStatus, setFilterStatus] = useState('');
   const [selectedApp, setSelectedApp] = useState<any>(null);
   const [appNotes, setAppNotes] = useState('');
+  const [openingFile, setOpeningFile] = useState(false);
+
+  const openApplicationFile = async (which: 'cv' | 'other') => {
+    if (!selectedApp?.id) return;
+    setOpeningFile(true);
+    setMessage('');
+    try {
+      await careersApi.openApplicationFile(selectedApp.id, which);
+    } catch (e: any) {
+      setMessage(e?.message || 'Could not open file');
+    } finally {
+      setOpeningFile(false);
+    }
+  };
 
   const stats = useMemo(() => {
     const open = vacancies.filter((v) => v.status === 'open').length;
@@ -487,24 +494,24 @@ export default function AdminCareers({ isDarkTheme, toggleTheme }: AdminCareersP
                     )}
 
                     <div className="careers-actions" style={{ marginTop: 0 }}>
-                      <a
+                      <button
+                        type="button"
                         className="btn btn-primary"
                         style={{ color: '#000' }}
-                        href={fileUrl(selectedApp.cvUrl)}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        disabled={openingFile || !selectedApp.cvUrl}
+                        onClick={() => openApplicationFile('cv')}
                       >
-                        Open CV
-                      </a>
+                        {openingFile ? 'Opening…' : 'Open CV'}
+                      </button>
                       {selectedApp.otherDocsUrl && (
-                        <a
+                        <button
+                          type="button"
                           className="btn btn-outline"
-                          href={fileUrl(selectedApp.otherDocsUrl)}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          disabled={openingFile}
+                          onClick={() => openApplicationFile('other')}
                         >
                           Other docs
-                        </a>
+                        </button>
                       )}
                     </div>
 

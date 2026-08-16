@@ -15,6 +15,12 @@ router.put('/admin/vacancies/:id', authenticate, requireAdmin, careersController
 router.delete('/admin/vacancies/:id', authenticate, requireAdmin, careersController.adminDeleteVacancy);
 
 router.get('/admin/applications', authenticate, requireAdmin, careersController.adminListApplications);
+router.get(
+  '/admin/applications/:id/file/:which',
+  authenticate,
+  requireAdmin,
+  careersController.adminDownloadApplicationFile
+);
 router.put('/admin/applications/:id', authenticate, requireAdmin, careersController.adminUpdateApplication);
 
 module.exports = router;
