@@ -117,8 +117,8 @@ export default function PublicShell({
               go('/');
             }}
           >
-            <img src="/logo.png" alt="Gindeberet General Construction PLC" style={{ height: '40px', width: 'auto', display: 'block' }} />
-            <span>Gindeberet General Construction PLC</span>
+            <img src="/logo.png" alt="Gindeberet General Construction PLC" />
+            <span className="logo-text">Gindeberet General Construction PLC</span>
           </a>
 
           <div className="nav-links">

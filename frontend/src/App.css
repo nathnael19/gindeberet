@@ -367,20 +367,61 @@
 
 .logo {
   font-family: var(--font-heading);
-  font-size: 0.95rem;
+  font-size: clamp(1.05rem, 1.55vw, 1.32rem);
   font-weight: 800;
   color: var(--text-main);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  max-width: min(280px, 42vw);
+  gap: 0.65rem;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  max-width: min(360px, 52vw);
+  perspective: 720px;
+  transform-style: preserve-3d;
 }
 
-.logo span {
-  color: var(--text-main);
+.logo img {
+  height: 48px;
+  width: auto;
   display: block;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
+}
+
+.logo-text {
+  display: block;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  will-change: transform, text-shadow;
+  animation: logoBrandFloat 4.8s ease-in-out infinite;
+  color: var(--text-main);
+  text-shadow:
+    0 1px 0 color-mix(in srgb, var(--cta) 55%, #fff),
+    0 2px 0 color-mix(in srgb, var(--cta) 35%, transparent),
+    0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+.logo:hover img {
+  transform: translateZ(12px) scale(1.06) rotateY(-8deg);
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+}
+
+.logo:hover .logo-text {
+  animation-duration: 2.8s;
+}
+
+@keyframes logoBrandFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotateX(0deg) rotateY(0deg);
+  }
+  35% {
+    transform: translateY(-2px) rotateX(6deg) rotateY(-4deg);
+  }
+  70% {
+    transform: translateY(1px) rotateX(-3deg) rotateY(5deg);
+  }
 }
 
 .navbar:not(.glass) .logo,
@@ -388,6 +429,26 @@
 .navbar:not(.glass) .mobile-menu-btn,
 .navbar:not(.glass) .theme-toggle {
   color: white; /* Keep white over the hero image */
+}
+
+/* Over hero: bright white + yellow depth so brand stays readable */
+.navbar:not(.glass) .logo-text {
+  color: #ffffff;
+  text-shadow:
+    0 1px 0 #fde047,
+    0 2px 0 #eab308,
+    0 3px 0 #ca8a04,
+    0 4px 0 rgba(161, 98, 7, 0.55),
+    0 10px 22px rgba(0, 0, 0, 0.55),
+    0 0 28px rgba(250, 204, 21, 0.35);
+}
+
+.navbar.glass .logo-text {
+  color: var(--text-main);
+  text-shadow:
+    0 1px 0 color-mix(in srgb, var(--cta) 70%, #fff),
+    0 2px 0 color-mix(in srgb, var(--cta) 40%, transparent),
+    0 8px 18px rgba(0, 0, 0, 0.12);
 }
 
 .nav-links {
@@ -432,9 +493,9 @@ html[lang='am'] .nav-links a.btn-primary {
   font-size: 0.7rem;
 }
 
-html[lang='om'] .logo span,
-html[lang='am'] .logo span {
-  font-size: 0.9rem;
+html[lang='om'] .logo-text,
+html[lang='am'] .logo-text {
+  font-size: 0.98rem;
 }
 
 @media (min-width: 768px) and (max-width: 1100px) {
@@ -448,9 +509,9 @@ html[lang='am'] .logo span {
     font-size: 0.65rem;
   }
 
-  html[lang='om'] .logo span,
-  html[lang='am'] .logo span {
-    font-size: 0.8rem;
+  html[lang='om'] .logo-text,
+  html[lang='am'] .logo-text {
+    font-size: 0.88rem;
   }
 }
 
@@ -2398,8 +2459,13 @@ html[lang='am'] .logo span {
   .hero-bg-slide,
   .anim-line,
   .hero-rotate-item,
-  .hero-title-swap {
+  .hero-title-swap,
+  .logo-text {
     animation: none !important;
+  }
+
+  .logo:hover img {
+    transform: none;
   }
 
   .hero-bg-slide {
