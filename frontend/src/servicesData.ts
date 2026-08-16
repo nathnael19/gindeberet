@@ -40,8 +40,7 @@ export const SERVICES: ServiceDef[] = [
       'Safer alignments and clearer roadside environments',
       'Predictable schedules through staged traffic control',
     ],
-    heroImage:
-      'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1800&q=80',
+    heroImage: '/images/services/road.png',
   },
   {
     slug: 'building-construction',
@@ -69,8 +68,7 @@ export const SERVICES: ServiceDef[] = [
       'Fewer rework cycles through staged inspections',
       'Clean handover packages for owners and operators',
     ],
-    heroImage:
-      'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1800&q=80',
+    heroImage: '/images/services/building.png',
   },
   {
     slug: 'water-works',
@@ -98,8 +96,7 @@ export const SERVICES: ServiceDef[] = [
       'Assets built for inspection and long service life',
       'Sites ready for follow-on packages on schedule',
     ],
-    heroImage:
-      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1800&q=80',
+    heroImage: '/images/services/water.png',
   },
   {
     slug: 'electro-mechanical',
@@ -127,8 +124,7 @@ export const SERVICES: ServiceDef[] = [
       'Reduced clashes through early coordination',
       'Clear documentation for maintenance teams',
     ],
-    heroImage:
-      'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&w=1800&q=80',
+    heroImage: '/images/services/electro.png',
   },
   {
     slug: 'machinery-rental',
@@ -156,8 +152,7 @@ export const SERVICES: ServiceDef[] = [
       'Less downtime waiting for plant',
       'Flexible support alongside our construction services',
     ],
-    heroImage:
-      'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1800&q=80',
+    heroImage: '/images/services/machinery.png',
   },
   {
     slug: 'corridors',
@@ -185,8 +180,7 @@ export const SERVICES: ServiceDef[] = [
       'Safer junctions and clearer access for communities',
       'Programmes that open sections in usable stages',
     ],
-    heroImage:
-      'https://images.unsplash.com/photo-1465447142348-e9952c393450?auto=format&fit=crop&w=1800&q=80',
+    heroImage: '/images/services/corridors.png',
   },
 ];
 
