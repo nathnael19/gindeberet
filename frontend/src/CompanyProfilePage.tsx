@@ -76,7 +76,7 @@ export default function CompanyProfilePage({ isDarkTheme, toggleTheme }: Company
   };
 
   return (
-    <PublicShell isDarkTheme={isDarkTheme} toggleTheme={toggleTheme}>
+    <PublicShell active="about" isDarkTheme={isDarkTheme} toggleTheme={toggleTheme}>
       <div className="cp-public">
         <header className="cp-public-hero">
           <p className="cp-kicker">Company profile</p>
