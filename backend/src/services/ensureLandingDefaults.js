@@ -218,6 +218,30 @@ async function ensureLandingDefaults() {
     if ((await prisma.heroSlide.count()) === 0) {
       await prisma.heroSlide.createMany({ data: DEFAULT_HERO });
       heroCreated = DEFAULT_HERO.length;
+    } else {
+      // Repair absolute API URLs that point at /images (those 404 on the API host)
+      const slides = await prisma.heroSlide.findMany();
+      for (const slide of slides) {
+        const raw = String(slide.imageUrl || '').trim();
+        if (!raw) continue;
+        let next = raw;
+        try {
+          if (/^https?:\/\//i.test(raw)) {
+            const u = new URL(raw);
+            if (u.pathname.startsWith('/images/') || u.pathname.startsWith('/promo/')) {
+              next = u.pathname;
+            }
+          }
+        } catch {
+          /* ignore */
+        }
+        if (next !== raw) {
+          await prisma.heroSlide.update({
+            where: { id: slide.id },
+            data: { imageUrl: next },
+          });
+        }
+      }
     }
   } catch (err) {
     console.error('ensureLandingDefaults hero:', err.message);

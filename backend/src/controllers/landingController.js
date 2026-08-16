@@ -115,6 +115,30 @@ const pickFields = (section, body = {}, { partial = false } = {}) => {
     data.category = 'news';
   }
 
+  // Keep image fields as site-relative /images or /uploads paths when possible
+  for (const imgKey of ['imageUrl', 'heroImage', 'logoUrl']) {
+    if (typeof data[imgKey] === 'string' && data[imgKey]) {
+      try {
+        const raw = data[imgKey].trim();
+        if (/^https?:\/\//i.test(raw)) {
+          const u = new URL(raw);
+          if (
+            u.pathname.startsWith('/images/') ||
+            u.pathname.startsWith('/promo/') ||
+            u.pathname.startsWith('/uploads/') ||
+            u.pathname.startsWith('/logo')
+          ) {
+            data[imgKey] = u.pathname;
+          }
+        } else if (raw && !raw.startsWith('/')) {
+          data[imgKey] = `/${raw}`;
+        }
+      } catch {
+        /* keep as-is */
+      }
+    }
+  }
+
   return data;
 };
 

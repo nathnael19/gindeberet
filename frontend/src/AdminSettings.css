@@ -576,6 +576,30 @@
   white-space: nowrap;
 }
 
+.landing-preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+
+.landing-preset-btn {
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  color: var(--text-main);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.landing-preset-btn:hover {
+  border-color: var(--cta);
+  background: color-mix(in srgb, var(--cta) 12%, transparent);
+}
+
 .landing-preview {
   margin-top: 0.65rem;
   max-height: 64px;

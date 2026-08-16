@@ -1,6 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { landingApi, uploadApi } from './api';
-import { getImageUrl } from './imageUrl';
+import { getImageUrl, normalizeStoredImagePath } from './imageUrl';
+
+const HERO_SITE_PRESETS = [
+  { label: 'Home hero', path: '/images/hero.jpg' },
+  { label: 'About photo', path: '/images/about.jpg' },
+  { label: 'Portfolio', path: '/images/portfolio-2.jpg' },
+];
 
 type SectionId =
   | 'hero'
@@ -183,6 +189,21 @@ export default function AdminLandingSettings() {
     fetchSectionData(activeSection);
   }, [activeSection]);
 
+  const uploadImage = async (file: File, field: 'logoUrl' | 'imageUrl' | 'heroImage') => {
+    setUploading(true);
+    setError('');
+    try {
+      const res = await uploadApi.uploadImage(file);
+      if (!res.success || !res.data?.url) throw new Error('Upload failed');
+      const url = normalizeStoredImagePath(res.data.url);
+      setCurrentItem((prev: any) => ({ ...prev, [field]: url }));
+    } catch (err: any) {
+      setError(err?.message || 'Image upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
@@ -190,6 +211,11 @@ export default function AdminLandingSettings() {
     setSaving(true);
     try {
       const payload = toPayload(activeSection, currentItem);
+      for (const key of ['imageUrl', 'heroImage', 'logoUrl'] as const) {
+        if (typeof payload[key] === 'string') {
+          payload[key] = normalizeStoredImagePath(String(payload[key]));
+        }
+      }
       if (currentItem.id) {
         await landingApi.updateItem(activeSection, currentItem.id, payload);
         setMessage('Item updated');
@@ -217,20 +243,6 @@ export default function AdminLandingSettings() {
       await fetchSectionData(activeSection);
     } catch (err: any) {
       setError(err?.message || 'Delete failed');
-    }
-  };
-
-  const uploadImage = async (file: File, field: 'logoUrl' | 'imageUrl' | 'heroImage') => {
-    setUploading(true);
-    setError('');
-    try {
-      const res = await uploadApi.uploadImage(file);
-      if (!res.success || !res.data?.url) throw new Error('Upload failed');
-      setCurrentItem((prev: any) => ({ ...prev, [field]: res.data.url }));
-    } catch (err: any) {
-      setError(err?.message || 'Image upload failed');
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -429,8 +441,13 @@ export default function AdminLandingSettings() {
                   className="settings-input"
                   required
                   value={currentItem.imageUrl || ''}
-                  onChange={(e) => setCurrentItem({ ...currentItem, imageUrl: e.target.value })}
-                  placeholder="/uploads/… or https://…"
+                  onChange={(e) =>
+                    setCurrentItem({
+                      ...currentItem,
+                      imageUrl: normalizeStoredImagePath(e.target.value) || e.target.value,
+                    })
+                  }
+                  placeholder="/images/hero.jpg or upload a file"
                 />
                 <label className="landing-upload-btn">
                   {uploading ? 'Uploading…' : 'Upload'}
@@ -447,11 +464,26 @@ export default function AdminLandingSettings() {
                   />
                 </label>
               </div>
+              <div className="landing-preset-row">
+                {HERO_SITE_PRESETS.map((p) => (
+                  <button
+                    key={p.path}
+                    type="button"
+                    className="landing-preset-btn"
+                    onClick={() => setCurrentItem({ ...currentItem, imageUrl: p.path })}
+                  >
+                    Use {p.label}
+                  </button>
+                ))}
+              </div>
               {currentItem.imageUrl && (
                 <img
                   className="landing-preview landing-preview--wide"
                   src={getImageUrl(currentItem.imageUrl)}
                   alt="Hero preview"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.opacity = '0.35';
+                  }}
                 />
               )}
             </div>
@@ -999,34 +1031,42 @@ export default function AdminLandingSettings() {
               {data.map((item) => (
                 <li key={item.id} className="landing-item">
                   <div className="landing-item-main">
-                    {(activeSection === 'partners' && item.logoUrl) ||
-                    (activeSection === 'team' && item.imageUrl) ||
-                    (activeSection === 'hero' && item.imageUrl) ||
-                    (activeSection === 'services' && item.heroImage) ||
-                    (activeSection === 'awards' && item.imageUrl) ||
-                    (activeSection === 'news' && item.imageUrl) ||
-                    (activeSection === 'facilities' && item.imageUrl) ? (
-                      <img
-                        className="landing-item-thumb"
-                        src={getImageUrl(
-                          activeSection === 'partners'
-                            ? item.logoUrl
-                            : activeSection === 'services'
-                              ? item.heroImage
-                              : item.imageUrl
-                        )}
-                        alt=""
-                      />
-                    ) : (
-                      <span className="landing-item-icon">
-                        {item.icon ||
-                          item.indexLabel ||
-                          item.name?.[0] ||
-                          item.title?.[0] ||
-                          item.title1?.[0] ||
-                          '•'}
-                      </span>
-                    )}
+                    {(() => {
+                      const thumbSrc =
+                        activeSection === 'partners'
+                          ? item.logoUrl
+                          : activeSection === 'services'
+                            ? item.heroImage
+                            : item.imageUrl;
+                      const letter =
+                        item.icon ||
+                        item.indexLabel ||
+                        item.name?.[0] ||
+                        item.title?.[0] ||
+                        item.title1?.[0] ||
+                        '•';
+                      if (!thumbSrc) {
+                        return <span className="landing-item-icon">{letter}</span>;
+                      }
+                      return (
+                        <>
+                          <img
+                            className="landing-item-thumb"
+                            src={getImageUrl(thumbSrc)}
+                            alt=""
+                            onError={(e) => {
+                              const el = e.target as HTMLImageElement;
+                              el.style.display = 'none';
+                              const fb = el.nextElementSibling as HTMLElement | null;
+                              if (fb) fb.style.display = 'inline-flex';
+                            }}
+                          />
+                          <span className="landing-item-icon" style={{ display: 'none' }}>
+                            {letter}
+                          </span>
+                        </>
+                      );
+                    })()}
                     <div>
                       <strong>{itemLabel(item)}</strong>
                       {itemSubtitle(activeSection, item) && <p>{itemSubtitle(activeSection, item)}</p>}
