@@ -156,7 +156,7 @@ export default function HomePage({
         setTextLeaving(false);
         leaveTimerRef.current = null;
       }, 380);
-    }, 5000);
+    }, 7500);
     return () => {
       phaseTimers.forEach((id) => window.clearTimeout(id));
       window.clearInterval(slideTimer);

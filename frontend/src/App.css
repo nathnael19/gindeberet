@@ -42,47 +42,23 @@
   to { opacity: 1; }
 }
 
-/* Hero only: aerial drone orbit — look down + side pass, not zoom-out */
-@keyframes heroAerialOrbit {
+/* Hero: start slightly zoomed (full frame readable), then slowly ease out */
+@keyframes heroKenBurnsOut {
   0% {
-    transform:
-      perspective(1600px)
-      rotateX(20deg)
-      rotateZ(-2.5deg)
-      translate3d(10%, 4%, -60px)
-      scale(1.2);
-  }
-  25% {
-    transform:
-      perspective(1600px)
-      rotateX(14deg)
-      rotateZ(1deg)
-      translate3d(-8%, 1%, 0)
-      scale(1.18);
-  }
-  50% {
-    transform:
-      perspective(1600px)
-      rotateX(22deg)
-      rotateZ(2deg)
-      translate3d(-12%, 6%, -40px)
-      scale(1.2);
-  }
-  75% {
-    transform:
-      perspective(1600px)
-      rotateX(15deg)
-      rotateZ(-1deg)
-      translate3d(4%, 2%, 0)
-      scale(1.19);
+    transform: scale(1.12) translate3d(0, 0, 0);
   }
   100% {
-    transform:
-      perspective(1600px)
-      rotateX(20deg)
-      rotateZ(-2.5deg)
-      translate3d(10%, 4%, -60px)
-      scale(1.2);
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+/* Kept for legacy class names — same gentle motion */
+@keyframes heroAerialOrbit {
+  0% {
+    transform: scale(1.12) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
   }
 }
 
@@ -537,38 +513,36 @@ html[lang='am'] .logo span {
   inset: 0;
   overflow: hidden;
   z-index: 0;
-  perspective: 1600px;
-  transform-style: preserve-3d;
 }
 
 .hero-bg-slide {
   position: absolute;
-  inset: -14%;
-  background-position: center 42%;
+  inset: -4%;
+  background-position: center center;
   background-size: cover;
   background-repeat: no-repeat;
   opacity: 0;
   pointer-events: none;
-  transform-origin: 50% 55%;
+  transform-origin: center center;
   will-change: opacity, transform;
-  filter: saturate(1.08) contrast(1.05);
+  filter: saturate(1.05) contrast(1.02);
 }
 
 .hero-bg-slide.is-active {
   z-index: 1;
   pointer-events: auto;
   animation:
-    heroAerialFade 1.1s ease both,
-    heroAerialOrbit 16s ease-in-out infinite;
+    heroAerialFade 0.9s ease both,
+    heroKenBurnsOut 7.5s ease-out forwards;
 }
 
 .hero-bg-zoom {
   position: absolute;
-  inset: -14%;
+  inset: -4%;
   background: url('/images/hero.jpg') center/cover no-repeat;
-  animation: heroAerialOrbit 16s ease-in-out infinite;
+  animation: heroKenBurnsOut 7.5s ease-out forwards;
   will-change: transform;
-  transform-origin: 50% 55%;
+  transform-origin: center center;
 }
 
 .hero-overlay {
