@@ -16,6 +16,8 @@ import ContactPage from './ContactPage';
 import CareersPage from './CareersPage';
 import AdminCareers from './AdminCareers';
 import AdminStampSign from './AdminStampSign';
+import AdminCompanyProfile from './AdminCompanyProfile';
+import CompanyProfilePage from './CompanyProfilePage';
 import { publicApi, settingsApi, landingApi, careersApi, getToken } from './api';
 import { OFFICE, officePlaceUrl } from './contactLocation';
 import { getImageUrl } from './imageUrl';
@@ -77,7 +79,14 @@ function App() {
       const authenticated = isAuthenticated();
 
       // /admin itself shows login when logged out — do not redirect away
-      const protectedRoutes = ['/projects', '/projects/add', '/vacancies', '/stamp-sign', '/settings'];
+      const protectedRoutes = [
+        '/projects',
+        '/projects/add',
+        '/vacancies',
+        '/stamp-sign',
+        '/settings',
+        '/company-profile-admin',
+      ];
       const isProtectedRoute = protectedRoutes.some(route => path === route || path.startsWith(route + '/'));
 
       if (isProtectedRoute && !authenticated) {
@@ -377,6 +386,18 @@ function App() {
       return null;
     }
     return <AdminStampSign isDarkTheme={isDarkTheme} toggleTheme={toggleTheme} />;
+  }
+
+  if (currentRoute === '/company-profile-admin' || currentRoute === '/company-profile-admin/') {
+    if (!isAuthenticated()) {
+      window.location.href = '/admin';
+      return null;
+    }
+    return <AdminCompanyProfile isDarkTheme={isDarkTheme} toggleTheme={toggleTheme} />;
+  }
+
+  if (currentRoute === '/company-profile' || currentRoute === '/company-profile/') {
+    return <CompanyProfilePage isDarkTheme={isDarkTheme} toggleTheme={toggleTheme} />;
   }
 
   if (currentRoute === '/about' || currentRoute === '/about/') {

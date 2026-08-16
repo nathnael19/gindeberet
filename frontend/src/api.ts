@@ -736,6 +736,57 @@ export const careersApi = {
   },
 };
 
+export const companyProfileApi = {
+  getPublic: async () => {
+    return publicApiCall<{
+      success: boolean;
+      data: {
+        company: string;
+        title: string;
+        generatedAt: string;
+        summary: any;
+        rows: any[];
+        sharePath: string;
+      };
+    }>('/company-profile/public');
+  },
+
+  getAdmin: async () => {
+    return apiCall<{
+      success: boolean;
+      data: {
+        company: string;
+        title: string;
+        generatedAt: string;
+        summary: any;
+        rows: any[];
+        sharePath: string;
+        note?: string;
+      };
+    }>('/company-profile/admin');
+  },
+
+  downloadPublicPdf: async () => {
+    const data = await publicApiCall<{
+      success: boolean;
+      data: { filename: string; pdfBase64: string; count: number };
+    }>('/company-profile/public/pdf?format=json');
+    if (!data.data?.pdfBase64) throw new Error('PDF not returned');
+    savePdfBytes(base64ToUint8Array(data.data.pdfBase64), data.data.filename || 'company-profile.pdf');
+  },
+
+  downloadAdminPdf: async (scope: 'all' | 'public' = 'all') => {
+    const qs = new URLSearchParams({ format: 'json' });
+    if (scope === 'public') qs.set('scope', 'public');
+    const data = await apiCall<{
+      success: boolean;
+      data: { filename: string; pdfBase64: string; count: number };
+    }>(`/company-profile/admin/pdf?${qs.toString()}`);
+    if (!data.data?.pdfBase64) throw new Error('PDF not returned');
+    savePdfBytes(base64ToUint8Array(data.data.pdfBase64), data.data.filename || 'company-profile.pdf');
+  },
+};
+
 // Landing Page dynamic sections API
 export const landingApi = {
   getSection: async (section: string) => {

@@ -125,6 +125,13 @@ const PAGES: Record<string, SeoPage> = {
       'Construction projects by Gindeberet General Construction PLC across Ethiopia and Oromia — roads, corridors, buildings, health facilities, bridges, and water works.',
     keywords: DEFAULT_KEYWORDS,
   },
+  '/company-profile': {
+    path: '/company-profile',
+    title: `Company Project Profile | ${SITE_NAME}`,
+    description:
+      'Gindeberet General Construction PLC company project profile — contract history, amounts, periods, and progress across Ethiopia and Oromia. Download as PDF.',
+    keywords: DEFAULT_KEYWORDS,
+  },
   '/contact': {
     path: '/contact',
     title: `Contact Construction Company Addis Ababa | ${SITE_NAME}`,

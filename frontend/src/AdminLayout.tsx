@@ -6,7 +6,7 @@ interface AdminLayoutProps {
   children: ReactNode;
   isDarkTheme: boolean;
   toggleTheme: () => void;
-  activePage: 'overview' | 'projects' | 'careers' | 'stamp' | 'settings';
+  activePage: 'overview' | 'projects' | 'careers' | 'stamp' | 'settings' | 'profile';
 }
 
 const navigate = (path: string) => {
@@ -146,9 +146,21 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
     </svg>
   );
 
+  const ProfileIcon = () => (
+    <svg className="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      />
+    </svg>
+  );
+
   const navItems = [
     { key: 'overview' as const, label: 'Overview', path: '/admin', Icon: HomeIcon },
     { key: 'projects' as const, label: 'Projects', path: '/projects', Icon: ProjectsIcon },
+    { key: 'profile' as const, label: 'Company Profile', path: '/company-profile-admin', Icon: ProfileIcon },
     { key: 'careers' as const, label: 'Careers', path: '/vacancies', Icon: CareersIcon },
     { key: 'stamp' as const, label: 'Stamp & Sign', path: '/stamp-sign', Icon: StampIcon },
     { key: 'settings' as const, label: 'Settings', path: '/settings', Icon: SettingsIcon },

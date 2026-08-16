@@ -208,6 +208,7 @@ export default function PublicShell({
                 <a href="/" onClick={(e) => { e.preventDefault(); go('/'); }}>{t('nav.home')}</a>
                 <a href="/about" onClick={(e) => { e.preventDefault(); go('/about'); }}>{t('footer.aboutUs')}</a>
                 <a href="/portfolio" onClick={(e) => { e.preventDefault(); go('/portfolio'); }}>{t('nav.projects')}</a>
+                <a href="/company-profile" onClick={(e) => { e.preventDefault(); go('/company-profile'); }}>Company Profile</a>
                 <a href="/careers" onClick={(e) => { e.preventDefault(); go('/careers'); }}>{t('nav.vacancies')}</a>
                 <a href="/services" onClick={(e) => { e.preventDefault(); go('/services'); }}>{t('nav.services')}</a>
                 <a href="/contact" onClick={(e) => { e.preventDefault(); go('/contact'); }}>{t('nav.contactShort')}</a>
