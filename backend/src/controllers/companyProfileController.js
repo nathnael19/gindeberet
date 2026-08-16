@@ -1,5 +1,6 @@
 const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 const prisma = require('../config/database');
+const { getYearMatrix } = require('../config/companyProfileMatrix');
 
 const CONTRACTOR = 'Gindeberet General Construction PLC';
 
@@ -71,6 +72,7 @@ const getPublicProfile = async (_req, res) => {
         title: 'Company Project Profile',
         generatedAt: new Date().toISOString(),
         summary: buildSummary(rows),
+        yearMatrix: getYearMatrix(),
         rows,
         sharePath: '/company-profile',
       },
@@ -91,6 +93,7 @@ const getAdminProfile = async (_req, res) => {
         title: 'Company Project Profile',
         generatedAt: new Date().toISOString(),
         summary: buildSummary(rows),
+        yearMatrix: getYearMatrix(),
         rows,
         sharePath: '/company-profile',
         note: 'Public share link shows projects published on the website (isPublic).',
@@ -262,6 +265,141 @@ async function buildProfilePdf(rows, { publicOnly }) {
     size: 8,
     font,
     color: rgb(0.45, 0.45, 0.45),
+  });
+
+  // Year × category summary matrix (from company profile sheet)
+  const matrix = getYearMatrix();
+  page = pdfDoc.addPage([pageWidth, pageHeight]);
+  y = pageHeight - margin;
+  page.drawText('Projects by type and year', {
+    x: margin,
+    y: y - 14,
+    size: 13,
+    font: fontBold,
+    color: rgb(0.12, 0.12, 0.12),
+  });
+  y -= 28;
+  page.drawText(matrix.calendarNote, {
+    x: margin,
+    y: y - 9,
+    size: 8,
+    font,
+    color: rgb(0.4, 0.4, 0.4),
+  });
+  y -= 22;
+
+  const labelW = 150;
+  const yearW = 55;
+  const mx = margin;
+  const mh = 14;
+
+  // header
+  page.drawRectangle({
+    x: mx,
+    y: y - mh - 2,
+    width: labelW + matrix.years.length * yearW,
+    height: mh + 4,
+    color: rgb(0.12, 0.12, 0.12),
+  });
+  page.drawText('Type / Year', {
+    x: mx + 4,
+    y: y - mh + 2,
+    size: 8,
+    font: fontBold,
+    color: rgb(1, 1, 1),
+  });
+  matrix.years.forEach((year, i) => {
+    page.drawText(String(year), {
+      x: mx + labelW + i * yearW + 10,
+      y: y - mh + 2,
+      size: 8,
+      font: fontBold,
+      color: rgb(1, 1, 1),
+    });
+  });
+  y -= mh + 6;
+
+  matrix.rows.forEach((row, ri) => {
+    if (ri % 2 === 0) {
+      page.drawRectangle({
+        x: mx,
+        y: y - mh,
+        width: labelW + matrix.years.length * yearW,
+        height: mh,
+        color: rgb(0.96, 0.96, 0.94),
+      });
+    }
+    page.drawText(row.label, {
+      x: mx + 4,
+      y: y - mh + 3,
+      size: 8,
+      font,
+      color: rgb(0.15, 0.15, 0.15),
+      maxWidth: labelW - 8,
+    });
+    row.counts.forEach((n, i) => {
+      page.drawText(String(n), {
+        x: mx + labelW + i * yearW + 18,
+        y: y - mh + 3,
+        size: 8,
+        font,
+        color: rgb(0.15, 0.15, 0.15),
+      });
+    });
+    y -= mh;
+  });
+
+  // totals count row
+  y -= 4;
+  page.drawRectangle({
+    x: mx,
+    y: y - mh,
+    width: labelW + matrix.years.length * yearW,
+    height: mh,
+    color: rgb(0.92, 0.9, 0.85),
+  });
+  page.drawText('Total projects', {
+    x: mx + 4,
+    y: y - mh + 3,
+    size: 8,
+    font: fontBold,
+    color: rgb(0.1, 0.1, 0.1),
+  });
+  matrix.projectCountTotals.forEach((n, i) => {
+    page.drawText(String(n), {
+      x: mx + labelW + i * yearW + 18,
+      y: y - mh + 3,
+      size: 8,
+      font: fontBold,
+      color: rgb(0.1, 0.1, 0.1),
+    });
+  });
+  y -= mh + 4;
+
+  // cost row
+  page.drawRectangle({
+    x: mx,
+    y: y - mh - 2,
+    width: labelW + matrix.years.length * yearW,
+    height: mh + 2,
+    color: rgb(0.15, 0.15, 0.15),
+  });
+  page.drawText('TOTAL PROJECT COST', {
+    x: mx + 4,
+    y: y - mh + 2,
+    size: 7.5,
+    font: fontBold,
+    color: rgb(1, 1, 1),
+  });
+  matrix.totalCost.forEach((cost, i) => {
+    page.drawText(String(cost), {
+      x: mx + labelW + i * yearW + 2,
+      y: y - mh + 2,
+      size: 6.5,
+      font: fontBold,
+      color: rgb(1, 1, 1),
+      maxWidth: yearW - 4,
+    });
   });
 
   return pdfDoc.save();

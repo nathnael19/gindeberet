@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import AdminLayout from './AdminLayout';
 import { companyProfileApi } from './api';
 import { SITE_URL } from './seo';
+import CompanyProfileYearMatrix from './CompanyProfileYearMatrix';
 import './AdminDashboard.css';
 import './CompanyProfile.css';
 
@@ -32,6 +33,7 @@ type Row = {
 export default function AdminCompanyProfile({ isDarkTheme, toggleTheme }: AdminCompanyProfileProps) {
   const [rows, setRows] = useState<Row[]>([]);
   const [summary, setSummary] = useState<any>(null);
+  const [yearMatrix, setYearMatrix] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -49,6 +51,7 @@ export default function AdminCompanyProfile({ isDarkTheme, toggleTheme }: AdminC
       const res = await companyProfileApi.getAdmin();
       setRows(res.data.rows || []);
       setSummary(res.data.summary || null);
+      setYearMatrix(res.data.yearMatrix || null);
     } catch (e: any) {
       setError(e?.message || 'Failed to load company profile');
       setRows([]);
@@ -197,6 +200,8 @@ export default function AdminCompanyProfile({ isDarkTheme, toggleTheme }: AdminC
             rows stay admin-only (and in “all projects” PDF).
           </p>
         </div>
+
+        <CompanyProfileYearMatrix matrix={yearMatrix} />
 
         <div className="cp-table-wrap">
           {loading ? (

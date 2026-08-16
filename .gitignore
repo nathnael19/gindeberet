@@ -22,3 +22,5 @@ backend/uploads/*
 !backend/uploads/.gitkeep
 *.tmp
 query_engine-windows.dll.node.tmp*
+
+_profile.xlsx

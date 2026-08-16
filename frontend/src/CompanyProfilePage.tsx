@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import PublicShell from './PublicShell';
 import { companyProfileApi } from './api';
 import { SITE_NAME } from './seo';
+import CompanyProfileYearMatrix from './CompanyProfileYearMatrix';
 import './CompanyProfile.css';
 
 interface CompanyProfilePageProps {
@@ -29,6 +30,7 @@ type Row = {
 export default function CompanyProfilePage({ isDarkTheme, toggleTheme }: CompanyProfilePageProps) {
   const [rows, setRows] = useState<Row[]>([]);
   const [summary, setSummary] = useState<any>(null);
+  const [yearMatrix, setYearMatrix] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -42,6 +44,7 @@ export default function CompanyProfilePage({ isDarkTheme, toggleTheme }: Company
         const res = await companyProfileApi.getPublic();
         setRows(res.data.rows || []);
         setSummary(res.data.summary || null);
+        setYearMatrix(res.data.yearMatrix || null);
       } catch (e: any) {
         setError(e?.message || 'Could not load company profile');
       } finally {
@@ -112,6 +115,8 @@ export default function CompanyProfilePage({ isDarkTheme, toggleTheme }: Company
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
+
+        <CompanyProfileYearMatrix matrix={yearMatrix} />
 
         <div className="cp-table-wrap">
           {loading ? (

@@ -745,6 +745,7 @@ export const companyProfileApi = {
         title: string;
         generatedAt: string;
         summary: any;
+        yearMatrix: any;
         rows: any[];
         sharePath: string;
       };
@@ -759,6 +760,7 @@ export const companyProfileApi = {
         title: string;
         generatedAt: string;
         summary: any;
+        yearMatrix: any;
         rows: any[];
         sharePath: string;
         note?: string;
