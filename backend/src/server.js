@@ -168,6 +168,20 @@ async function runBootMaintenance() {
         `Boot landing defaults: hero=${landing.heroCreated} services=${landing.servicesCreated}`
       );
     }
+    const CONTACT_EMAIL = 'gindeberetconstruction278@gmail.com';
+    const emailFix = await prisma.siteSettings.updateMany({
+      where: {
+        OR: [
+          { email: 'gindeberetconstruction2772@gmail.com' },
+          { email: 'info@gindeberet.com' },
+          { email: null },
+        ],
+      },
+      data: { email: CONTACT_EMAIL },
+    });
+    if (emailFix.count > 0) {
+      console.log(`Boot contact email fixed → ${CONTACT_EMAIL}`);
+    }
   } catch (err) {
     const msg = `bootMaintenance: ${err.message}`;
     console.error(msg);

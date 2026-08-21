@@ -82,7 +82,7 @@ sql.push('SET NAMES utf8mb4;');
 sql.push('');
 sql.push('UPDATE site_settings SET');
 sql.push("  phone = CONCAT('+251 911 908 456', CHAR(10), '+251 917 000 912'),");
-sql.push("  email = 'gindeberetconstruction2772@gmail.com',");
+sql.push("  email = 'gindeberetconstruction278@gmail.com',");
 sql.push("  workingHours = 'Mon-Fri, 8:00am-6:00pm',");
 sql.push("  officeLocation = CONCAT('Near Global Hotel Lancha', CHAR(10), 'Addis Ababa, Ethiopia'),");
 sql.push(`  updatedAt = ${now}`);

@@ -30,7 +30,7 @@ const DEFAULT_SITE_SETTINGS = {
   officeLocation: OFFICE.address,
   phone: '+251 911 908 456\n+251 917 000 912',
   workingHours: 'Mon–Fri, 8:00am–6:00pm',
-  email: 'gindeberetconstruction2772@gmail.com',
+  email: 'gindeberetconstruction278@gmail.com',
   mapUrl: officePlaceUrl(),
 };
 

@@ -22,7 +22,7 @@ const DEFAULT_SETTINGS = {
   officeLocation: OFFICE.address,
   phone: '+251 11 000 0000',
   workingHours: 'Mon–Fri, 8:00am–6:00pm',
-  email: 'info@gindeberet.com',
+  email: 'gindeberetconstruction278@gmail.com',
   mapUrl: officePlaceUrl(),
 };
 

@@ -5,7 +5,7 @@ const DEFAULT_SITE_SETTINGS = {
   officeLocation: '123 Industrial Way, Builder City, BC 12345',
   phone: '(555) 123-4567',
   workingHours: 'Mon-Fri, 8am-6pm',
-  email: 'info@gindeberet.com',
+  email: 'gindeberetconstruction278@gmail.com',
   mapUrl: 'https://www.google.com/maps/search/?api=1&query=9.0244,38.7469'
 };
 

@@ -135,7 +135,7 @@ async function fixPublicContent() {
       officeLocation: 'Near Global Hotel Lancha\nAddis Ababa, Ethiopia',
       phone: '+251 911 908 456\n+251 917 000 912',
       workingHours: 'Mon-Fri, 8:00am-6:00pm',
-      email: 'gindeberetconstruction2772@gmail.com',
+      email: 'gindeberetconstruction278@gmail.com',
       mapUrl: 'https://www.google.com/maps/search/?api=1&query=8.9935718,38.7598685',
     },
     create: {
@@ -143,7 +143,7 @@ async function fixPublicContent() {
       officeLocation: 'Near Global Hotel Lancha\nAddis Ababa, Ethiopia',
       phone: '+251 911 908 456\n+251 917 000 912',
       workingHours: 'Mon-Fri, 8:00am-6:00pm',
-      email: 'gindeberetconstruction2772@gmail.com',
+      email: 'gindeberetconstruction278@gmail.com',
       mapUrl: 'https://www.google.com/maps/search/?api=1&query=8.9935718,38.7598685',
     },
   });

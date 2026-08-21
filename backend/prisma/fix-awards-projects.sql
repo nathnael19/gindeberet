@@ -4,7 +4,7 @@ SET NAMES utf8mb4;
 
 UPDATE site_settings SET
   phone = CONCAT('+251 911 908 456', CHAR(10), '+251 917 000 912'),
-  email = 'gindeberetconstruction2772@gmail.com',
+  email = 'gindeberetconstruction278@gmail.com',
   workingHours = 'Mon-Fri, 8:00am-6:00pm',
   officeLocation = CONCAT('Near Global Hotel Lancha', CHAR(10), 'Addis Ababa, Ethiopia'),
   updatedAt = NOW(3)
