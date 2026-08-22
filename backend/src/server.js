@@ -8,6 +8,10 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const { ensureUploadDir, migrateLegacyUploadsIfNeeded } = require('./config/uploads');
+
+const uploadDir = ensureUploadDir();
+migrateLegacyUploadsIfNeeded();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -59,7 +63,7 @@ app.use('/uploads', (req, res, next) => {
   res.setHeader('Cache-Control', 'public, max-age=86400');
   next();
 });
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(uploadDir));
 
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -193,8 +197,13 @@ async function runBootMaintenance() {
 
 const start = () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Upload directory: ${uploadDir}`);
   console.log(`Frontend URL(s): ${allowedOrigins.join(', ')}`);
   console.log(`DATABASE_URL set: ${Boolean(process.env.DATABASE_URL)}`);
+  console.log(`JWT_SECRET set: ${Boolean(process.env.JWT_SECRET)}`);
+  if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+    bootErrors.push('JWT_SECRET is not set — admin login tokens will fail after restart');
+  }
   if (bootErrors.length) {
     console.error('Boot errors:', bootErrors);
   }

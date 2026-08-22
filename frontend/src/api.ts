@@ -6,6 +6,18 @@ const getToken = () => localStorage.getItem('token');
 const setToken = (token: string) => localStorage.setItem('token', token);
 const removeToken = () => localStorage.removeItem('token');
 
+function redirectToLoginIfUnauthorized(status: number) {
+  if (status !== 401) return;
+  removeToken();
+  const returnPath = `${window.location.pathname}${window.location.search}`;
+  const params = new URLSearchParams();
+  params.set('session', 'expired');
+  if (returnPath && returnPath !== '/admin') {
+    params.set('return', returnPath);
+  }
+  window.location.href = `/admin?${params.toString()}`;
+}
+
 import {
   createCacheKey,
   invalidateCache,
@@ -45,6 +57,7 @@ async function apiCall<T>(
   }
 
   if (!response.ok) {
+    redirectToLoginIfUnauthorized(response.status);
     throw new Error(data?.message || 'API request failed');
   }
 
@@ -423,6 +436,7 @@ export const uploadApi = {
     const data = await response.json();
 
     if (!response.ok) {
+      redirectToLoginIfUnauthorized(response.status);
       throw new Error(data.message || 'Upload failed');
     }
 
@@ -450,6 +464,7 @@ export const uploadApi = {
     const data = await response.json();
 
     if (!response.ok) {
+      redirectToLoginIfUnauthorized(response.status);
       throw new Error(data.message || 'Upload failed');
     }
 
@@ -480,6 +495,7 @@ export const uploadApi = {
 
     const data = await response.json();
     if (!response.ok) {
+      redirectToLoginIfUnauthorized(response.status);
       throw new Error(data.message || 'Document upload failed');
     }
 

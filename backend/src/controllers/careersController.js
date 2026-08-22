@@ -2,8 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const prisma = require('../config/database');
 const { ensureCareersTables } = require('../services/ensureCareersTables');
+const { ensureUploadDir } = require('../config/uploads');
 
-const uploadDir = path.join(__dirname, '../../uploads');
+const uploadDir = ensureUploadDir();
 
 function resolveUploadPath(storedUrl) {
   if (!storedUrl || typeof storedUrl !== 'string') return null;

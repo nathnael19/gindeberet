@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { authApi } from './api';
 import './AdminLogin.css';
 
@@ -7,16 +7,28 @@ export default function AdminLogin({ isDarkTheme }: { isDarkTheme: boolean }) {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('session') === 'expired') {
+      setInfo('Your session expired. Please sign in again to upload or edit.');
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setInfo('');
 
     try {
       const response = await authApi.login(email, password);
       if (response.success) {
-        window.location.href = '/admin';
+        const params = new URLSearchParams(window.location.search);
+        const returnPath = params.get('return');
+        window.location.href =
+          returnPath && returnPath.startsWith('/') ? returnPath : '/admin';
       } else {
         setError('Login failed. Please try again.');
       }
@@ -62,6 +74,12 @@ export default function AdminLogin({ isDarkTheme }: { isDarkTheme: boolean }) {
               required 
             />
           </div>
+
+          {info && (
+            <div className="error-message" style={{ color: '#d97706', marginBottom: '0.75rem' }}>
+              {info}
+            </div>
+          )}
 
           {error && (
             <div className="error-message" style={{ color: '#EF4444', fontSize: '0.875rem', marginTop: '0.5rem' }}>

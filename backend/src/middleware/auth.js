@@ -16,10 +16,14 @@ const authenticate = (req, res, next) => {
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     const decoded = verifyToken(token);
 
-    if (!decoded) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Invalid or expired token.' 
+    if (!decoded || decoded.error) {
+      return res.status(401).json({
+        success: false,
+        code: decoded?.error === 'expired' ? 'TOKEN_EXPIRED' : 'TOKEN_INVALID',
+        message:
+          decoded?.error === 'expired'
+            ? 'Session expired. Please sign in again.'
+            : 'Invalid or expired token.',
       });
     }
 
@@ -69,7 +73,7 @@ const optionalAuthenticate = (req, res, next) => {
       return next();
     }
     const decoded = verifyToken(authHeader.substring(7));
-    if (decoded) {
+    if (decoded && !decoded.error) {
       req.user = {
         userId: decoded.userId,
         email: decoded.email,

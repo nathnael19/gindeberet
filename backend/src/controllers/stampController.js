@@ -8,8 +8,9 @@ try {
 }
 const { PDFDocument, degrees, BlendMode } = require('pdf-lib');
 const prisma = require('../config/database');
+const { ensureUploadDir } = require('../config/uploads');
 
-const uploadDir = path.join(__dirname, '../../uploads');
+const uploadDir = ensureUploadDir();
 const stampedDir = path.join(uploadDir, 'stamped');
 
 if (!fs.existsSync(stampedDir)) {
