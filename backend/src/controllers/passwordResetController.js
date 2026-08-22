@@ -81,12 +81,26 @@ const forgotPassword = async (req, res) => {
     try {
       await sendPasswordResetOtp(MAIL_INBOX_EMAIL, otp);
     } catch (mailErr) {
-      console.error('Forgot password mail error:', mailErr.message);
+      console.error('Forgot password mail error:', mailErr.message, mailErr.code);
       if (mailErr.code === 'SMTP_NOT_CONFIGURED') {
         return res.status(503).json({
           success: false,
           message:
             'Password reset email is not configured on the server yet. Contact the site owner.',
+        });
+      }
+      if (mailErr.code === 'EAUTH') {
+        return res.status(502).json({
+          success: false,
+          message:
+            'Email authentication failed on the server. Check Gmail App Password in cPanel (no spaces).',
+        });
+      }
+      if (mailErr.code === 'ETIMEDOUT' || mailErr.code === 'ESOCKET') {
+        return res.status(502).json({
+          success: false,
+          message:
+            'Email server timed out. Try SMTP_PORT=587 and SMTP_SECURE=false on cPanel, then Restart.',
         });
       }
       return res.status(502).json({

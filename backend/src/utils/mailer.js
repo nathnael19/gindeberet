@@ -1,15 +1,57 @@
 const nodemailer = require('nodemailer');
 const { MAIL_INBOX_EMAIL } = require('../config/emails');
 
+function normalizeSmtpPass(pass) {
+  // Gmail App Passwords are often copied with spaces (abcd efgh ijkl mnop)
+  return String(pass || '').replace(/\s+/g, '');
+}
+
 function smtpConfigured() {
   return Boolean(
     process.env.SMTP_HOST &&
       process.env.SMTP_USER &&
-      process.env.SMTP_PASS
+      normalizeSmtpPass(process.env.SMTP_PASS)
   );
 }
 
+function isGmailHost(host) {
+  const h = String(host || '').toLowerCase();
+  return h === 'smtp.gmail.com' || h.includes('gmail.com');
+}
+
 function createTransport() {
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const user = process.env.SMTP_USER;
+  const pass = normalizeSmtpPass(process.env.SMTP_PASS);
+
+  if (isGmailHost(host)) {
+    const port = Number(process.env.SMTP_PORT || 465);
+    const useService = process.env.SMTP_USE_SERVICE !== '0';
+
+    if (useService && !process.env.SMTP_PORT) {
+      return nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user, pass },
+      });
+    }
+
+    const secure =
+      process.env.SMTP_SECURE === 'true' ||
+      process.env.SMTP_SECURE === '1' ||
+      port === 465;
+
+    return nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port,
+      secure,
+      auth: { user, pass },
+      tls: { minVersion: 'TLSv1.2' },
+      connectionTimeout: 20000,
+      greetingTimeout: 20000,
+      socketTimeout: 20000,
+    });
+  }
+
   const port = Number(process.env.SMTP_PORT || 465);
   const secure =
     process.env.SMTP_SECURE === 'true' ||
@@ -17,13 +59,14 @@ function createTransport() {
     port === 465;
 
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+    host,
     port,
     secure,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
+    auth: { user, pass },
+    tls: { minVersion: 'TLSv1.2' },
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
+    socketTimeout: 20000,
   });
 }
 
@@ -49,14 +92,27 @@ async function sendMail({ to, subject, text, html, replyTo }) {
     MAIL_INBOX_EMAIL;
 
   const transport = createTransport();
-  await transport.sendMail({
-    from,
-    to,
-    subject,
-    text,
-    html,
-    replyTo: replyTo || undefined,
-  });
+
+  try {
+    await transport.sendMail({
+      from,
+      to,
+      subject,
+      text,
+      html,
+      replyTo: replyTo || undefined,
+    });
+  } catch (err) {
+    console.error('SMTP send failed:', {
+      code: err.code,
+      command: err.command,
+      response: err.response,
+      message: err.message,
+    });
+    throw err;
+  } finally {
+    transport.close();
+  }
 
   return { queued: true, mode: 'smtp' };
 }

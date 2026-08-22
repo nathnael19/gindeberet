@@ -72,11 +72,18 @@ app.use((req, res, next) => {
 
 // Health must work even when Prisma/routes fail to load
 app.get('/health', (req, res) => {
+  let smtpReady = false;
+  try {
+    smtpReady = require('./utils/mailer').smtpConfigured();
+  } catch {
+    smtpReady = false;
+  }
   res.json({
     success: bootErrors.length === 0,
     message: bootErrors.length === 0 ? 'Server is running' : 'Server booted with errors',
     timestamp: new Date().toISOString(),
     hasDatabaseUrl: Boolean(process.env.DATABASE_URL),
+    smtpConfigured: smtpReady,
     bootErrors,
   });
 });
