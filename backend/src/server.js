@@ -172,7 +172,7 @@ async function runBootMaintenance() {
         `Boot landing defaults: hero=${landing.heroCreated} services=${landing.servicesCreated}`
       );
     }
-    const { PUBLIC_CONTACT_EMAIL } = require('./config/emails');
+    const { DEFAULT_ADMIN_EMAIL, PUBLIC_CONTACT_EMAIL } = require('./config/emails');
     const CONTACT_EMAIL = PUBLIC_CONTACT_EMAIL;
     const emailFix = await prisma.siteSettings.updateMany({
       where: {
@@ -189,7 +189,6 @@ async function runBootMaintenance() {
     }
 
     const bcrypt = require('bcryptjs');
-    const { DEFAULT_ADMIN_EMAIL, PUBLIC_CONTACT_EMAIL } = require('./config/emails');
     const plcEmail = DEFAULT_ADMIN_EMAIL;
     const plcAdmin = await prisma.adminUser.findUnique({ where: { email: plcEmail } });
     if (!plcAdmin) {
