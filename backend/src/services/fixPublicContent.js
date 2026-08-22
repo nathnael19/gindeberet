@@ -3,8 +3,9 @@ const bcrypt = require('bcryptjs');
 const { seedSheetProjects } = require('../config/seedSheetProjects');
 const { ensureResetTable } = require('../controllers/passwordResetController');
 
-const ADMIN_EMAIL =
-  process.env.ADMIN_EMAIL || 'gindeberetconstruction278@gmail.com';
+const { DEFAULT_ADMIN_EMAIL, PUBLIC_CONTACT_EMAIL } = require('../config/emails');
+
+const ADMIN_EMAIL = DEFAULT_ADMIN_EMAIL.trim().toLowerCase();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Gindeberetplc@246';
 
 const AWARDS = [
@@ -135,7 +136,7 @@ async function fixPublicContent() {
       officeLocation: 'Near Global Hotel Lancha\nAddis Ababa, Ethiopia',
       phone: '+251 911 908 456\n+251 917 000 912',
       workingHours: 'Mon-Fri, 8:00am-6:00pm',
-      email: 'gindeberetconstruction278@gmail.com',
+      email: PUBLIC_CONTACT_EMAIL,
       mapUrl: 'https://www.google.com/maps/search/?api=1&query=8.9935718,38.7598685',
     },
     create: {
@@ -143,7 +144,7 @@ async function fixPublicContent() {
       officeLocation: 'Near Global Hotel Lancha\nAddis Ababa, Ethiopia',
       phone: '+251 911 908 456\n+251 917 000 912',
       workingHours: 'Mon-Fri, 8:00am-6:00pm',
-      email: 'gindeberetconstruction278@gmail.com',
+      email: PUBLIC_CONTACT_EMAIL,
       mapUrl: 'https://www.google.com/maps/search/?api=1&query=8.9935718,38.7598685',
     },
   });

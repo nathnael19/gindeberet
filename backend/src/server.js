@@ -172,7 +172,8 @@ async function runBootMaintenance() {
         `Boot landing defaults: hero=${landing.heroCreated} services=${landing.servicesCreated}`
       );
     }
-    const CONTACT_EMAIL = 'gindeberetconstruction278@gmail.com';
+    const { PUBLIC_CONTACT_EMAIL } = require('./config/emails');
+    const CONTACT_EMAIL = PUBLIC_CONTACT_EMAIL;
     const emailFix = await prisma.siteSettings.updateMany({
       where: {
         OR: [
@@ -186,6 +187,31 @@ async function runBootMaintenance() {
     if (emailFix.count > 0) {
       console.log(`Boot contact email fixed → ${CONTACT_EMAIL}`);
     }
+
+    const bcrypt = require('bcryptjs');
+    const { DEFAULT_ADMIN_EMAIL, PUBLIC_CONTACT_EMAIL } = require('./config/emails');
+    const plcEmail = DEFAULT_ADMIN_EMAIL;
+    const plcAdmin = await prisma.adminUser.findUnique({ where: { email: plcEmail } });
+    if (!plcAdmin) {
+      const legacy = await prisma.adminUser.findUnique({
+        where: { email: PUBLIC_CONTACT_EMAIL.toLowerCase() },
+      });
+      const password =
+        legacy?.password ||
+        (await bcrypt.hash(process.env.ADMIN_PASSWORD || 'Gindeberetplc@246', 10));
+      await prisma.adminUser.create({
+        data: {
+          email: plcEmail,
+          password,
+          role: 'SUPER_ADMIN',
+          isActive: true,
+          firstName: 'Admin',
+          lastName: 'Gindeberet',
+        },
+      });
+      console.log(`Boot admin inbox account ready → ${plcEmail}`);
+    }
+
     const { ensureResetTable } = require('./controllers/passwordResetController');
     await ensureResetTable();
   } catch (err) {

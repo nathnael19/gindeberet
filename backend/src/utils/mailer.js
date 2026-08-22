@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { MAIL_INBOX_EMAIL } = require('../config/emails');
 
 function smtpConfigured() {
   return Boolean(
@@ -45,7 +46,7 @@ async function sendMail({ to, subject, text, html, replyTo }) {
   const from =
     process.env.SMTP_FROM ||
     process.env.SMTP_USER ||
-    'gindeberetconstruction278@gmail.com';
+    MAIL_INBOX_EMAIL;
 
   const transport = createTransport();
   await transport.sendMail({
@@ -81,9 +82,7 @@ async function sendPasswordResetOtp(toEmail, otp) {
  * Forward public contact-form submissions to the company inbox.
  */
 async function sendContactFormEmail(payload) {
-  const to =
-    process.env.CONTACT_TO_EMAIL ||
-    'gindeberetconstruction278@gmail.com';
+  const to = process.env.CONTACT_TO_EMAIL || MAIL_INBOX_EMAIL;
 
   const {
     firstName,

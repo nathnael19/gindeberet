@@ -1,22 +1,23 @@
 const bcrypt = require('bcryptjs');
 const prisma = require('./database');
+const { DEFAULT_ADMIN_EMAIL, PUBLIC_CONTACT_EMAIL } = require('./emails');
 
 async function seed() {
   try {
     console.log('Starting database seeding...');
 
-    // Create admin user
     const hashedPassword = await bcrypt.hash('Gindeberetplc@246', 10);
-    
+    const adminEmail = DEFAULT_ADMIN_EMAIL;
+
     const adminUser = await prisma.adminUser.upsert({
-      where: { email: 'gindeberetconstruction278@gmail.com' },
+      where: { email: adminEmail },
       update: {
         password: hashedPassword,
         role: 'SUPER_ADMIN',
         isActive: true,
       },
       create: {
-        email: 'gindeberetconstruction278@gmail.com',
+        email: adminEmail,
         password: hashedPassword,
         firstName: 'Admin',
         lastName: 'Gindeberet',
@@ -24,7 +25,6 @@ async function seed() {
       }
     });
 
-    // Prefer the production admin email; keep legacy inactive if present
     await prisma.adminUser.updateMany({
       where: { email: 'admin@gindeberet.com' },
       data: { isActive: false },
@@ -39,7 +39,7 @@ async function seed() {
         officeLocation: 'Near Global Hotel Lancha\nAddis Ababa, Ethiopia',
         phone: '+251 911 908 456\n+251 917 000 912',
         workingHours: 'Mon–Fri, 8:00am–6:00pm',
-        email: 'gindeberetconstruction278@gmail.com',
+        email: PUBLIC_CONTACT_EMAIL,
         mapUrl: 'https://www.google.com/maps/search/?api=1&query=8.9935718,38.7598685'
       },
       create: {
@@ -47,7 +47,7 @@ async function seed() {
         officeLocation: 'Near Global Hotel Lancha\nAddis Ababa, Ethiopia',
         phone: '+251 911 908 456\n+251 917 000 912',
         workingHours: 'Mon–Fri, 8:00am–6:00pm',
-        email: 'gindeberetconstruction278@gmail.com',
+        email: PUBLIC_CONTACT_EMAIL,
         mapUrl: 'https://www.google.com/maps/search/?api=1&query=8.9935718,38.7598685'
       }
     });

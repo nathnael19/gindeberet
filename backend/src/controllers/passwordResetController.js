@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const prisma = require('../config/database');
 const { sendPasswordResetOtp } = require('../utils/mailer');
+const { resolveAdminEmail, MAIL_INBOX_EMAIL } = require('../config/emails');
 
 const OTP_TTL_MS = 15 * 60 * 1000;
 
@@ -37,12 +38,14 @@ const forgotPassword = async (req, res) => {
       });
     }
 
+    const adminEmail = resolveAdminEmail(email);
+
     const generic = {
       success: true,
       message: 'If that email is registered, a reset code has been sent.',
     };
 
-    const user = await prisma.adminUser.findUnique({ where: { email } });
+    const user = await prisma.adminUser.findUnique({ where: { email: adminEmail } });
     if (!user || !user.isActive) {
       return res.json(generic);
     }
@@ -51,7 +54,7 @@ const forgotPassword = async (req, res) => {
 
     const recentCount = await prisma.passwordResetToken.count({
       where: {
-        email,
+        email: adminEmail,
         createdAt: { gt: new Date(Date.now() - OTP_TTL_MS) },
       },
     });
@@ -67,16 +70,16 @@ const forgotPassword = async (req, res) => {
     const expiresAt = new Date(Date.now() + OTP_TTL_MS);
 
     await prisma.passwordResetToken.updateMany({
-      where: { email, usedAt: null },
+      where: { email: adminEmail, usedAt: null },
       data: { usedAt: new Date() },
     });
 
     await prisma.passwordResetToken.create({
-      data: { email, otpHash, expiresAt },
+      data: { email: adminEmail, otpHash, expiresAt },
     });
 
     try {
-      await sendPasswordResetOtp(email, otp);
+      await sendPasswordResetOtp(MAIL_INBOX_EMAIL, otp);
     } catch (mailErr) {
       console.error('Forgot password mail error:', mailErr.message);
       if (mailErr.code === 'SMTP_NOT_CONFIGURED') {
@@ -107,6 +110,7 @@ const resetPassword = async (req, res) => {
     const email = String(req.body.email || '')
       .trim()
       .toLowerCase();
+    const adminEmail = resolveAdminEmail(email);
     const otp = String(req.body.otp || '').trim();
     const newPassword = String(req.body.newPassword || req.body.password || '');
 
@@ -128,7 +132,7 @@ const resetPassword = async (req, res) => {
 
     const token = await prisma.passwordResetToken.findFirst({
       where: {
-        email,
+        email: adminEmail,
         usedAt: null,
         expiresAt: { gt: new Date() },
       },
@@ -150,7 +154,7 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    const user = await prisma.adminUser.findUnique({ where: { email } });
+    const user = await prisma.adminUser.findUnique({ where: { email: adminEmail } });
     if (!user || !user.isActive) {
       return res.status(400).json({
         success: false,
@@ -170,7 +174,7 @@ const resetPassword = async (req, res) => {
     });
 
     await prisma.passwordResetToken.updateMany({
-      where: { email, usedAt: null },
+      where: { email: adminEmail, usedAt: null },
       data: { usedAt: new Date() },
     });
 

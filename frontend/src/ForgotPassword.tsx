@@ -113,7 +113,7 @@ export default function ForgotPassword({ isDarkTheme }: { isDarkTheme: boolean }
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="gindeberetconstruction278@gmail.com"
+                placeholder="gindeberetconstruction278@gmail.com or gindeberetconstructionplc@gmail.com"
                 autoComplete="email"
                 required
               />

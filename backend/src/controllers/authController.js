@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const prisma = require('../config/database');
 const { generateToken } = require('../utils/jwt');
 const { convertRole } = require('../middleware/enumConverter');
+const { resolveAdminEmail } = require('../config/emails');
 
 const formatAdminUser = (user) => {
   const firstName = user.firstName || '';
@@ -31,9 +32,11 @@ const login = async (req, res) => {
       });
     }
 
+    const adminEmail = resolveAdminEmail(email);
+
     // Find user by email
     const user = await prisma.adminUser.findUnique({
-      where: { email }
+      where: { email: adminEmail }
     });
 
     if (!user || !user.isActive) {
