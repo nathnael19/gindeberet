@@ -9,10 +9,7 @@ interface AdminLayoutProps {
   activePage: 'overview' | 'projects' | 'careers' | 'stamp' | 'settings' | 'profile';
 }
 
-const navigate = (path: string) => {
-  window.history.pushState({}, '', path);
-  window.dispatchEvent(new PopStateEvent('popstate'));
-};
+import { adminNavigate } from './adminNav';
 
 export default function AdminLayout({ children, isDarkTheme, toggleTheme, activePage }: AdminLayoutProps) {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
@@ -188,7 +185,7 @@ export default function AdminLayout({ children, isDarkTheme, toggleTheme, active
               key={key}
               href={path}
               className={`nav-item ${activePage === key ? 'active' : ''}`}
-              onClick={(e) => { e.preventDefault(); navigate(path); }}
+              onClick={(e) => { e.preventDefault(); adminNavigate(path); }}
             >
               <Icon />
               {!isCollapsed && <span style={{ whiteSpace: 'nowrap' }}>{label}</span>}

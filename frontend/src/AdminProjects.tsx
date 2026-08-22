@@ -2,33 +2,14 @@ import { useState, useEffect, type MouseEvent } from 'react';
 import { type AdminProject, type ProjectStatus } from './adminData';
 import { projectsApi } from './api';
 import AdminLayout from './AdminLayout';
-import ProjectDetail, { type Project } from './ProjectDetail';
+import ProjectDetail from './ProjectDetail';
+import { adminNavigate } from './adminNav';
+import { adminProjectToDetail } from './adminProjectUtils';
 import { formatBirr } from './format';
 import { getImageUrl } from './imageUrl';
 import './AdminProjects.css';
 
-const navigateTo = (path: string) => {
-  window.history.pushState({}, '', path);
-  window.dispatchEvent(new PopStateEvent('popstate'));
-};
-
-const toProject = (p: AdminProject): Project => ({
-  id: Number(p.id),
-  title: p.name,
-  category: p.category,
-  image: p.image,
-  description: p.description || 'No description available.',
-  client: p.client,
-  location: p.location,
-  duration: p.duration,
-  value: p.budget,
-  year: p.year,
-  status: p.status.charAt(0).toUpperCase() + p.status.slice(1),
-  challenge: p.challenge,
-  solution: p.solution,
-  highlights: p.highlights,
-  gallery: p.gallery && p.gallery.length > 0 ? p.gallery : (p.image ? [p.image] : undefined),
-});
+const toProject = adminProjectToDetail;
 
 export default function AdminProjects({
   isDarkTheme,
@@ -195,7 +176,7 @@ export default function AdminProjects({
           >
             {syncing ? 'Importing…' : 'Import 35 sheet projects'}
           </button>
-          <button className="add-project-btn" onClick={() => navigateTo('/projects/add')}>
+          <button className="add-project-btn" onClick={() => adminNavigate('/projects/add')}>
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
@@ -425,7 +406,11 @@ export default function AdminProjects({
           project={toProject(selectedProject)}
           onClose={closeDetail}
           isDarkTheme={isDarkTheme}
-          onEdit={() => navigateTo(`/projects/add?edit=${selectedProject.id}`)}
+          onEdit={() => {
+            const id = selectedProject.id;
+            closeDetail();
+            adminNavigate(`/projects/add?edit=${id}`);
+          }}
         />
       )}
     </AdminLayout>

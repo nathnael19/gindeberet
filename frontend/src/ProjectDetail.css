@@ -22,7 +22,7 @@
 .pd-overlay {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  z-index: 10000;
   display: flex;
   align-items: flex-end;
   justify-content: center;

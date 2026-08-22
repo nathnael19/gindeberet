@@ -18,18 +18,12 @@ import {
 } from 'recharts';
 import { projectsApi, activityApi, dashboardApi } from './api';
 import AdminLayout from './AdminLayout';
+import ProjectDetail from './ProjectDetail';
+import { type AdminProject } from './adminData';
+import { adminNavigate } from './adminNav';
+import { adminProjectToDetail } from './adminProjectUtils';
 import { formatBirr } from './format';
 import './AdminDashboard.css';
-
-interface DashboardProject {
-  id: string | number;
-  name: string;
-  client: string;
-  budget: string;
-  status: string;
-  year?: string;
-  category?: string;
-}
 
 interface DashboardActivity {
   id?: string | number;
@@ -57,10 +51,7 @@ interface AnalyticsData {
   };
 }
 
-const go = (path: string) => {
-  window.history.pushState({}, '', path);
-  window.dispatchEvent(new PopStateEvent('popstate'));
-};
+const go = adminNavigate;
 
 function statusClass(status: string) {
   const s = (status || '').toLowerCase();
@@ -104,7 +95,8 @@ export default function AdminDashboard({
   toggleTheme: () => void;
 }) {
   const [activities, setActivities] = useState<DashboardActivity[]>([]);
-  const [recentProjects, setRecentProjects] = useState<DashboardProject[]>([]);
+  const [recentProjects, setRecentProjects] = useState<AdminProject[]>([]);
+  const [selectedProject, setSelectedProject] = useState<AdminProject | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData>(emptyAnalytics);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -424,7 +416,15 @@ export default function AdminDashboard({
             ) : (
               <ul className="dash-project-list">
                 {recentProjects.map((project) => (
-                  <li key={project.id}>
+                  <li
+                    key={project.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedProject(project)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') setSelectedProject(project);
+                    }}
+                  >
                     <div className="dash-project-main">
                       <strong>{project.name}</strong>
                       <span>
@@ -473,6 +473,19 @@ export default function AdminDashboard({
           </section>
         </div>
       </div>
+
+      {selectedProject && (
+        <ProjectDetail
+          project={adminProjectToDetail(selectedProject)}
+          onClose={() => setSelectedProject(null)}
+          isDarkTheme={isDarkTheme}
+          onEdit={() => {
+            const id = selectedProject.id;
+            setSelectedProject(null);
+            adminNavigate(`/projects/add?edit=${id}`);
+          }}
+        />
+      )}
     </AdminLayout>
   );
 }

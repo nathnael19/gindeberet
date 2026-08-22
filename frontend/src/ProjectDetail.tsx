@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getImageUrl } from './imageUrl';
 import './ProjectDetail.css';
 
@@ -46,7 +47,7 @@ export default function ProjectDetail({ project, onClose, isDarkTheme, onEdit }:
     return () => window.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div className="pd-overlay" role="dialog" aria-modal="true" aria-label={`${project.title} details`}>
       {/* Backdrop click to close */}
       <div className="pd-backdrop" onClick={onClose} />
@@ -193,6 +194,7 @@ export default function ProjectDetail({ project, onClose, isDarkTheme, onEdit }:
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

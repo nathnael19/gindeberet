@@ -8,10 +8,7 @@ import './AdminAddProject.css';
 const DEFAULT_COVER_IMAGE =
   'https://images.unsplash.com/photo-1545459720-aac8509eb02c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
 
-const navigateTo = (path: string) => {
-  window.history.pushState({}, '', path);
-  window.dispatchEvent(new PopStateEvent('popstate'));
-};
+import { adminNavigate } from './adminNav';
 
 const createEmptyForm = () => ({
   name: '',
@@ -49,6 +46,10 @@ export default function AdminAddProject({
   const [existingGallery, setExistingGallery] = useState<string[]>([]);
   const [galleryImages, setGalleryImages] = useState<File[]>([]);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [galleryReplacements, setGalleryReplacements] = useState<Record<number, File>>({});
+  const [galleryReplacementPreviews, setGalleryReplacementPreviews] = useState<Record<number, string>>({});
+  const galleryReplaceInputRef = useRef<HTMLInputElement>(null);
+  const [replacingGalleryIndex, setReplacingGalleryIndex] = useState<number | null>(null);
 
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -56,6 +57,8 @@ export default function AdminAddProject({
   const [error, setError] = useState('');
 
   useEffect(() => {
+    document.querySelector('.dashboard-content')?.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+
     const searchParams = new URLSearchParams(window.location.search);
     const editId = searchParams.get('edit');
 
@@ -159,6 +162,34 @@ export default function AdminAddProject({
 
   const removeExistingGalleryImage = (index: number) => {
     setExistingGallery((currentGallery) => currentGallery.filter((_, galleryIndex) => galleryIndex !== index));
+    setGalleryReplacements((current) => {
+      const next = { ...current };
+      delete next[index];
+      return next;
+    });
+    setGalleryReplacementPreviews((current) => {
+      const next = { ...current };
+      delete next[index];
+      return next;
+    });
+  };
+
+  const startReplaceGalleryImage = (index: number) => {
+    setReplacingGalleryIndex(index);
+    galleryReplaceInputRef.current?.click();
+  };
+
+  const handleGalleryReplaceChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && replacingGalleryIndex !== null) {
+      setGalleryReplacements((current) => ({ ...current, [replacingGalleryIndex]: file }));
+      setGalleryReplacementPreviews((current) => ({
+        ...current,
+        [replacingGalleryIndex]: URL.createObjectURL(file),
+      }));
+    }
+    setReplacingGalleryIndex(null);
+    event.target.value = '';
   };
 
   const generateProjectId = () => {
@@ -182,6 +213,13 @@ export default function AdminAddProject({
       }
 
       let galleryUrls = [...existingGallery];
+      for (const [indexStr, file] of Object.entries(galleryReplacements)) {
+        const index = Number(indexStr);
+        const uploadResponse = await uploadApi.uploadImage(file);
+        if (index >= 0 && index < galleryUrls.length) {
+          galleryUrls[index] = uploadResponse.data.url;
+        }
+      }
       if (galleryImages.length > 0) {
         const uploadResponse = await uploadApi.uploadImages(galleryImages);
         galleryUrls = [...galleryUrls, ...uploadResponse.data.map((file) => file.url)];
@@ -214,7 +252,7 @@ export default function AdminAddProject({
         throw new Error(isEditMode ? 'Failed to update project' : 'Failed to create project');
       }
 
-      navigateTo('/projects');
+      adminNavigate('/projects');
     } catch (submitError) {
       console.error('Error saving project:', submitError);
       setError(submitError instanceof Error ? submitError.message : 'Failed to save project. Please try again.');
@@ -236,7 +274,7 @@ export default function AdminAddProject({
       if (!response.success) {
         throw new Error('Failed to delete project');
       }
-      navigateTo('/projects');
+      adminNavigate('/projects');
     } catch (deleteError) {
       console.error('Error deleting project:', deleteError);
       setError(deleteError instanceof Error ? deleteError.message : 'Failed to delete project. Please try again.');
@@ -249,7 +287,7 @@ export default function AdminAddProject({
     <AdminLayout isDarkTheme={isDarkTheme} toggleTheme={toggleTheme} activePage="projects">
       <div className="add-project-header">
         <div>
-          <a href="/projects" className="back-link" onClick={(event) => { event.preventDefault(); navigateTo('/projects'); }}>
+          <a href="/projects" className="back-link" onClick={(event) => { event.preventDefault(); adminNavigate('/projects'); }}>
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
@@ -443,6 +481,13 @@ export default function AdminAddProject({
 
                 <div className="form-group full-width">
                   <label>Gallery Images</label>
+                  <input
+                    type="file"
+                    ref={galleryReplaceInputRef}
+                    accept="image/*"
+                    className="file-input-hidden"
+                    onChange={handleGalleryReplaceChange}
+                  />
                   <div className="upload-container">
                     <input type="file" id="gallery-upload" accept="image/*" multiple onChange={handleGalleryChange} className="file-input-hidden" />
                     <label htmlFor="gallery-upload" className="upload-dropzone upload-dropzone-small">
@@ -459,11 +504,29 @@ export default function AdminAddProject({
                   {existingGallery.length > 0 && (
                     <>
                       <h3 className="section-heading" style={{ marginTop: '1rem', fontSize: '1rem' }}>Existing Gallery</h3>
+                      <p className="upload-hint" style={{ marginBottom: '0.75rem' }}>Click a photo to replace it, or use × to remove.</p>
                       <div className="gallery-preview-grid">
                         {existingGallery.map((image, index) => (
-                          <div key={`${image}-${index}`} className="gallery-preview-item">
-                            <img src={getImageUrl(image)} alt={`Existing gallery ${index + 1}`} />
-                            <button type="button" className="remove-image-btn" onClick={() => removeExistingGalleryImage(index)}>
+                          <div
+                            key={`${image}-${index}`}
+                            className="gallery-preview-item clickable"
+                            onClick={() => startReplaceGalleryImage(index)}
+                          >
+                            <img
+                              src={galleryReplacementPreviews[index] || getImageUrl(image)}
+                              alt={`Existing gallery ${index + 1}`}
+                            />
+                            <span className="image-preview-overlay">
+                              {galleryReplacements[index] ? 'Replace selected' : 'Click to replace'}
+                            </span>
+                            <button
+                              type="button"
+                              className="remove-image-btn"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                removeExistingGalleryImage(index);
+                              }}
+                            >
                               &times;
                             </button>
                           </div>
@@ -497,7 +560,7 @@ export default function AdminAddProject({
                     {isDeleting ? 'Deleting...' : 'Delete Project'}
                   </button>
                 )}
-                <button type="button" className="btn-cancel" onClick={() => navigateTo('/projects')} disabled={isSaving || isDeleting}>
+                <button type="button" className="btn-cancel" onClick={() => adminNavigate('/projects')} disabled={isSaving || isDeleting}>
                   Cancel
                 </button>
                 <button type="submit" className="btn-save" disabled={isSaving || isDeleting}>

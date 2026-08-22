@@ -64,6 +64,8 @@ function App() {
   useEffect(() => {
     const handlePopState = () => {
       setCurrentRoute(window.location.pathname);
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.querySelector('.dashboard-content')?.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);

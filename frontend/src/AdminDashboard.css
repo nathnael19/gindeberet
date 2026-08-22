@@ -556,6 +556,18 @@
   gap: 1rem;
   padding: 0.9rem 0;
   border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 8px;
+}
+
+.dash-project-list li:hover {
+  background: color-mix(in srgb, var(--cta) 6%, transparent);
+}
+
+.dash-project-list li:focus-visible {
+  outline: 2px solid var(--cta);
+  outline-offset: 2px;
 }
 
 .dash-project-list li:last-child {
