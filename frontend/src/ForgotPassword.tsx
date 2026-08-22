@@ -1,8 +1,10 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { authApi } from './api';
 import './AdminLogin.css';
 
 type Step = 'email' | 'otp' | 'done';
+
+const RESEND_COOLDOWN_SEC = 60;
 
 export default function ForgotPassword({ isDarkTheme }: { isDarkTheme: boolean }) {
   const [step, setStep] = useState<Step>('email');
@@ -11,8 +13,24 @@ export default function ForgotPassword({ isDarkTheme }: { isDarkTheme: boolean }
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = window.setInterval(() => {
+      setResendCooldown((s) => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [resendCooldown]);
+
+  const requestOtp = async (targetEmail: string) => {
+    const res = await authApi.forgotPassword(targetEmail.trim());
+    setInfo(res.message || 'If that email is registered, a reset code has been sent.');
+    setResendCooldown(RESEND_COOLDOWN_SEC);
+  };
 
   const sendOtp = async (e: FormEvent) => {
     e.preventDefault();
@@ -20,13 +38,25 @@ export default function ForgotPassword({ isDarkTheme }: { isDarkTheme: boolean }
     setInfo('');
     setIsLoading(true);
     try {
-      const res = await authApi.forgotPassword(email.trim());
-      setInfo(res.message || 'If that email is registered, a reset code has been sent.');
+      await requestOtp(email);
       setStep('otp');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not send reset code');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const resendOtp = async () => {
+    if (resendCooldown > 0 || !email.trim()) return;
+    setError('');
+    setIsResending(true);
+    try {
+      await requestOtp(email);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not resend code');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -84,37 +114,25 @@ export default function ForgotPassword({ isDarkTheme }: { isDarkTheme: boolean }
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="gindeberetconstruction278@gmail.com"
+                autoComplete="email"
                 required
               />
             </div>
 
-            {error && (
-              <div
-                style={{
-                  color: '#EF4444',
-                  fontSize: '0.875rem',
-                  marginBottom: '1rem',
-                  textAlign: 'center',
-                  fontWeight: 500,
-                }}
-              >
-                {error}
-              </div>
-            )}
+            {error && <div className="error-message">{error}</div>}
 
             <button type="submit" className={`btn-login ${isLoading ? 'loading' : ''}`} disabled={isLoading}>
-              {isLoading ? <span className="spinner" /> : 'Send OTP'}
+              {isLoading ? <span className="spinner" /> : 'Send OTP to Email'}
             </button>
           </form>
         )}
 
         {step === 'otp' && (
           <form className="admin-login-form" onSubmit={submitNewPassword}>
-            {info && (
-              <p style={{ fontSize: '0.9rem', marginBottom: '1rem', textAlign: 'center', opacity: 0.85 }}>
-                {info}
-              </p>
-            )}
+            {info && <p className="forgot-info">{info}</p>}
+            <p className="forgot-email-hint">
+              Code sent to <strong>{email}</strong>
+            </p>
 
             <div className="form-group">
               <label htmlFor="otp">OTP Code</label>
@@ -138,6 +156,8 @@ export default function ForgotPassword({ isDarkTheme }: { isDarkTheme: boolean }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
+                autoComplete="new-password"
+                minLength={8}
                 required
               />
             </div>
@@ -150,38 +170,42 @@ export default function ForgotPassword({ isDarkTheme }: { isDarkTheme: boolean }
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
+                autoComplete="new-password"
+                minLength={8}
                 required
               />
             </div>
 
-            {error && (
-              <div
-                style={{
-                  color: '#EF4444',
-                  fontSize: '0.875rem',
-                  marginBottom: '1rem',
-                  textAlign: 'center',
-                  fontWeight: 500,
-                }}
-              >
-                {error}
-              </div>
-            )}
+            {error && <div className="error-message">{error}</div>}
 
             <button type="submit" className={`btn-login ${isLoading ? 'loading' : ''}`} disabled={isLoading}>
-              {isLoading ? <span className="spinner" /> : 'Update Password'}
+              {isLoading ? <span className="spinner" /> : 'Verify OTP & Update Password'}
             </button>
 
             <button
               type="button"
-              className="back-link"
-              style={{ marginTop: '1rem', background: 'none', border: 0, cursor: 'pointer', width: '100%' }}
+              className="forgot-resend-btn"
+              disabled={resendCooldown > 0 || isResending}
+              onClick={() => void resendOtp()}
+            >
+              {isResending
+                ? 'Sending…'
+                : resendCooldown > 0
+                  ? `Resend code in ${resendCooldown}s`
+                  : 'Resend OTP to email'}
+            </button>
+
+            <button
+              type="button"
+              className="back-link forgot-back-btn"
               onClick={() => {
                 setStep('email');
                 setOtp('');
                 setPassword('');
                 setConfirmPassword('');
                 setError('');
+                setInfo('');
+                setResendCooldown(0);
               }}
             >
               ← Use a different email
@@ -194,7 +218,7 @@ export default function ForgotPassword({ isDarkTheme }: { isDarkTheme: boolean }
             <div className="success-icon">✓</div>
             <h3>Password Updated</h3>
             <p>You can now sign in with your new password.</p>
-            <a href="/admin" className="btn-login" style={{ textDecoration: 'none', marginTop: '1.5rem', display: 'flex' }}>
+            <a href="/admin" className="btn-login forgot-done-btn">
               Proceed to Login
             </a>
           </div>

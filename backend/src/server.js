@@ -182,6 +182,8 @@ async function runBootMaintenance() {
     if (emailFix.count > 0) {
       console.log(`Boot contact email fixed → ${CONTACT_EMAIL}`);
     }
+    const { ensureResetTable } = require('./controllers/passwordResetController');
+    await ensureResetTable();
   } catch (err) {
     const msg = `bootMaintenance: ${err.message}`;
     console.error(msg);

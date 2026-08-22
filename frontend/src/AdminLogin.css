@@ -213,6 +213,81 @@
   color: #EA580C;
 }
 
+.error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.forgot-info {
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.forgot-email-hint {
+  font-size: 0.85rem;
+  margin: 0 0 1.25rem;
+  text-align: center;
+  opacity: 0.9;
+}
+
+.forgot-email-hint strong {
+  color: #f97316;
+  word-break: break-all;
+}
+
+.forgot-resend-btn {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.65rem;
+  background: transparent;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.forgot-resend-btn:hover:not(:disabled) {
+  border-color: #f97316;
+  color: #f97316;
+}
+
+.forgot-resend-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.forgot-back-btn {
+  margin-top: 1rem;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  width: 100%;
+  font: inherit;
+}
+
+.forgot-done-btn {
+  text-decoration: none;
+  margin-top: 1.5rem;
+  display: flex;
+}
+
+.admin-login-wrapper.dark-mode .forgot-email-hint strong {
+  color: #fb923c;
+}
+
+.admin-login-wrapper.dark-mode .forgot-resend-btn {
+  border-color: #475569;
+  color: #94a3b8;
+}
+
 .btn-login {
   width: 100%;
   padding: 0.875rem;

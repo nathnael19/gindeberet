@@ -49,6 +49,19 @@ const forgotPassword = async (req, res) => {
 
     await ensureResetTable();
 
+    const recentCount = await prisma.passwordResetToken.count({
+      where: {
+        email,
+        createdAt: { gt: new Date(Date.now() - OTP_TTL_MS) },
+      },
+    });
+    if (recentCount >= 5) {
+      return res.status(429).json({
+        success: false,
+        message: 'Too many reset attempts. Please wait 15 minutes and try again.',
+      });
+    }
+
     const otp = generateOtp();
     const otpHash = await bcrypt.hash(otp, 10);
     const expiresAt = new Date(Date.now() + OTP_TTL_MS);

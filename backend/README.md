@@ -86,11 +86,28 @@ The server will run on port 3001 by default.
 
 - `GET /health` - Server health check
 
+### Forgot password (admin OTP)
+
+1. Open `/admin` → **Forgot password?**
+2. Enter admin email → server sends a **6-digit OTP** (valid 15 minutes).
+3. Enter OTP + new password on the next step.
+
+**API**
+
+- `POST /api/auth/forgot-password` — `{ "email": "..." }`
+- `POST /api/auth/reset-password` — `{ "email", "otp", "newPassword" }`
+
+**SMTP (required on production)** — set on cPanel Node env:
+
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, optional `SMTP_FROM`
+- For local testing without mail: `EMAIL_DEV_LOG=true` (OTP printed in server logs)
+
 ## Default Admin User
 
-After seeding, you can login with:
-- Email: `admin@gindeberet.com`
-- Password: `admin123`
+After seeding / fix-content:
+
+- Email: `gindeberetconstruction278@gmail.com`
+- Password: `Gindeberetplc@246`
 
 ## Example API Usage
 
@@ -98,7 +115,7 @@ After seeding, you can login with:
 ```bash
 curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@gindeberet.com","password":"admin123"}'
+  -d '{"email":"gindeberetconstruction278@gmail.com","password":"Gindeberetplc@246"}'
 ```
 
 ### Get Projects (with token)
