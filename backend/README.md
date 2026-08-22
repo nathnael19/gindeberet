@@ -97,9 +97,12 @@ The server will run on port 3001 by default.
 - `POST /api/auth/forgot-password` — `{ "email": "..." }`
 - `POST /api/auth/reset-password` — `{ "email", "otp", "newPassword" }`
 
-**SMTP (required on production)** — set on cPanel Node env:
+**SMTP (required on production)** — Gmail example for `gindeberetconstruction278@gmail.com`:
 
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, optional `SMTP_FROM`
+- `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_SECURE=true`
+- `SMTP_USER=gindeberetconstruction278@gmail.com`
+- `SMTP_PASS` = Gmail **App Password** (not your normal login password)
+- Optional `SMTP_FROM="Gindeberet Admin <gindeberetconstruction278@gmail.com>"`
 - For local testing without mail: `EMAIL_DEV_LOG=true` (OTP printed in server logs)
 
 ## Default Admin User

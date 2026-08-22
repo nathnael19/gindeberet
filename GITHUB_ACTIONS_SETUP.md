@@ -41,10 +41,10 @@ On restart, Node applies awards + **35 sheet projects** automatically.
 
 Set these on cPanel Node App (and optionally in `.env`):
 
-- `SMTP_HOST` (e.g. `mail.gindeberetconstruction.com`)
+- `SMTP_HOST` (`smtp.gmail.com`)
 - `SMTP_PORT` (`465`)
-- `SMTP_USER` / `SMTP_PASS` (cPanel email account)
-- `SMTP_FROM` (optional)
+- `SMTP_USER` / `SMTP_PASS` (`gindeberetconstruction278@gmail.com` + Gmail App Password)
+- `SMTP_FROM` (optional, e.g. `Gindeberet Admin <gindeberetconstruction278@gmail.com>`)
 
 Then restart Node. Users open `/forgot-password`, receive a 6-digit OTP, and set a new password.
 

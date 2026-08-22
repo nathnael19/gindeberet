@@ -45,7 +45,7 @@ async function sendMail({ to, subject, text, html, replyTo }) {
   const from =
     process.env.SMTP_FROM ||
     process.env.SMTP_USER ||
-    'noreply@gindeberetconstruction.com';
+    'gindeberetconstruction278@gmail.com';
 
   const transport = createTransport();
   await transport.sendMail({
